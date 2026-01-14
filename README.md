@@ -8,7 +8,7 @@ I build data-driven intelligence systems for cricket and racket sports, spanning
 
 🔗 Portfolio Website: https://yashv04.github.io  
 🔗 LinkedIn: <https://www.linkedin.com/in/yash-vardhan-5b3956169/>  
-🔗 Resume: <pdf-link>
+🔗 Resume: <https://acrobat.adobe.com/id/urn:aaid:sc:AP:d5e86926-01ec-439d-bfa8-7669bfecff35>
 
 ---
 
