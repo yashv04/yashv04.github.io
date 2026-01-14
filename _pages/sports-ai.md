@@ -1,7 +1,7 @@
 ---
-Layout: single
-Title: "Sports AI & Computer Vision"
-Permalink: /sports-ai/
+layout: single
+title: "Sports AI & Computer Vision"
+permalink: /sports-ai/
 classes: wide
 author_profile: true
 ---
