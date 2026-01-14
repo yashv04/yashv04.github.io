@@ -49,6 +49,6 @@ How I approach Sports AI problems as **production-ready systems**, not isolated 
 
 ##  Links
 
-- **GitHub:** https://github.com/yashv04  
-- **Portfolio:** https://yashv04.github.io  
-- **Resume:** https://acrobat.adobe.com/id/urn:aaid:sc:AP:24594d30-8208-4d0e-8cc2-4e6bb38a1b61
+- **GitHub:** <https://github.com/yashv04> 
+- **Portfolio:** <https://yashv04.github.io> 
+- **Resume:** <https://acrobat.adobe.com/id/urn:aaid:sc:AP:24594d30-8208-4d0e-8cc2-4e6bb38a1b61>
