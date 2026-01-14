@@ -6,9 +6,9 @@ I build data-driven intelligence systems for cricket and racket sports, spanning
 - Computer vision for sports (tracking, action recognition, biomechanics)
 - Analyst-ready tools for teams, fantasy platforms, and broadcasters
 
-🔗 Portfolio Website: <https://yashv04.github.io> 
-🔗 LinkedIn: <https://www.linkedin.com/in/yash-vardhan-5b3956169/>  
-🔗 Resume: <https://acrobat.adobe.com/id/urn:aaid:sc:AP:f545a696-5616-4ef7-854f-94c6e1d87b8f>
+Portfolio Website: <https://yashv04.github.io> 
+LinkedIn: <https://www.linkedin.com/in/yash-vardhan-5b3956169/>  
+Resume: <https://acrobat.adobe.com/id/urn:aaid:sc:AP:f545a696-5616-4ef7-854f-94c6e1d87b8f>
 
 ---
 
