@@ -1,9 +1,15 @@
 main:
-  - title: "Posts"
-    url: /posts/
-  - title: "Categories"
-    url: /categories/
-  - title: "Tags"
-    url: /tags/
-  - title: "About"
-    url: /about/
+  - title: "Home"
+    url: /
+
+  - title: "Sports Analytics"
+    url: /sports-analytics/
+
+  - title: "Sports AI"
+    url: /sports-ai/
+
+  - title: "Systems"
+    url: /systems/
+
+  - title: "GitHub"
+    url: https://github.com/yashv04
