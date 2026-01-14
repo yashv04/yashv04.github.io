@@ -30,7 +30,7 @@ I build data-driven intelligence systems for cricket and racket sports, spanning
 - Audio-based bat-ball contact detection
 - Biomechanics & speed estimation
 
- Read more → `sports-ai.md`
+ Read more → `[sports-ai.md]([url](https://yashv04.github.io/sports-ai/))`
 
 ---
 
@@ -39,7 +39,7 @@ I build data-driven intelligence systems for cricket and racket sports, spanning
 - Error analysis & metric-driven iteration
 - Deployment-ready inference workflows
 
- Read more → `systems.md`
+ Read more → `[systems.md]([url](https://yashv04.github.io/systems/))`
 
 ---
 
