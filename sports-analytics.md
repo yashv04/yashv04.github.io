@@ -1,7 +1,7 @@
 ---
 layout: single
 title: "Sports Analytics & Strategy"
-permalink: /sports-ai/
+permalink: /sports-analytics/
 ---
 
 I design data-driven intelligence systems that explain why matches are won, which players truly matter, and how conditions and pressure shape outcomes.
