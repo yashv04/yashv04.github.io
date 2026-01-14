@@ -25,14 +25,14 @@ Predictive models and analytical systems focused on **winning matches**, **evalu
 
 ---
 
-### 🤖 Sports AI Systems
+###  Sports AI Systems
 End-to-end Sports AI pipelines covering **computer vision, audio ML, tracking, and biomechanics**.
 
  [Explore Sports AI Systems →](/sports-ai/)
 
 ---
 
-### 🧩 Systems Thinking
+###  Systems Thinking
 How I approach Sports AI problems as **production-ready systems**, not isolated models.
 
  [Read My Systems Approach →](/systems/)
