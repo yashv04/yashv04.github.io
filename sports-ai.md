@@ -2,8 +2,6 @@
 layout: single
 title: "Sports AI & Computer Vision"
 permalink: /sports-ai/
-classes: wide
-author_profile: true
 ---
 
 ## What I work on
