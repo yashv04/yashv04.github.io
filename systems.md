@@ -4,81 +4,130 @@ title: "How I Build Sports Intelligence Systems"
 permalink: /systems/
 ---
 
-## My approach
+## Overview
 
-I approach sports AI problems as **systems**, not isolated models.  
-Each project follows a structured pipeline that ensures technical robustness and sports relevance.
+I approach sports AI problems as **end-to-end intelligence systems**, not isolated models.
 
-Below is the general framework I follow across computer vision, audio, and data-driven sports intelligence tasks.
+Sports data — especially video — is **noisy, fast, incomplete, and inconsistent**.  
+My focus is on building pipelines that remain **useful under real-world constraints**, and that translate raw outputs into **decisions coaches and analysts can trust**.
 
+This page outlines the system design principles I apply across **computer vision, audio, and data-driven sports intelligence**.
 
-## End-to-End Sports AI Pipeline
+---
 
-### 1. Problem Framing (Sports-First)
-Every project begins by clearly defining the **sports question**, not the model.
+## Core Principles
+
+- **Sports-first problem framing**
+- **Robustness over theoretical optimality**
+- **Evaluation and failure analysis as design drivers**
+- **Decision-ready outputs over raw predictions**
+
+---
+
+## End-to-End Sports Intelligence Pipeline
+
+### 1. Problem Framing (Sports Before Models)
+
+Every system starts by defining the **sports question**, not the algorithm.
+
 Examples:
-- How fast was the smash, and how consistent is it?
-- Where did the ball travel, and what does that reveal about execution?
-- Which shots are being played under pressure?
+- How consistent is a player’s smash execution across attempts?
+- How does ball length distribution change under pressure?
+- Which shot patterns dominate long rallies?
 
-This ensures the AI system is aligned with coaching, analytics, or performance goals.
-
----
-
-### 2. Data Collection & Annotation
-I work closely with raw data in multiple formats:
-- Match and training videos
-- Short clips for action recognition
-- Audio signals for event detection
-
-I design annotation strategies (coordinates, labels, keypoints) that directly support downstream modeling and evaluation.
+This prevents building technically impressive systems that fail to answer meaningful sports questions.
 
 ---
 
-### 3. Model Design & Training
-Depending on the problem, I select appropriate modeling approaches:
-- Detection and tracking models for spatial understanding
-- Classification models for events and actions
-- Temporal analysis for motion and sequence-based patterns
+### 2. Data Reality & Annotation Strategy
 
-I prioritize **practical performance and interpretability** over unnecessary complexity.
+Sports data rarely arrives clean.
 
----
+I routinely work with:
+- Variable camera angles and zoom
+- Motion blur and occlusion
+- Inconsistent frame rates
+- Imperfect audio quality
 
-### 4. Evaluation & Error Analysis
-Evaluation is treated as a first-class component, not an afterthought.
-Typical validation steps include:
-- Ground-truth vs prediction error analysis
-- Confusion matrix and failure case analysis
-- Visual and qualitative inspection alongside metrics
+I design **annotation strategies** that acknowledge these constraints:
+- Coordinate annotations instead of bounding boxes where appropriate  
+- Clip-level labels when frame-level labeling is unreliable  
+- Keypoints and trajectories chosen to support downstream metrics  
 
-This step often reveals insights that guide model refinement.
+Annotation is treated as a **model design decision**, not a preprocessing step.
 
 ---
 
-### 5. Sports Insight Translation
-Raw model outputs are translated into **sports-relevant metrics**, such as:
-- Speed, consistency, and trajectory patterns
-- Shot distributions and tactical tendencies
-- Performance comparisons across attempts or players
+### 3. Model Selection Under Constraints
 
-This ensures outputs are meaningful to analysts and coaches.
+I select models based on **fitness for the environment**, not novelty.
+
+Typical considerations:
+- Can the model run with limited GPU or CPU-only inference?
+- Does it degrade gracefully under occlusion or blur?
+- Are the outputs interpretable enough for analysts?
+
+This often means favoring **simpler, well-understood models** that can be debugged and iterated quickly.
+
+---
+
+### 4. Evaluation & Failure Analysis (First-Class Step)
+
+Metrics alone are insufficient in sports contexts.
+
+My evaluation process includes:
+- Quantitative metrics (error distributions, precision/recall)
+- Visual inspection of predictions overlaid on video
+- Identification of systematic failure modes (camera cuts, extreme motion, overlap)
+- Manual review of edge cases
+
+Failure analysis directly informs:
+- Dataset refinement
+- Feature redesign
+- System-level safeguards
+
+---
+
+### 5. Translating Outputs Into Sports Intelligence
+
+Raw model outputs are rarely useful on their own.
+
+I focus on translating them into:
+- **Performance metrics** (speed, consistency, variation)
+- **Behavioral patterns** (shot selection, intent changes)
+- **Comparative insights** (within-player and across-player trends)
+
+The goal is always to answer:
+> “What decision does this enable?”
 
 ---
 
 ### 6. Iteration & Deployment Mindset
-Systems are iteratively refined based on:
-- New data
-- Observed failure modes
-- Changing analysis requirements
 
-I design pipelines with scalability and reusability in mind, enabling extension to new sports or use cases.
+I design systems with iteration in mind:
+- Modular pipelines that allow component replacement
+- Clear interfaces between tracking, classification, and analytics layers
+- Batch and offline processing for realistic sports workflows
 
+While full-scale deployment varies by context, I prioritize **stability, reproducibility, and extensibility**.
 
-## Example Applications
+---
 
-- **Ball & Shuttle Tracking:** Tracking outputs used for speed estimation, biomechanics, and shot analysis  
-- **Hit vs Miss Detection:** Audio-based event detection enabling automated shot segmentation  
-- **Shot Classification:** Temporal models supporting tactical breakdowns and player profiling  
+## Example System Applications
 
-These examples demonstrate how individual models integrate into larger sports intelligence systems.
+These principles are applied across my work, including:
+- **Ball & Shuttle Intelligence:** Tracking-based speed, trajectory, and execution analysis  
+- **Shot & Action Intelligence:** Automated tagging and tactical breakdowns  
+- **Technique & Biomechanics Intelligence:** Video-based kinematic assessment  
+- **Audio–Visual Event Detection:** Reliable segmentation in noisy environments  
+
+---
+
+## Why This Matters
+
+Sports intelligence systems fail not because of weak models, but because they:
+- Ignore data realities
+- Overfit clean benchmarks
+- Produce outputs that decision-makers can’t interpret
+
+My approach is designed to avoid these pitfalls — building systems that are **practical, transparent, and sport-relevant**.
