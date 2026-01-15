@@ -3,6 +3,7 @@ layout: single
 title: "Video-Based Performance Intelligence Systems"
 permalink: /sports-ai/
 ---
+# Video-Based Performance Intelligence Systems
 
 ## Overview
 
