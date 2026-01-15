@@ -3,6 +3,7 @@ layout: single
 title: "Applied Tactical & Performance Analytics"
 permalink: /sports-analytics/
 ---
+# Applied Tactical & Performance Analytics
 
 ## Overview
 
