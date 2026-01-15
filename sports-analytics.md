@@ -1,60 +1,65 @@
 ---
 layout: single
-title: "Sports Analytics & Strategy"
+title: "Applied Tactical & Performance Analytics"
 permalink: /sports-analytics/
 ---
 
-## Sports Analytics & Strategy
+## Overview
 
-I design **data-driven intelligence systems** that explain **why matches are won**, **which players truly matter**, and **how conditions and pressure shape outcomes**.
+This section covers **downstream analytics systems** built on top of structured sports data — such as events, actions, player roles, and match context — to support **tactical decision-making and performance evaluation**.
 
-My work blends **cricketing context, machine learning, and clear storytelling** to support decision-making for teams, analysts, fantasy platforms, and broadcasters.
-
----
-
-##  Core Focus Areas
-
-- **Tactical prediction & match simulation**
-- **Player impact and pressure performance modeling**
-- **Venue- and condition-aware analytics**
-- **Turning complex data into actionable cricket insights**
+While my primary specialization is **video-based performance intelligence**, these analytics systems demonstrate how extracted signals can be translated into **match strategy, player valuation, and venue-aware insights**.
 
 ---
 
-##  Tactical & Match Intelligence
+## How This Fits Into My Work
 
-### Match Simulator & Opponent Strategy Prediction _(Flagship)_
+In a complete sports intelligence stack:
 
-**Problem**  
-In high-stakes T20 matches, anticipating an opponent’s tactical intent (powerplay aggression, death-over bowling plans, spin usage) provides a decisive edge. Traditional analysis is manual, slow, and reactive.
+- **Video & sensor systems** extract events, actions, and performance signals  
+- **Analytics models** transform those signals into tactical and strategic insights  
 
-**Solution**  
-Built an AI-powered tactical prediction engine that learns team-specific behaviors from historical IPL and T20 data to forecast strategies **before and during matches**.
+This section represents the **decision layer** of that stack.
+
+---
+
+## Tactical & Match Intelligence Systems
+
+### Match Simulator & Opponent Strategy Prediction (Flagship)
+
+**Sports Problem**  
+In high-stakes T20 matches, teams need to anticipate opponent intent — powerplay aggression, bowling plans, and phase-wise strategies — before patterns fully emerge.
+
+**System Overview**  
+A phase-wise tactical prediction system that models team behavior using historical ball-by-ball data and contextual match features.
 
 **Approach**
-- Ball-by-ball data collection from IPL & T20 leagues  
-- Contextual feature engineering: match phase, venue, opposition, batsman & bowler types  
-- Phase-wise modeling:
-  - **Random Forest** for tactical pattern classification  
-  - **XGBoost** for optimized decision boundaries  
-- Team-specific matchup models (e.g., CSK vs RCB)
+- Context-aware feature engineering (phase, venue, opposition, player roles)  
+- Phase-specific modeling using:
+  - Random Forest for pattern learning  
+  - XGBoost for optimized tactical classification  
+- Team-specific matchup modeling (e.g., CSK vs RCB)
 
-**Impact**
-- Predictive insight into powerplay intent and death-over plans  
-- Venue-aware tactical simulations  
-- Shift from descriptive analysis to **predictive match intelligence**
+**Insights Enabled**
+- Predictive understanding of phase-wise intent  
+- Scenario-based tactical simulation  
+- Support for pre-match and in-match planning
 
 ---
 
-### Live Win Probability Model
+### Live Win Probability Engine
 
-Built a real-time win probability engine that updates dynamically using ball-by-ball match data.
+A real-time win probability system that updates dynamically using ball-by-ball match state.
 
-- Trained **Logistic Regression & Random Forest** models on historical T20/IPL data  
-- Deployed as a **Streamlit application**  
-- Identified death overs and run-rate stability as decisive match phases  
+**Key Elements**
+- Logistic Regression and Random Forest models  
+- Emphasis on phase transitions and pressure situations  
+- Interactive Streamlit deployment
 
-**Use cases:** Broadcasting graphics, analyst decision support, fantasy insights  
+**Use Cases**
+- Broadcast graphics  
+- Analyst decision support  
+- Fantasy platforms  
 
 <https://live-win-probability-mxjsrxex83jok9smfqwqyf.streamlit.app/>
 
@@ -62,114 +67,97 @@ Built a real-time win probability engine that updates dynamically using ball-by-
 
 ### ODI Pre-Match Win Predictor
 
-A probabilistic model to estimate ODI match outcomes using team strength, venue, toss, and recent form.
+A probabilistic model estimating ODI match outcomes using team strength, venue, toss, and recent form.
 
-- Feature engineering from cleaned ODI match & delivery datasets  
-- Designed for analyst previews and fantasy platforms  
+**Purpose**
+- Analyst previews  
+- Scenario comparison  
+- Fantasy decision support  
+
 <https://odi-pre-match-win-predictor-cvacrsmbuds2t5cn5bdpwg.streamlit.app/>
+
 ---
 
-##  Player Impact & Performance Intelligence
+## Player Impact & Performance Modeling
 
-### Impact Index Model & Auction Strategy _(Flagship)_
+### Impact Index & Auction Strategy (Flagship)
 
-**Problem**  
-Traditional metrics (runs, wickets) fail to capture a player’s true match impact.
+**Sports Problem**  
+Traditional statistics fail to capture a player’s true influence on match outcomes, especially under pressure.
 
-**Solution**  
-Designed a composite **Impact Index** combining batting, bowling, fielding, and contextual pressure.
+**System Overview**  
+A composite player impact model combining batting, bowling, fielding, and contextual performance.
 
-**Methodology**
-- **Batting:** runs, boundary %, partnerships  
-- **Bowling:** wickets, economy, pressure creation  
-- **Fielding:** catches, run-saving actions  
-- **Context:** match pressure, chases, death overs  
+**Modeling Components**
+- Batting contribution and partnership impact  
+- Bowling efficiency and pressure creation  
+- Fielding value estimation  
+- Contextual weighting (chases, death overs)
 
 **Applications**
-- Auction strategy & squad planning  
-- Fantasy team optimization  
+- Auction and squad planning  
 - Role-based player deployment  
+- Fantasy optimization
 
 ---
 
-### Match-Winning Pressure Index
+### Pressure Performance Index
 
-Quantified player performance in high-pressure situations such as tight chases and final overs.
+A specialized model quantifying player effectiveness in high-pressure situations.
 
-- Identified consistent clutch performers  
-- Useful for leadership roles and fantasy captaincy decisions  
+**Insights Enabled**
+- Identification of clutch performers  
+- Leadership and role suitability analysis  
 
 <https://public.tableau.com/app/profile/yash.vardhan6567/viz/T20IndexDashboard/T20PressureIndexDashboard>
 
 ---
 
-### Batsman vs Bowler Matchups
+### Batter vs Bowler Matchup Analysis
 
-Interactive dashboard analyzing batter–bowler performance across phases and venues.
+Interactive analysis of batter–bowler performance across match phases and venues.
 
-- Phase-wise insights: Powerplay, Middle, Death  
-- Identified exploitable matchups and vulnerabilities  
+**Insights Enabled**
+- Exploitable matchups  
+- Phase-specific vulnerabilities  
+- Tactical bowling and batting plans  
 
 <https://public.tableau.com/app/profile/yash.vardhan6567/viz/BatsmanvsBowlersMatchup/BatsmanvsBowlerMatchupDashboardTillIPL2024>
 
 ---
 
-### AI-Powered Player Scouting
+## Venue & Conditions Intelligence
 
-Machine learning–driven scouting system using **K-Means clustering** on normalized batter metrics.
+### Cricket Venue Intelligence Hub (Flagship)
 
-- Role-based player archetypes  
-- PCA & t-SNE for interpretability  
-- Identification of undervalued players  
-
-<https://ai-powered-player-scouting-model-86df5borqdxszypxupgr5y.streamlit.app/>
-
----
-
-##  Venue & Conditions Intelligence
-
-### Cricket Venue Intelligence Hub _(Flagship)_
-
-Venue-centric analytics platform to decode how stadiums influence scoring, toss outcomes, and player performance.
+A venue-centric intelligence platform decoding how stadium characteristics influence scoring, toss outcomes, and player performance.
 
 **Key Features**
-- Venue profiles: pitch behavior, boundary dimensions  
-- Phase-wise scoring trends  
-- **XGBoost-powered** score & win predictors  
-- Venue-specific player recommendations  
+- Venue-specific scoring and phase trends  
+- Pitch and boundary influence analysis  
+- XGBoost-based score and win predictors  
+- Venue-aware player recommendations  
 
 <https://cricket-venue-intelligence-app-mkbwla6gsdfdxqpdguihnx.streamlit.app/>
 
 ---
 
-### Smart Pitch Analysis Model
+## Data Storytelling & Analytical Narratives
 
-Pitch behavior classification using **CNN-based visual analysis** combined with machine learning.
+These projects focus on **explaining performance evolution and context**, combining analytics with clear narrative structure.
 
-- Predicts spin, swing, and bounce tendencies  
-- Supports team strategy and fantasy decisions  
+- Virat Kohli — Test Career Analysis  
+  <https://virat-test-story-7doohhp63qt4dyyfg7wx8n.streamlit.app/>
 
----
-
-##  Data Storytelling & Cricket Narratives
-
-### Virat Kohli – Test Career Analysis
-
-Interactive analytical tribute capturing evolution, overseas dominance, partnerships, and leadership phases.
-
-<https://virat-test-story-7doohhp63qt4dyyfg7wx8n.streamlit.app/>
+- Rohit Sharma — Career Analytics Hub  
+  Test: <https://rohit-sharma-test-career-ycbroxcnwmefkesca4kstx.streamlit.app/>  
+  T20I: <https://rohit-sharma-t20i-dashboard-nohflzrqecgvcaiezyxxhg.streamlit.app/>
 
 ---
 
-### Rohit Sharma – Career Analytics Hub
+## Why This Section Matters
 
-Dual-dashboard project translating Rohit Sharma’s T20I and Test careers into data-driven narratives.
-
-Test: <https://rohit-sharma-test-career-ycbroxcnwmefkesca4kstx.streamlit.app/> 
-T20I: <https://rohit-sharma-t20i-dashboard-nohflzrqecgvcaiezyxxhg.streamlit.app/>
-
----
-
-##  Final Note
-
-These projects reflect my focus on building **practical, context-aware cricket intelligence systems** — where analytics directly informs strategy, performance, and decision-making.
+These analytics systems demonstrate my ability to:
+- Convert structured events and context into decisions  
+- Support coaches, analysts, and strategists  
+- Build the **final intelligence layer** on top of vision-driven signals
