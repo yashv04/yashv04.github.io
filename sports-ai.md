@@ -1,123 +1,136 @@
 ---
 layout: single
-title: "Sports AI & Computer Vision"
+title: "Video-Based Performance Intelligence Systems"
 permalink: /sports-ai/
 ---
 
-## What I work on
+## Overview
 
-I design and build **end-to-end AI systems** for sports performance analysis, focusing on computer vision and multimodal learning.
+I design **end-to-end computer vision systems** that transform raw cricket and badminton video into **movement data, action understanding, and performance insights**.
 
-My work spans:
-- Object detection & keypoints
-- Ball & shuttle tracking
-- Action recognition & shot classification
-- Sports biomechanics & motion analysis
+These systems are built for **real-world sports environments** — fast motion, motion blur, occlusion, variable camera angles, and limited compute — with a strong emphasis on **evaluation, failure analysis, and sports relevance**.
 
-Below are selected projects that reflect **real-world sports problems**, engineering depth, and applied outcomes.
+Below are my core **flagship systems**, each designed as a complete pipeline rather than an isolated model.
 
+---
 
-### Ball & Shuttle Tracking using TrackNet
+## 1. Ball & Shuttle Intelligence System
 
-**Problem**  
-Accurate tracking of fast-moving objects like a cricket ball or badminton shuttle is critical for performance analysis, speed estimation, and downstream biomechanics. However, tracking reliability often degrades due to high velocity, motion blur, occlusion, and varying camera angles.
+**Sports Problem**  
+Accurately tracking fast-moving objects like a cricket ball or badminton shuttle is foundational for speed estimation, shot analysis, and biomechanics. Manual tagging is slow and unreliable, while naive detection models fail under high velocity and occlusion.
 
 **System Overview**  
-I built and evaluated a TrackNet-based tracking pipeline to detect and track ball and shuttle trajectories frame-by-frame across cricket and badminton footage.
+A TrackNet-based tracking pipeline that produces **continuous, frame-wise trajectories** from match and training footage.
 
-**Engineering Details**  
-- Owned the end-to-end workflow, including dataset preparation, frame extraction, and ground-truth coordinate annotation  
-- Fine-tuned TrackNet models on sport-specific data to improve robustness across different environments  
-- Performed inference and testing on unseen match and practice clips  
-- Conducted detailed error analysis by comparing predicted trajectories against ground-truth coordinates to identify failure cases
+**Key Components**
+- Frame extraction and ground-truth coordinate annotation  
+- Sport-specific fine-tuning of TrackNet  
+- Trajectory smoothing and continuity checks  
+- Robustness testing on unseen clips
 
-**Evaluation & Validation**  
-- Quantitative evaluation using ground-truth vs predicted pixel distance error  
-- Qualitative validation via visual overlay of predicted and ground-truth trajectories  
-- Clip-level success vs failure analysis to assess robustness under fast motion and partial occlusion  
-- Trajectory continuity and smoothness checks to validate temporal consistency
+**Evaluation**
+- Ground-truth vs prediction pixel error analysis  
+- Visual overlay of predicted vs true trajectories  
+- Failure case analysis under motion blur and partial occlusion
 
-**Sports Insight & Impact**  
-The improved tracking pipeline provides a reliable foundation for advanced sports analytics, including speed estimation, shot quality assessment, and biomechanics analysis. This work enables scalable, automated analysis that reduces reliance on manual tagging.
+**Insights Enabled**
+- Speed and trajectory-based shot assessment  
+- Foundations for biomechanics and tactical analysis  
+- Scalable replacement for manual ball/shuttle tagging
 
 **Tech Stack**  
 Python, OpenCV, PyTorch, TrackNet, FFmpeg
 
-### Cricket Hit vs Miss Detection (Audio-Based)
+---
 
-**Problem**  
-Accurately detecting bat–ball contact events is essential for automated shot segmentation and batting analysis. Manual tagging is time-consuming and inconsistent, while visual-only approaches often struggle under occlusion and camera variability.
+## 2. Shot & Action Intelligence System (Cricket & Badminton)
 
-**System Overview**  
-I built an audio-based hit vs miss detection system to classify bat–ball contact events from short cricket clips using acoustic signals.
-
-**Engineering Details**  
-- Owned the complete pipeline, including audio annotation, feature extraction, model training, and threshold tuning  
-- Designed features to capture acoustic signatures associated with bat–ball contact  
-- Performed extensive error analysis to reduce false positives and false negatives across diverse recording conditions
-
-**Evaluation & Validation**  
-- Evaluated model performance using accuracy, precision, and recall metrics  
-- Conducted manual clip-level validation to verify predictions against ground truth labels  
-- Iteratively tuned decision thresholds based on observed failure cases
-
-**Sports Insight & Impact**  
-This system enables reliable detection of bat–ball contact events, forming a critical building block for automated shot segmentation and scalable batting analysis without manual intervention.
-
-**Tech Stack**  
-Python, Audio Signal Processing, Machine Learning
-
-
-### Badminton Smash Biomechanics & Speed Estimation
-
-**Problem**  
-Evaluating smash quality in badminton is traditionally subjective, relying on visual judgment rather than measurable performance metrics. Coaches need objective, video-based indicators to assess technique, power, and consistency.
+**Sports Problem**  
+Manual labeling of shot types is time-consuming and inconsistent, limiting large-scale tactical and performance analysis.
 
 **System Overview**  
-I built a video-based biomechanics analysis pipeline to estimate smash speed and analyze motion characteristics using shuttle tracking and player keypoints, without relying on wearable sensors.
+A video-based shot classification pipeline using **short temporal clips (2–3 seconds)** to model spatio-temporal motion patterns.
 
-**Engineering Details**  
-- Used shuttle trajectory outputs from a tracking model to compute frame-wise velocity and estimate smash speed  
-- Integrated player keypoint data to analyze movement patterns and kinematic angles during smash execution  
-- Designed calculations to work purely from video input, enabling scalable analysis in real-world settings
+**Key Components**
+- Clip-level dataset creation and labeling  
+- Feature extraction capturing motion and execution patterns  
+- Multi-class classification across shot categories  
+- Confusion and failure analysis to refine labels and models
 
-**Evaluation & Validation**  
-- Performed visual verification of shuttle trajectories and biomechanical outputs to ensure correctness  
-- Compared speed and motion patterns across multiple smash instances to validate consistency and reliability  
-- Analyzed variations in kinematic angles to identify execution differences between attempts
+**Evaluation**
+- Standard classification metrics and confusion matrices  
+- Qualitative analysis of visually similar shot failures  
+- Iterative dataset refinement
 
-**Sports Insight & Impact**  
-This pipeline enables objective performance benchmarking of badminton smashes, supporting data-driven coaching feedback and skill assessment. It bridges the gap between raw tracking outputs and actionable biomechanical insights for player development.
-
-**Tech Stack**  
-Python, OpenCV, Computer Vision, Biomechanics Analysis
-
-### Shot Type Classification (Cricket & Badminton)
-
-**Problem**  
-Manual labeling of shot types from match and training footage is time-consuming and inconsistent, limiting large-scale tactical and performance analysis across sports.
-
-**System Overview**  
-I developed shot type classification pipelines for cricket and badminton using short video clips to automatically identify stroke categories based on motion and temporal patterns.
-
-**Engineering Details**  
-- Created labeled datasets using short (2–3 second) video clips capturing complete shot executions  
-- Extracted frame-based features to model spatio-temporal motion patterns  
-- Trained and tested classification models for multiple shot categories across both sports  
-- Performed error and confusion analysis to understand misclassification patterns and refine model behavior
-
-**Evaluation & Validation**  
-- Evaluated classification performance using standard metrics and confusion matrices  
-- Conducted qualitative analysis on failure cases to identify visually similar shot patterns  
-- Iteratively refined datasets and models based on observed classification errors
-
-**Sports Insight & Impact**  
-Automated shot classification enables scalable tagging of match footage, supports tactical breakdowns by shot selection, and contributes to player profiling through quantitative stroke distribution analysis.
+**Insights Enabled**
+- Automated shot distribution analysis  
+- Player profiling based on shot selection tendencies  
+- Scalable tagging for match and training footage
 
 **Tech Stack**  
 Python, OpenCV, Machine Learning, Video Analytics
 
+---
+
+## 3. Technique & Biomechanics Intelligence (Badminton)
+
+**Sports Problem**  
+Smash quality assessment is often subjective. Coaches need **objective, video-based indicators** of technique, power, and consistency without relying on wearables.
+
+**System Overview**  
+A video-only biomechanics pipeline combining **shuttle trajectories and player keypoints** to estimate smash speed and execution patterns.
+
+**Key Components**
+- Shuttle velocity estimation from tracked trajectories  
+- Player keypoint extraction for kinematic analysis  
+- Frame-wise and attempt-wise motion comparisons
+
+**Evaluation**
+- Visual verification of trajectories and keypoints  
+- Consistency checks across multiple smash attempts  
+- Relative comparison of kinematic trends
+
+**Insights Enabled**
+- Objective smash speed benchmarking  
+- Technique consistency analysis  
+- Data-driven coaching feedback
+
+**Tech Stack**  
+Python, OpenCV, Pose Estimation, Biomechanics Analysis
 
 ---
 
-These projects reflect my focus on building **practical, end-to-end Sports AI systems** that translate raw data and video into actionable insights for analysts, coaches, and performance teams.
+## 4. Audio–Visual Event Detection (Cricket)
+
+**Sports Problem**  
+Reliable bat–ball contact detection is critical for automated shot segmentation, but visual-only systems struggle with occlusion and camera variability.
+
+**System Overview**  
+An **audio-based hit vs miss detection system** that identifies contact events from short cricket clips.
+
+**Key Components**
+- Audio clip annotation and feature extraction  
+- Binary classification with threshold tuning  
+- Clip-level manual validation and error analysis
+
+**Evaluation**
+- Precision, recall, and false-positive analysis  
+- Robustness testing across recording conditions
+
+**Insights Enabled**
+- Automated shot boundary detection  
+- Reduced manual tagging effort  
+- Improved downstream video analysis pipelines
+
+**Tech Stack**  
+Python, Audio Signal Processing, Machine Learning
+
+---
+
+## Design Philosophy
+
+Across all systems, I prioritize:
+- **Sports-first problem framing**
+- **Metric-driven evaluation**
+- **Explicit failure analysis**
+- **Translation of model outputs into decisions**
