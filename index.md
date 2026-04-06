@@ -60,5 +60,5 @@ My system design philosophy — from **problem framing and annotation** to **eva
 
 - **GitHub:** <https://github.com/yashv04> 
 - **Portfolio:** <https://yashv04.github.io>  
-- **Resume:** <https://acrobat.adobe.com/id/urn:aaid:sc:AP:b899ad1c-48ee-413b-bfea-fe0b6f8db801>
+- **Resume:** <https://acrobat.adobe.com/id/urn:aaid:sc:AP:3ebf50aa-da84-42c9-bca0-812d237ed320>
 
