@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Video Intelligence Systems · Yash Vardhan</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#080c10;--surface:#0d1318;--card:#111820;--border:#1e2d3d;
+  --accent:#00d4ff;--accent2:#ff6b35;--gold:#f5c542;--green:#00e5a0;
+  --text:#e8edf2;--muted:#6b8299;--dim:#3a5068;
+}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;overflow-x:hidden}
+.grid-bg{position:fixed;inset:0;background-image:linear-gradient(rgba(0,212,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,0.03) 1px,transparent 1px);background-size:60px 60px;pointer-events:none;z-index:0}
+canvas{position:fixed;inset:0;pointer-events:none;z-index:0;opacity:0.3}
+.page{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:0 2rem 6rem}
+
+/* NAV */
+.nav{display:flex;align-items:center;justify-content:space-between;padding:1.5rem 0;border-bottom:1px solid var(--border);margin-bottom:3rem}
+.nav-back{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);text-decoration:none;display:flex;align-items:center;gap:6px;letter-spacing:0.05em;transition:color 0.2s}
+.nav-back:hover{color:var(--accent)}
+.nav-links{display:flex;gap:1.5rem}
+.nav-link{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);text-decoration:none;letter-spacing:0.05em;transition:color 0.2s}
+.nav-link:hover,.nav-link.active{color:var(--accent)}
+
+/* PAGE HEADER */
+.page-header{padding:2rem 0 3rem;border-bottom:1px solid var(--border);margin-bottom:3rem;display:grid;grid-template-columns:1fr auto;gap:2rem;align-items:end}
+.ph-tag{font-family:'DM Mono',monospace;font-size:10px;color:var(--accent);letter-spacing:0.2em;text-transform:uppercase;margin-bottom:1rem}
+.ph-title{font-size:clamp(2rem,4vw,3rem);font-weight:800;color:#fff;line-height:1.1;margin-bottom:1rem}
+.ph-title span{color:var(--accent)}
+.ph-desc{font-family:'DM Mono',monospace;font-size:12px;color:var(--muted);line-height:1.9;max-width:580px}
+.ph-desc strong{color:var(--text);font-weight:400}
+.ph-stats{display:flex;flex-direction:column;gap:0.75rem;flex-shrink:0}
+.ph-stat{background:var(--card);border:1px solid var(--border);padding:0.7rem 1.2rem;text-align:right}
+.ph-stat-num{font-size:1.6rem;font-weight:800;color:var(--accent);line-height:1}
+.ph-stat-label{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-top:2px}
+
+/* SEC HEAD */
+.sec-head{display:flex;align-items:center;gap:1rem;margin:3.5rem 0 1.5rem}
+.sec-label{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--accent);white-space:nowrap}
+.sec-line{flex:1;height:1px;background:var(--border)}
+.sec-label-gold{color:var(--gold)}
+.sec-label-green{color:var(--green)}
+.sec-label-orange{color:var(--accent2)}
+
+/* ── THE THINKING BLOCK ── */
+.thinking-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);border:1px solid var(--border);margin-bottom:1px}
+.thinking-cell{background:var(--card);padding:1.6rem}
+.tc-num{font-family:'DM Mono',monospace;font-size:10px;color:var(--dim);margin-bottom:0.5rem}
+.tc-question{font-size:14px;font-weight:700;color:var(--accent);margin-bottom:0.6rem;line-height:1.4}
+.tc-answer{font-family:'DM Mono',monospace;font-size:11.5px;color:var(--muted);line-height:1.8}
+.tc-answer strong{color:var(--text);font-weight:400}
+
+/* ── FULL STACK PIPELINE ── */
+.pipeline-visual{background:var(--card);border:1px solid var(--border);overflow:hidden;margin-bottom:1px}
+.pv-header{padding:1.5rem 2rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.pv-title{font-size:1rem;font-weight:700;color:#fff}
+.pv-sub{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)}
+.pv-stages{display:grid;grid-template-columns:repeat(6,1fr);gap:0}
+.pv-stage{padding:1.2rem 1rem;border-right:1px solid var(--border);position:relative;transition:background 0.2s}
+.pv-stage:last-child{border-right:none}
+.pv-stage:hover{background:rgba(0,212,255,0.03)}
+.pv-stage-num{font-family:'DM Mono',monospace;font-size:9px;color:var(--dim);margin-bottom:0.4rem}
+.pv-stage-name{font-size:12px;font-weight:700;color:var(--text);margin-bottom:0.3rem;line-height:1.3}
+.pv-stage-detail{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);line-height:1.5}
+.pv-stage-dot{width:6px;height:6px;border-radius:50%;margin-bottom:0.5rem}
+.dot-gold{background:var(--gold)}
+.dot-cyan{background:var(--accent)}
+.dot-orange{background:var(--accent2)}
+.dot-green{background:var(--green)}
+
+/* ── ANNOTATOR CARD ── */
+.annotator-card{background:var(--card);border:1px solid var(--gold);overflow:hidden;margin-bottom:1px}
+.annotator-card::before{content:'';display:block;height:2px;background:linear-gradient(90deg,var(--gold),rgba(245,197,66,0.2),transparent)}
+.ann-body{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border)}
+.ann-left{background:var(--card);padding:2rem}
+.ann-right{background:var(--surface);padding:2rem}
+.ann-eyebrow{font-family:'DM Mono',monospace;font-size:9px;color:var(--gold);letter-spacing:0.2em;text-transform:uppercase;margin-bottom:0.8rem;display:flex;align-items:center;gap:6px}
+.ann-eyebrow::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--gold)}
+.ann-title{font-size:1.3rem;font-weight:800;color:#fff;margin-bottom:0.6rem;line-height:1.2}
+.ann-title span{color:var(--gold)}
+.ann-desc{font-family:'DM Mono',monospace;font-size:11.5px;color:var(--muted);line-height:1.9;margin-bottom:1.2rem}
+.ann-desc strong{color:var(--text);font-weight:400}
+.ann-why-title{font-family:'DM Mono',monospace;font-size:9px;color:var(--green);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:0.6rem}
+.ann-why-list{list-style:none}
+.ann-why-list li{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);padding:4px 0;display:flex;gap:8px;line-height:1.5}
+.ann-why-list li::before{content:'✓';color:var(--green);flex-shrink:0}
+.ann-modes-title{font-family:'DM Mono',monospace;font-size:9px;color:var(--gold);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:0.8rem}
+.ann-mode-row{display:flex;align-items:start;gap:0.75rem;padding:0.6rem 0;border-bottom:1px solid var(--border)}
+.ann-mode-row:last-child{border-bottom:none}
+.ann-mode-num{font-family:'DM Mono',monospace;font-size:10px;color:var(--dim);flex-shrink:0;width:2rem}
+.ann-mode-name{font-size:12px;font-weight:700;color:var(--text);margin-bottom:2px}
+.ann-mode-detail{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)}
+.ann-mode-tags{display:flex;flex-wrap:wrap;gap:3px;margin-top:4px}
+.ann-mode-tag{font-family:'DM Mono',monospace;font-size:9px;padding:1px 6px;border:1px solid rgba(245,197,66,0.2);color:rgba(245,197,66,0.55);border-radius:2px}
+.ann-footer{padding:0.8rem 2rem;border-top:1px solid rgba(245,197,66,0.15);background:rgba(245,197,66,0.02);display:flex;gap:1.5rem;flex-wrap:wrap}
+.ann-footer-item{font-family:'DM Mono',monospace;font-size:10px;color:var(--dim)}
+.ann-footer-item span{color:rgba(245,197,66,0.7)}
+
+/* ── SYSTEM CARDS ── */
+.systems-list{display:flex;flex-direction:column;gap:1px}
+.system{background:var(--card);border:1px solid var(--border);overflow:hidden;transition:border-color 0.2s}
+.system:hover{border-color:var(--dim)}
+.sys-top{display:grid;grid-template-columns:60px 1fr auto;align-items:start;padding:1.8rem;gap:1.5rem}
+.sys-num{font-family:'DM Mono',monospace;font-size:2.2rem;font-weight:300;color:var(--border);line-height:1;flex-shrink:0}
+.sys-sport{font-family:'DM Mono',monospace;font-size:9px;color:var(--accent2);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:0.4rem}
+.sys-title{font-size:1.15rem;font-weight:700;color:#fff;margin-bottom:0.5rem}
+.sys-badge{flex-shrink:0;background:rgba(0,212,255,0.06);border:1px solid var(--dim);padding:5px 11px;border-radius:2px;font-family:'DM Mono',monospace;font-size:9px;color:var(--dim);letter-spacing:0.1em;text-transform:uppercase;white-space:nowrap;height:fit-content}
+
+/* value + approach 2-col */
+.sys-detail{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:var(--border);border-top:1px solid var(--border)}
+.sys-col{background:var(--surface);padding:1.3rem}
+.sys-col-head{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:0.7rem;padding-bottom:0.4rem;border-bottom:1px solid var(--border)}
+.col-cyan{color:var(--accent)}
+.col-orange{color:var(--accent2)}
+.col-green{color:var(--green)}
+.sys-col ul{list-style:none}
+.sys-col ul li{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);padding:3px 0;line-height:1.6;display:flex;gap:6px;align-items:start}
+.sys-col ul li::before{content:'–';color:var(--dim);flex-shrink:0;margin-top:1px}
+.sys-stack{padding:0.9rem 1.8rem;border-top:1px solid var(--border);display:flex;align-items:center;gap:0.6rem;flex-wrap:wrap}
+.stack-lbl{font-family:'DM Mono',monospace;font-size:9px;color:var(--dim);letter-spacing:0.1em;text-transform:uppercase;margin-right:4px}
+.tag{font-family:'DM Mono',monospace;font-size:9px;padding:2px 7px;border:1px solid var(--dim);color:var(--dim);border-radius:2px}
+.tag.hi{border-color:rgba(0,212,255,0.3);color:rgba(0,212,255,0.6)}
+
+/* CTA */
+.cta-bar{margin-top:3rem;background:var(--card);border:1px solid var(--border);padding:2rem 2.5rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.cta-text h3{font-size:1rem;font-weight:700;color:#fff;margin-bottom:0.3rem}
+.cta-text p{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)}
+.cta-links{display:flex;gap:0.75rem;flex-wrap:wrap}
+.cta-btn{display:inline-flex;align-items:center;gap:6px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;padding:9px 18px;border-radius:2px;text-decoration:none;cursor:pointer;white-space:nowrap;transition:opacity 0.2s}
+.cta-btn.primary{background:var(--accent);color:#000;border:none}
+.cta-btn.secondary{background:transparent;color:var(--muted);border:1px solid var(--border)}
+.cta-btn:hover{opacity:0.8}
+
+.fade-up{opacity:0;transform:translateY(12px);animation:fadeUp 0.45s forwards}
+@keyframes fadeUp{to{opacity:1;transform:translateY(0)}}
+.d1{animation-delay:0.05s}.d2{animation-delay:0.1s}.d3{animation-delay:0.2s}.d4{animation-delay:0.3s}.d5{animation-delay:0.4s}.d6{animation-delay:0.5s}
+</style>
+</head>
+<body>
+<div class="grid-bg"></div>
+<canvas id="c"></canvas>
+<div class="page">
+
+  <nav class="nav fade-up d1">
+    <a class="nav-back" href="/">← Yash Vardhan</a>
+    <div class="nav-links">
+      <a class="nav-link active" href="/sports-ai/">Vision Systems</a>
+      <a class="nav-link" href="/sports-analytics/">Analytics</a>
+      <a class="nav-link" href="/systems/">Systems Thinking</a>
+    </div>
+  </nav>
+
+  <!-- PAGE HEADER -->
+  <div class="page-header fade-up d1">
+    <div>
+      <div class="ph-tag">Computer Vision · Full Stack · Production</div>
+      <h1 class="ph-title">Video-Based<br><span>Intelligence Systems</span></h1>
+      <p class="ph-desc">
+        Five systems built in sequence — starting with <strong>annotation infrastructure</strong>, then tracking, classification, biomechanics, and event detection. Each system was designed to solve a specific sports problem, built for real-world video conditions, and delivered as output coaches and analysts can act on without any data science knowledge.<br><br>
+        This page documents the <strong>thinking, approach, and value</strong> behind every system.
+      </p>
+    </div>
+    <div class="ph-stats">
+      <div class="ph-stat"><div class="ph-stat-num">5</div><div class="ph-stat-label">Systems Built</div></div>
+      <div class="ph-stat"><div class="ph-stat-num">2</div><div class="ph-stat-label">Sports</div></div>
+      <div class="ph-stat"><div class="ph-stat-num">E2E</div><div class="ph-stat-label">Infra → Delivery</div></div>
+    </div>
+  </div>
+
+  <!-- THE THINKING -->
+  <div class="sec-head fade-up d2">
+    <span class="sec-label">The Thinking · Why These Systems</span>
+    <div class="sec-line"></div>
+  </div>
+
+  <div class="thinking-grid fade-up d2">
+    <div class="thinking-cell">
+      <div class="tc-num">Question 01</div>
+      <div class="tc-question">Why build an annotator before building any model?</div>
+      <div class="tc-answer">Because bad ground truth produces bad models regardless of architecture. Most CV engineers start with a pre-trained model and discover data quality problems later. I started with the data problem — built the annotation tool first, established ground truth standards for each object type, then trained models against verified data. The annotator also supports <strong>predicted overlay</strong>: you load model predictions alongside manual labels and immediately see where the model diverges. That's how you build a retraining loop that targets real failures, not synthetic edge cases.</div>
+    </div>
+    <div class="thinking-cell">
+      <div class="tc-num">Question 02</div>
+      <div class="tc-question">Why TrackNet for ball tracking instead of a detection model?</div>
+      <div class="tc-answer">Standard object detectors fail on small, fast-moving objects — a cricket ball at 140 km/h occupies ~3–5 pixels per frame and spends several frames as a blur rather than a distinct object. TrackNet was designed specifically for this problem: it takes a <strong>sequence of frames</strong> as input and predicts the heatmap of where the ball is, using temporal context to infer position through frames where the ball is invisible. Fine-tuning on sport-specific footage — with annotated occlusion, release, and landing events — makes it meaningfully more accurate than using generic weights.</div>
+    </div>
+    <div class="thinking-cell">
+      <div class="tc-num">Question 03</div>
+      <div class="tc-question">Why audio-first for bat-ball contact detection?</div>
+      <div class="tc-answer">Visual-only event detection breaks down at precisely the moments that matter most — when the bat meets the ball, the camera is often mid-pan, the ball is occluded by the bat, or the frame rate is too low to capture the exact moment. Audio doesn't have this problem: <strong>bat-ball contact produces a distinct acoustic signature</strong> that exists even in noisy nets sessions. The audio signal is the most reliable event anchor available, so the system uses it as the primary detection method and uses visual frames only for downstream context, not for detection itself.</div>
+    </div>
+    <div class="thinking-cell">
+      <div class="tc-num">Question 04</div>
+      <div class="tc-question">Why video-only biomechanics instead of wearables?</div>
+      <div class="tc-answer">Wearables require athletes to change their equipment and routine, introduce calibration overhead, and are impractical for retrospective analysis of existing footage. A video-only pipeline works on <strong>any footage that already exists</strong> — archived training sessions, match recordings, academy clips — without instrumenting the athlete. Mediapipe gives reliable joint keypoints at 30fps on standard hardware. Combined with shuttle trajectory from the tracking system, you can derive smash speed and kinematic consistency metrics without any hardware dependency.</div>
+    </div>
+  </div>
+
+  <!-- FULL STACK PIPELINE -->
+  <div class="sec-head fade-up d3">
+    <span class="sec-label sec-label-green">Full Stack · Raw Video to Decision</span>
+    <div class="sec-line"></div>
+  </div>
+
+  <div class="pipeline-visual fade-up d3">
+    <div class="pv-header">
+      <div>
+        <div class="pv-title">End-to-End Pipeline Architecture</div>
+      </div>
+      <div class="pv-sub">Every stage built and owned — not stitched from third-party APIs</div>
+    </div>
+    <div class="pv-stages">
+      <div class="pv-stage">
+        <div class="pv-stage-dot dot-gold"></div>
+        <div class="pv-stage-num">Stage 01</div>
+        <div class="pv-stage-name">Raw Video Ingestion</div>
+        <div class="pv-stage-detail">Match footage, training clips, multi-angle broadcast. Variable quality, frame rates, resolutions.</div>
+      </div>
+      <div class="pv-stage">
+        <div class="pv-stage-dot dot-gold"></div>
+        <div class="pv-stage-num">Stage 02</div>
+        <div class="pv-stage-name">Annotation & Ground Truth</div>
+        <div class="pv-stage-detail">Internal labelling tool. Manual + predicted overlay. Frame-accurate event tagging per object type.</div>
+      </div>
+      <div class="pv-stage">
+        <div class="pv-stage-dot dot-cyan"></div>
+        <div class="pv-stage-num">Stage 03</div>
+        <div class="pv-stage-name">Model Training & Evaluation</div>
+        <div class="pv-stage-detail">Sport-specific fine-tuning. Failure analysis. Iterative dataset refinement against real breakdown cases.</div>
+      </div>
+      <div class="pv-stage">
+        <div class="pv-stage-dot dot-cyan"></div>
+        <div class="pv-stage-num">Stage 04</div>
+        <div class="pv-stage-name">Inference Pipeline</div>
+        <div class="pv-stage-detail">Tracking, classification, pose, audio event detection. Modular — each component replaceable independently.</div>
+      </div>
+      <div class="pv-stage">
+        <div class="pv-stage-dot dot-orange"></div>
+        <div class="pv-stage-num">Stage 05</div>
+        <div class="pv-stage-name">Analytics Layer</div>
+        <div class="pv-stage-detail">Raw model outputs translated into performance metrics, shot distributions, biomechanics reports.</div>
+      </div>
+      <div class="pv-stage">
+        <div class="pv-stage-dot dot-green"></div>
+        <div class="pv-stage-num">Stage 06</div>
+        <div class="pv-stage-name">Coach-Ready Output</div>
+        <div class="pv-stage-detail">Rally summaries, technique reports, tactical breakdowns. No data science literacy required.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ANNOTATOR -->
+  <div class="sec-head fade-up d3">
+    <span class="sec-label sec-label-gold">Foundation Layer · Built First</span>
+    <div class="sec-line"></div>
+  </div>
+
+  <div class="annotator-card fade-up d3">
+    <div class="ann-body">
+      <div class="ann-left">
+        <div class="ann-eyebrow">Internal Infrastructure · Google Cloud Run · Production</div>
+        <div class="ann-title">Sports Annotation &<br><span>Ground Truth Engine</span></div>
+        <div class="ann-desc">
+          A production-grade internal labelling tool built from scratch to handle multi-sport, multi-object annotation with keyboard-driven workflows. Supports both <strong>manual annotation</strong> and <strong>predicted data overlay</strong> in the same interface — so you can benchmark model outputs against ground truth directly, without switching tools.<br><br>
+          Built before any model was trained. The decision was deliberate: annotation strategy shapes what the model can learn. Building the tool first forced clarity on what ground truth actually means for each object type in each sport.
+        </div>
+        <div class="ann-why-title">Why this exists</div>
+        <ul class="ann-why-list">
+          <li>Generic annotation tools don't support sports-specific event tagging (occlusion, contact, release, landing)</li>
+          <li>Predicted overlay in the same UI closes the retraining loop without exporting/importing between tools</li>
+          <li>Keyboard shortcut workflows make annotation fast enough to build datasets at scale</li>
+          <li>Deployed on Cloud Run — accessible from anywhere, no local setup for annotators</li>
+        </ul>
+      </div>
+      <div class="ann-right">
+        <div class="ann-modes-title">4 Annotation Modes</div>
+        <div class="ann-mode-row">
+          <div class="ann-mode-num">01</div>
+          <div>
+            <div class="ann-mode-name">Shuttle Tracking</div>
+            <div class="ann-mode-detail">Frame-wise trajectory annotation for badminton shuttle</div>
+            <div class="ann-mode-tags">
+              <span class="ann-mode-tag">C contact</span><span class="ann-mode-tag">L landing</span><span class="ann-mode-tag">R rest</span><span class="ann-mode-tag">O occlude</span>
+            </div>
+          </div>
+        </div>
+        <div class="ann-mode-row">
+          <div class="ann-mode-num">02</div>
+          <div>
+            <div class="ann-mode-name">Cricket Ball Tracking</div>
+            <div class="ann-mode-detail">Frame-wise trajectory with delivery phase tagging</div>
+            <div class="ann-mode-tags">
+              <span class="ann-mode-tag">R release</span><span class="ann-mode-tag">L landing</span><span class="ann-mode-tag">C contact</span><span class="ann-mode-tag">O occlude</span>
+            </div>
+          </div>
+        </div>
+        <div class="ann-mode-row">
+          <div class="ann-mode-num">03</div>
+          <div>
+            <div class="ann-mode-name">Cricket Bat Tracking</div>
+            <div class="ann-mode-detail">4-keypoint quadrilateral — captures bat face geometry, not just bounding box</div>
+            <div class="ann-mode-tags">
+              <span class="ann-mode-tag">1–4 keypoints</span><span class="ann-mode-tag">C contact</span><span class="ann-mode-tag">D clear</span>
+            </div>
+          </div>
+        </div>
+        <div class="ann-mode-row">
+          <div class="ann-mode-num">04</div>
+          <div>
+            <div class="ann-mode-name">Badminton Court</div>
+            <div class="ann-mode-detail">10-keypoint layout for homography and court-relative position analysis</div>
+            <div class="ann-mode-tags">
+              <span class="ann-mode-tag">SSL/SSC/SSR</span><span class="ann-mode-tag">LSR/LSC/LSL</span><span class="ann-mode-tag">TL/TR/BL/BR</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="ann-footer">
+      <span class="ann-footer-item">Deployed: <span>Google Cloud Run</span></span>
+      <span class="ann-footer-item">Access: <span>Internal only</span></span>
+      <span class="ann-footer-item">Supports: <span>Manual + Predicted data</span></span>
+      <span class="ann-footer-item">Workflow: <span>Human-in-the-loop retraining</span></span>
+      <span class="ann-footer-item">Coverage: <span>2 Sports · 4 Object Types</span></span>
+    </div>
+  </div>
+
+  <!-- 4 CV SYSTEMS -->
+  <div class="sec-head fade-up d4">
+    <span class="sec-label">Four CV Systems · Built On Top</span>
+    <div class="sec-line"></div>
+  </div>
+
+  <div class="systems-list">
+
+    <!-- SYSTEM 01 -->
+    <div class="system fade-up d4">
+      <div class="sys-top">
+        <div class="sys-num">01</div>
+        <div>
+          <div class="sys-sport">Cricket · Badminton</div>
+          <div class="sys-title">Ball & Shuttle Intelligence System</div>
+          <div style="font-family:'DM Mono',monospace;font-size:11.5px;color:var(--muted);line-height:1.8">Continuous frame-wise trajectory tracking using TrackNet — fine-tuned on sport-specific annotated data from the ground truth engine above. Produces the coordinate stream that feeds every downstream speed, trajectory, and biomechanics system.</div>
+        </div>
+        <div class="sys-badge">TrackNet · Fine-tuned</div>
+      </div>
+      <div class="sys-detail">
+        <div class="sys-col">
+          <div class="sys-col-head col-cyan">The Sports Problem</div>
+          <ul>
+            <li>Manual ball tagging is too slow for large-scale analysis</li>
+            <li>Standard detectors fail on 3–5px fast-moving objects</li>
+            <li>Occlusion mid-delivery breaks frame-by-frame approaches</li>
+            <li>Speed estimation requires continuous trajectory, not sparse detections</li>
+          </ul>
+        </div>
+        <div class="sys-col">
+          <div class="sys-col-head col-orange">Technical Approach</div>
+          <ul>
+            <li>TrackNet takes 3-frame sequences — uses temporal context to infer position through blur/occlusion</li>
+            <li>Fine-tuned on annotated cricket & badminton footage with event labels</li>
+            <li>Trajectory smoothing removes false positives without losing real detections</li>
+            <li>Failure cases fed back into annotator for targeted dataset improvement</li>
+          </ul>
+        </div>
+        <div class="sys-col">
+          <div class="sys-col-head col-green">Value Delivered</div>
+          <ul>
+            <li>Automated, scalable replacement for manual ball tagging</li>
+            <li>Speed estimation from trajectory delta across frames</li>
+            <li>Foundation coordinate stream for biomechanics & tactical systems</li>
+            <li>Works on broadcast footage — no custom camera required</li>
+          </ul>
+        </div>
+      </div>
+      <div class="sys-stack">
+        <span class="stack-lbl">Stack</span>
+        <span class="tag hi">TrackNet</span><span class="tag hi">PyTorch</span><span class="tag hi">OpenCV</span><span class="tag">Python</span><span class="tag">FFmpeg</span>
+      </div>
+    </div>
+
+    <!-- SYSTEM 02 -->
+    <div class="system fade-up d4">
+      <div class="sys-top">
+        <div class="sys-num">02</div>
+        <div>
+          <div class="sys-sport">Cricket · Badminton</div>
+          <div class="sys-title">Shot & Action Intelligence System</div>
+          <div style="font-family:'DM Mono',monospace;font-size:11.5px;color:var(--muted);line-height:1.8">Temporal clip-based shot classification across cricket and badminton. 2–3 second clips capture the full motion arc of a shot — enough temporal context to distinguish shot types that look similar in a single frame. Replaces manual tagging entirely.</div>
+        </div>
+        <div class="sys-badge">Temporal Modeling</div>
+      </div>
+      <div class="sys-detail">
+        <div class="sys-col">
+          <div class="sys-col-head col-cyan">The Sports Problem</div>
+          <ul>
+            <li>Shot type labels are required for tactical analysis but tagging is slow and inconsistent at scale</li>
+            <li>Single-frame detection can't distinguish a drive from a cut — motion context is essential</li>
+            <li>Coaches need shot distribution data across entire training sessions, not just highlights</li>
+          </ul>
+        </div>
+        <div class="sys-col">
+          <div class="sys-col-head col-orange">Technical Approach</div>
+          <ul>
+            <li>Clip-level labeling — each clip is 2–3 seconds centered on the shot event</li>
+            <li>Temporal feature extraction captures motion patterns across frames, not just spatial shape</li>
+            <li>Confusion matrix analysis identified visually similar shot pairs — drove label refinement and data collection targeting those pairs specifically</li>
+          </ul>
+        </div>
+        <div class="sys-col">
+          <div class="sys-col-head col-green">Value Delivered</div>
+          <ul>
+            <li>Automated shot tagging across full training sessions — zero manual effort post-setup</li>
+            <li>Shot distribution reports per player, per session, per phase</li>
+            <li>Player tendency profiling from shot selection patterns</li>
+            <li>Feeds directly into tactical modeling systems downstream</li>
+          </ul>
+        </div>
+      </div>
+      <div class="sys-stack">
+        <span class="stack-lbl">Stack</span>
+        <span class="tag hi">PyTorch</span><span class="tag hi">OpenCV</span><span class="tag">Python</span><span class="tag">Temporal CV</span><span class="tag">Video Analytics</span>
+      </div>
+    </div>
+
+    <!-- SYSTEM 03 -->
+    <div class="system fade-up d5">
+      <div class="sys-top">
+        <div class="sys-num">03</div>
+        <div>
+          <div class="sys-sport">Badminton</div>
+          <div class="sys-title">Smash Technique & Biomechanics System</div>
+          <div style="font-family:'DM Mono',monospace;font-size:11.5px;color:var(--muted);line-height:1.8">Video-only biomechanics pipeline that extracts smash speed and joint kinematics from raw training footage — no wearables, no special cameras. Uses shuttle trajectory from System 01 and player keypoints from pose estimation to derive objective technique metrics for coaching.</div>
+        </div>
+        <div class="sys-badge">Video-Only · No Hardware</div>
+      </div>
+      <div class="sys-detail">
+        <div class="sys-col">
+          <div class="sys-col-head col-cyan">The Sports Problem</div>
+          <ul>
+            <li>Smash quality is assessed subjectively — coaches use intuition, not data</li>
+            <li>Wearables are invasive, expensive, and don't work on archived footage</li>
+            <li>Players need objective consistency metrics, not just peak performance data</li>
+            <li>Academies need scalable technique analysis across many players simultaneously</li>
+          </ul>
+        </div>
+        <div class="sys-col">
+          <div class="sys-col-head col-orange">Technical Approach</div>
+          <ul>
+            <li>Shuttle velocity estimated from frame-delta of tracked trajectory coordinates</li>
+            <li>Mediapipe extracts 33 body keypoints per frame at 30fps on CPU</li>
+            <li>Joint angles computed from keypoint pairs across the smash motion arc</li>
+            <li>Attempt-wise comparison reveals consistency trends across multiple smashes</li>
+          </ul>
+        </div>
+        <div class="sys-col">
+          <div class="sys-col-head col-green">Value Delivered</div>
+          <ul>
+            <li>Objective smash speed benchmarking from any training video</li>
+            <li>Technique consistency scores across sessions — not just peak metrics</li>
+            <li>Coaching reports generated automatically from raw footage</li>
+            <li>Works retrospectively on existing academy/match recordings</li>
+          </ul>
+        </div>
+      </div>
+      <div class="sys-stack">
+        <span class="stack-lbl">Stack</span>
+        <span class="tag hi">Mediapipe</span><span class="tag hi">OpenCV</span><span class="tag">Python</span><span class="tag">Pose Estimation</span><span class="tag">Kinematics</span>
+      </div>
+    </div>
+
+    <!-- SYSTEM 04 -->
+    <div class="system fade-up d5">
+      <div class="sys-top">
+        <div class="sys-num">04</div>
+        <div>
+          <div class="sys-sport">Cricket</div>
+          <div class="sys-title">Audio–Visual Bat–Ball Contact Detection</div>
+          <div style="font-family:'DM Mono',monospace;font-size:11.5px;color:var(--muted);line-height:1.8">Audio-first hit/miss detection system that identifies bat-ball contact events from short cricket clips. Works independently of clean visual frames — designed specifically for the conditions where visual-only detection fails: noisy nets sessions, occluded contact, fast pan cameras.</div>
+        </div>
+        <div class="sys-badge">Audio-First · Multimodal</div>
+      </div>
+      <div class="sys-detail">
+        <div class="sys-col">
+          <div class="sys-col-head col-cyan">The Sports Problem</div>
+          <ul>
+            <li>Shot segmentation requires knowing exactly when bat meets ball</li>
+            <li>Visual detection fails at the moment of contact — ball is occluded by bat</li>
+            <li>Training environments are noisy — multiple nets, background sounds</li>
+            <li>Frame rates often too low to capture sub-frame contact events visually</li>
+          </ul>
+        </div>
+        <div class="sys-col">
+          <div class="sys-col-head col-orange">Technical Approach</div>
+          <ul>
+            <li>Bat-ball contact produces a consistent acoustic signature regardless of visual occlusion</li>
+            <li>Audio features extracted and classified as hit/miss with threshold tuning for noise floor</li>
+            <li>Tested across indoor nets, outdoor grounds, and broadcast audio — different noise profiles</li>
+            <li>False positive analysis drove threshold calibration per environment type</li>
+          </ul>
+        </div>
+        <div class="sys-col">
+          <div class="sys-col-head col-green">Value Delivered</div>
+          <ul>
+            <li>Reliable shot boundary detection in environments where visual detection fails</li>
+            <li>Automated shot segmentation from raw training footage</li>
+            <li>Reduces manual tagging effort for downstream classification systems</li>
+            <li>Can be deployed as the event anchor for any cricket CV pipeline</li>
+          </ul>
+        </div>
+      </div>
+      <div class="sys-stack">
+        <span class="stack-lbl">Stack</span>
+        <span class="tag hi">Audio Signal Processing</span><span class="tag">Python</span><span class="tag">Binary Classification</span><span class="tag">Librosa</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- CTA -->
+  <div class="cta-bar fade-up d6">
+    <div class="cta-text">
+      <h3>See the analytics and strategy layer built on top of these systems</h3>
+      <p>Tactical modeling · win probability · venue intelligence · player impact — the decision layer.</p>
+    </div>
+    <div class="cta-links">
+      <a class="cta-btn secondary" href="/systems/">Systems Approach →</a>
+      <a class="cta-btn primary" href="/sports-analytics/">View Analytics →</a>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const canvas=document.getElementById('c'),ctx=canvas.getContext('2d');
+function resize(){canvas.width=window.innerWidth;canvas.height=window.innerHeight}
+resize();window.addEventListener('resize',resize);
+const pts=Array.from({length:5},(_,i)=>({x:Math.random()*window.innerWidth,y:Math.random()*window.innerHeight,vx:(Math.random()-0.5)*0.7,vy:(Math.random()-0.5)*0.7,trail:[],hue:i<3?'0,212,255':'255,107,53',len:50+Math.random()*40}));
+function draw(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  pts.forEach(p=>{
+    p.x+=p.vx;p.y+=p.vy;
+    if(p.x<0||p.x>canvas.width)p.vx*=-1;
+    if(p.y<0||p.y>canvas.height)p.vy*=-1;
+    p.trail.push({x:p.x,y:p.y});
+    if(p.trail.length>p.len)p.trail.shift();
+    if(p.trail.length<2)return;
+    for(let i=1;i<p.trail.length;i++){
+      const a=i/p.trail.length;
+      ctx.beginPath();ctx.moveTo(p.trail[i-1].x,p.trail[i-1].y);ctx.lineTo(p.trail[i].x,p.trail[i].y);
+      ctx.strokeStyle=`rgba(${p.hue},${a*0.5})`;ctx.lineWidth=a*1.5;ctx.stroke();
+    }
+    ctx.beginPath();ctx.arc(p.x,p.y,2,0,Math.PI*2);ctx.fillStyle=`rgba(${p.hue},0.9)`;ctx.fill();
+  });
+  requestAnimationFrame(draw);
+}
+draw();
+</script>
+</body>
+</html>
