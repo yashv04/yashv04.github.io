@@ -129,13 +129,65 @@ canvas{position:fixed;inset:0;pointer-events:none;z-index:0;opacity:0.3}
     </div>
   </div>
 
-  <!-- MATCH SIMULATOR -->
+  <!-- LIVE DEPLOYED MODELS -->
   <div class="sec-head fade-up d2">
+    <span class="sec-label">Live Models & Apps</span>
+    <div class="sec-line"></div>
+  </div>
+
+  <div class="proj-grid fade-up d3" style="margin-bottom:1px">
+    <a class="proj-card" href="https://odi-full-match-predictor-mxvyyqyvgszg5krsutpqh9.streamlit.app/" target="_blank" style="grid-column:span 2">
+      <div class="proj-arrow">↗</div>
+      <div class="proj-num">End-to-End · ODI · Flagship</div>
+      <div class="proj-title">ODI Full Match Predictor</div>
+      <div class="proj-desc">Three-stage live win-probability engine: pre-match (calibrated LR) → 1st innings score projection (GBM + quantile bands) → 2nd innings chase (calibrated XGBoost · <strong>91% accuracy in death overs</strong>). Trained on 2,520 ODIs & 1.3M deliveries from Cricsheet. ICC-style Elo with variable K + recency weighting. Calibrated probabilities (Brier 0.146) for honest decision support.</div>
+      <div class="proj-link">Live Demo → · GitHub ↗</div>
+    </a>
+    <a class="proj-card" href="https://cricket-venue-intelligence-app-mkbwla6gsdfdxqpdguihnx.streamlit.app/" target="_blank">
+      <div class="proj-arrow">↗</div>
+      <div class="proj-num">Venue Intel · All Formats</div>
+      <div class="proj-title">Cricket Venue Intelligence Hub</div>
+      <div class="proj-desc">Venue-centric platform: scoring trends, pitch & boundary influence, XGBoost-based score & win predictors. Pre-match briefing tool for analysts and coaching staff.</div>
+      <div class="proj-link">Live Demo →</div>
+    </a>
+  </div>
+
+  <!-- TABLEAU DASHBOARDS -->
+  <div class="sec-head fade-up d3">
+    <span class="sec-label">Interactive Dashboards</span>
+    <div class="sec-line"></div>
+  </div>
+
+  <div class="proj-grid fade-up d3">
+    <a class="proj-card" href="https://public.tableau.com/app/profile/yash.vardhan6567/viz/T20IndexDashboard/T20PressureIndexDashboard" target="_blank">
+      <div class="proj-arrow">↗</div>
+      <div class="proj-num">Pressure Analysis</div>
+      <div class="proj-title">Pressure Performance Index</div>
+      <div class="proj-desc">Quantifies player effectiveness in high-pressure situations. Clutch performer identification, leadership suitability, and role analysis under match-deciding conditions.</div>
+      <div class="proj-link">Tableau Dashboard →</div>
+    </a>
+    <a class="proj-card" href="https://public.tableau.com/app/profile/yash.vardhan6567/viz/BatsmanvsBowlersMatchup/BatsmanvsBowlerMatchupDashboardTillIPL2024" target="_blank">
+      <div class="proj-arrow">↗</div>
+      <div class="proj-num">Matchup Intel</div>
+      <div class="proj-title">Batter vs Bowler Matchup Analysis</div>
+      <div class="proj-desc">Phase-specific vulnerability analysis across venues. Exploitable matchup identification for tactical bowling plans and batting orders. Covers through IPL 2024.</div>
+      <div class="proj-link">Tableau Dashboard →</div>
+    </a>
+    <div class="proj-card" style="cursor:default">
+      <div class="proj-num">Coming Soon</div>
+      <div class="proj-title">Real-time Analyst Dashboard</div>
+      <div class="proj-desc">Unified in-match analytics dashboard combining win probability, matchup intel, and phase-wise strategy recommendations in a single analyst-facing interface.</div>
+      <div class="proj-link" style="color:var(--dim)">In Development</div>
+    </div>
+  </div>
+
+  <!-- MATCH SIMULATOR -->
+  <div class="sec-head fade-up d4">
     <span class="sec-label">Match Strategy</span>
     <div class="sec-line"></div>
   </div>
 
-  <div class="flagship-ana fade-up d3">
+  <div class="flagship-ana fade-up d4">
     <div class="fa-header">
       <div>
         <div class="fa-sport">T20 Cricket · Flagship</div>
@@ -164,24 +216,6 @@ canvas{position:fixed;inset:0;pointer-events:none;z-index:0;opacity:0.3}
         </ul>
       </div>
     </div>
-  </div>
-
-  <!-- ODI FULL MATCH PREDICTOR + VENUE INTEL -->
-  <div class="proj-grid fade-up d3" style="margin-bottom:1px">
-    <a class="proj-card" href="https://odi-full-match-predictor-mxvyyqyvgszg5krsutpqh9.streamlit.app/" target="_blank" style="grid-column:span 2">
-      <div class="proj-arrow">↗</div>
-      <div class="proj-num">End-to-End · ODI · Flagship</div>
-      <div class="proj-title">ODI Full Match Predictor</div>
-      <div class="proj-desc">Three-stage live win-probability engine: pre-match (calibrated LR) → 1st innings score projection (GBM + quantile bands) → 2nd innings chase (calibrated XGBoost · <strong>91% accuracy in death overs</strong>). Trained on 2,520 ODIs & 1.3M deliveries from Cricsheet. ICC-style Elo with variable K + recency weighting. Calibrated probabilities (Brier 0.146) for honest decision support.</div>
-      <div class="proj-link">Live Demo → · GitHub ↗</div>
-    </a>
-    <a class="proj-card" href="https://cricket-venue-intelligence-app-mkbwla6gsdfdxqpdguihnx.streamlit.app/" target="_blank">
-      <div class="proj-arrow">↗</div>
-      <div class="proj-num">Venue Intel · All Formats</div>
-      <div class="proj-title">Cricket Venue Intelligence Hub</div>
-      <div class="proj-desc">Venue-centric platform: scoring trends, pitch & boundary influence, XGBoost-based score & win predictors. Pre-match briefing tool for analysts and coaching staff.</div>
-      <div class="proj-link">Live Demo →</div>
-    </a>
   </div>
 
   <!-- PLAYER IMPACT -->
@@ -218,29 +252,6 @@ canvas{position:fixed;inset:0;pointer-events:none;z-index:0;opacity:0.3}
           <li>Performance benchmarking across formats</li>
         </ul>
       </div>
-    </div>
-  </div>
-
-  <div class="proj-grid fade-up d4">
-    <a class="proj-card" href="https://public.tableau.com/app/profile/yash.vardhan6567/viz/T20IndexDashboard/T20PressureIndexDashboard" target="_blank">
-      <div class="proj-arrow">↗</div>
-      <div class="proj-num">Pressure Analysis</div>
-      <div class="proj-title">Pressure Performance Index</div>
-      <div class="proj-desc">Quantifies player effectiveness in high-pressure situations. Clutch performer identification, leadership suitability, and role analysis under match-deciding conditions.</div>
-      <div class="proj-link">Tableau Dashboard →</div>
-    </a>
-    <a class="proj-card" href="https://public.tableau.com/app/profile/yash.vardhan6567/viz/BatsmanvsBowlersMatchup/BatsmanvsBowlerMatchupDashboardTillIPL2024" target="_blank">
-      <div class="proj-arrow">↗</div>
-      <div class="proj-num">Matchup Intel</div>
-      <div class="proj-title">Batter vs Bowler Matchup Analysis</div>
-      <div class="proj-desc">Phase-specific vulnerability analysis across venues. Exploitable matchup identification for tactical bowling plans and batting orders. Covers through IPL 2024.</div>
-      <div class="proj-link">Tableau Dashboard →</div>
-    </a>
-    <div class="proj-card" style="cursor:default">
-      <div class="proj-num">Coming Soon</div>
-      <div class="proj-title">Real-time Analyst Dashboard</div>
-      <div class="proj-desc">Unified in-match analytics dashboard combining win probability, matchup intel, and phase-wise strategy recommendations in a single analyst-facing interface.</div>
-      <div class="proj-link" style="color:var(--dim)">In Development</div>
     </div>
   </div>
 
@@ -312,4 +323,6 @@ function draw(){
 draw();
 </script>
 </body>
+</html>
+
 </html>
