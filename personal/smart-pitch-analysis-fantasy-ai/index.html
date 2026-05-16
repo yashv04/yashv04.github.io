@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smart Pitch Analysis + Fantasy XI — Yash Vardhan</title>
+<meta name="description" content="A Fantasy Cricket system with rule-based venue tagging, faithful Dream11 fantasy points implementation, and Integer Linear Programming for optimal XI selection. ML experiments included as a teaching moment on target leakage.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;500;600&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/personal-detail.css">
+</head>
+<body>
+
+<nav class="nav">
+  <div class="container nav-inner">
+    <a href="/personal/" class="nav-back">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 11L5 7l4-4"/></svg>
+      Back to Personal Projects
+    </a>
+    <span class="nav-meta">Project / 06 / Fantasy Cricket</span>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="container">
+    <div class="hero-kicker">06 — Personal Analytics / Fantasy</div>
+    <h1 class="hero-title">Smart Pitch + <em>Fantasy XI</em></h1>
+    <p class="hero-sub">A Fantasy Cricket system: rule-based venue tagging from historical scoring patterns, a faithful Dream11-schema fantasy points calculator, and an Integer Linear Program that selects the optimal 11-player team under credit constraints. The notebook also includes two ML experiments — both kept in the writeup as a teaching moment on target leakage.</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item"><span class="label">Domain</span><span class="value">Fantasy Cricket</span></div>
+      <div class="hero-meta-item"><span class="label">Approach</span><span class="value">Rules + ILP</span></div>
+      <div class="hero-meta-item"><span class="label">Solver</span><span class="value mono">PuLP · CBC</span></div>
+      <div class="hero-meta-item"><span class="label">Status</span><span class="value mono">Honest cut</span></div>
+    </div>
+  </div>
+</header>
+
+<section class="section">
+  <div class="container">
+    <span class="section-num">01 / Read This First</span>
+    <h2 class="section-title">The <em>honest</em> framing.</h2>
+    <div class="preamble">
+      <div class="preamble-label">⚠ Important context before the rest of the page</div>
+      <div class="preamble-text">
+        <p style="margin-bottom: 1em;">This is the hardest project on my portfolio to write up honestly. The notebook contains two ML models with <strong>target leakage</strong> — they predict labels that are deterministic functions of their own input features. Their reported metrics (<code>Accuracy 1.0</code>, <code>R² 0.998</code>) are the textbook tells.</p>
+        <p style="margin-bottom: 1em;">Rather than hide them or fix them silently, I'm <em>leaving them in</em> and explaining exactly what went wrong, because the habit they cost me to learn — <em>if your metric is too good, audit the feature-target dependence</em> — is more valuable than any single result.</p>
+        <p>The <strong>genuine engineering</strong> in this project is the rule-based venue tagger, the Dream11-schema fantasy points calculator, and the PuLP LP for Fantasy XI selection. Lead with those. The ML experiments are a story about a mistake.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <span class="section-num">02 / What's In The Box</span>
+    <h2 class="section-title">Three working pieces. <em>Two</em> broken ones.</h2>
+    <div class="components">
+      <div class="component">
+        <div class="component-tag ok">Works — Rule-Based</div>
+        <h3 class="component-title">Venue Tagger</h3>
+        <p class="component-desc">Three if/then rules on first/second-innings run rate and wicket rate classify IPL grounds as Batting-friendly, Bowling-friendly, or Neutral. Not ML — a deterministic heuristic. Useful as a feature for downstream tasks.</p>
+      </div>
+      <div class="component">
+        <div class="component-tag ok">Works — Schema</div>
+        <h3 class="component-title">Dream11 Calculator</h3>
+        <p class="component-desc">Faithful implementation of the actual Dream11 fantasy scoring rules: runs, fours, sixes, milestone bonuses, duck penalty, wickets, wicket-haul bonuses. Real engineering, real schema.</p>
+      </div>
+      <div class="component">
+        <div class="component-tag ok">Works — LP</div>
+        <h3 class="component-title">Fantasy XI Optimizer</h3>
+        <p class="component-desc">PuLP Integer Linear Program: 11 players, credit cap of 100, role minimums. Decision variables are binary. CBC solves in under a second. <em>Has a string-matching bug in the role constraints — flagged honestly below.</em></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <span class="section-num">03 / The Real Engineering</span>
+    <h2 class="section-title">The fantasy points schema, <em>faithfully</em> implemented.</h2>
+    <div class="prose" style="margin-bottom: 28px;"><p>The Dream11 fantasy scoring system has dozens of components. This calculator implements the core ones: runs scoring, boundary bonuses, milestone bonuses (30+, 50+, 100+), wicket points, and wicket-haul bonuses (3 wickets, 4+ wickets). The duck penalty fires on a zero score with balls faced. Per-player-per-match.</p></div>
+
+    <div class="formula">
+      <div class="formula-label">▸ Batting Points ◂</div>
+      <div class="formula-line"><span class="out">batting_pts</span> <span class="op">=</span> <span class="var">runs</span> <span class="op">·</span> <span class="weight">1</span>           <span class="op">// 1 pt per run</span></div>
+      <div class="formula-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="op">+</span> <span class="var">fours</span> <span class="op">·</span> <span class="weight">1</span>          <span class="op">// boundary bonus</span></div>
+      <div class="formula-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="op">+</span> <span class="var">sixes</span> <span class="op">·</span> <span class="weight">2</span>          <span class="op">// six bonus</span></div>
+      <div class="formula-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="op">+</span> <span class="cond">10 if</span> <span class="weight">30 ≤</span> <span class="var">runs</span> <span class="weight">&lt; 50</span>     <span class="op">// half-fifty bonus</span></div>
+      <div class="formula-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="op">+</span> <span class="cond">20 if</span> <span class="weight">50 ≤</span> <span class="var">runs</span> <span class="weight">&lt; 100</span>    <span class="op">// fifty bonus</span></div>
+      <div class="formula-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="op">+</span> <span class="cond">30 if</span> <span class="var">runs</span> <span class="weight">≥ 100</span>           <span class="op">// century bonus</span></div>
+      <div class="formula-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="op">−</span> <span class="cond">2 if</span> <span class="var">runs</span> <span class="op">==</span> <span class="weight">0</span>             <span class="op">// duck penalty</span></div>
+    </div>
+
+    <div class="formula" style="margin-top: 16px;">
+      <div class="formula-label">▸ Bowling Points ◂</div>
+      <div class="formula-line"><span class="out">bowling_pts</span> <span class="op">=</span> <span class="var">wickets</span> <span class="op">·</span> <span class="weight">25</span>     <span class="op">// 25 pts per wicket</span></div>
+      <div class="formula-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="op">+</span> <span class="cond">10 if</span> <span class="var">wickets</span> <span class="op">==</span> <span class="weight">3</span>      <span class="op">// 3-fer</span></div>
+      <div class="formula-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="op">+</span> <span class="cond">20 if</span> <span class="var">wickets</span> <span class="weight">≥ 4</span>       <span class="op">// 4-fer+</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <span class="section-num">04 / How It Works</span>
+    <h2 class="section-title">From ball-by-ball <em>to</em> optimal XI.</h2>
+    <div class="flow">
+      <div class="flow-step"><div class="flow-step-num">01</div><div><h3 class="flow-step-title">Ingest and join three datasets</h3><p class="flow-step-body">Deliveries, matches, and player style metadata joined on match_id and bowler. Result: every delivery tagged with venue, season, toss, winner, and the bowler's style (pace/spin/all-rounder).</p><div class="flow-step-tech"><span class="tech-pill">pandas</span><span class="tech-pill">three-way merge</span></div></div></div>
+      <div class="flow-step"><div class="flow-step-num">02</div><div><h3 class="flow-step-title">Engineer venue-level features</h3><p class="flow-step-body">Per ground: average runs per over, wicket rate, first/second-innings run rate split, pace vs spin wicket counts, phase-wise run distribution (PP/Middle/Death). These are genuinely useful features — clean, interpretable, reusable.</p><div class="flow-step-tech"><span class="tech-pill">groupby</span><span class="tech-pill">bowling-style classifier</span><span class="tech-pill">phase tagging</span></div></div></div>
+      <div class="flow-step"><div class="flow-step-num">03</div><div><h3 class="flow-step-title">Tag venues with rule-based classifier</h3><p class="flow-step-body">Three conditions: Batting-friendly if both innings RR &gt; 9 and wicket rate &lt; league average. Bowling-friendly if both innings RR &lt; 8 and wicket rate &gt; league average. Neutral otherwise. Deterministic — same input always gives same label. <strong>Not ML.</strong></p><div class="flow-step-tech"><span class="tech-pill">if/then rules</span><span class="tech-pill">domain heuristic</span></div></div></div>
+      <div class="flow-step"><div class="flow-step-num">04</div><div><h3 class="flow-step-title">Compute per-match fantasy points</h3><p class="flow-step-body">Group ball-by-ball by (match_id, player) to get batting and bowling lines per player. Apply the Dream11 schema above. Faithful implementation of the actual fantasy scoring rules.</p><div class="flow-step-tech"><span class="tech-pill">Dream11 schema</span><span class="tech-pill">groupby aggregation</span></div></div></div>
+      <div class="flow-step"><div class="flow-step-num">05</div><div><h3 class="flow-step-title">Formulate the Fantasy XI LP</h3><p class="flow-step-body">One binary decision variable per player. Linear objective: maximize total fantasy points. Linear constraints: exactly 11 players, total credits ≤ 100, role minimums for bowlers / all-rounders / WK / batsmen. <em>Caveat: the role constraints have a string-matching bug — flagged in the limitations.</em></p><div class="flow-step-tech"><span class="tech-pill">PuLP</span><span class="tech-pill">binary variables</span><span class="tech-pill">credit cap</span></div></div></div>
+      <div class="flow-step"><div class="flow-step-num">06</div><div><h3 class="flow-step-title">Solve with CBC</h3><p class="flow-step-body">Branch-and-bound on the LP relaxation. For a problem this size, sub-second convergence. Returns an exact-optimal Fantasy XI under the active constraints.</p><div class="flow-step-tech"><span class="tech-pill">CBC solver</span><span class="tech-pill">branch-and-bound</span></div></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <span class="section-num">05 / Results</span>
+    <h2 class="section-title">The <em>genuine</em> numbers.</h2>
+    <div class="results">
+      <div class="result-cell"><div class="result-label">Datasets Joined</div><div class="result-number">3</div><div class="result-caption">Deliveries × matches × player style metadata, joined on multiple keys.</div></div>
+      <div class="result-cell"><div class="result-label">Pace Wickets</div><div class="result-number cream">7.7k</div><div class="result-caption">Total pace bowler wickets across IPL history. Bowling-style classified from raw strings.</div></div>
+      <div class="result-cell"><div class="result-label">Spin Wickets</div><div class="result-number cream">3.9k</div><div class="result-caption">Total spin bowler wickets — roughly half the pace count. Useful for venue-type signal.</div></div>
+      <div class="result-cell"><div class="result-label">Fantasy XI Players</div><div class="result-number accent">11</div><div class="result-caption">LP-selected team under a 100-credit cap. Output below.</div></div>
+      <div class="result-cell"><div class="result-label">Top Pick (LP)</div><div class="result-number" style="font-size: clamp(24px, 2.5vw, 32px); font-family: var(--font-mono); font-weight: 500;">DAJ Bracewell</div><div class="result-caption">98 avg fantasy points — small-sample artifact, same problem as the Impact Index LP.</div></div>
+      <div class="result-cell"><div class="result-label">LP Solve Time</div><div class="result-number warn">&lt;1s</div><div class="result-caption">CBC converges quickly. The LP isn't the slow part — the bug is in its constraints.</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <span class="section-num">06 / Technical Decisions</span>
+    <h2 class="section-title">Why these <em>choices</em>.</h2>
+    <div class="decisions">
+      <div class="decision"><div class="decision-q">Why rule-based<br>venue tagging?</div><div class="decision-a">A coach can read three if/then rules. The label is deterministic — same venue features always give the same tag — so it's reproducible and auditable. The honest weakness is that the thresholds (RR &gt; 9, RR &lt; 8) aren't calibrated; they're domain heuristics. V2 calibrates them against held-out match outcomes.</div></div>
+      <div class="decision"><div class="decision-q">Why faithful schema<br>over a learned model?</div><div class="decision-a">Dream11 fantasy points are <em>defined by a formula</em>. There's no prediction problem — it's pure schema. The right engineering is implementing the formula correctly, not training a model to recover it. The fact that I <em>did</em> later train a model to recover it (and got R² 0.998 from feature leakage) is exactly why this section matters: <strong>knowing when not to use ML is itself a skill.</strong></div></div>
+      <div class="decision"><div class="decision-q">Why PuLP<br>over heuristics?</div><div class="decision-a">Same reason as the Impact Index project — ILP guarantees the optimum under constraints, greedy heuristics don't. The Fantasy XI problem is binary decision variables with a linear objective and linear constraints. Textbook ILP. CBC solves it in under a second.</div></div>
+      <div class="decision"><div class="decision-q">Why keep the<br>broken ML models in?</div><div class="decision-a">Because the lesson is <em>more valuable than the result</em>. Target leakage doesn't announce itself — it produces models with great metrics. Being able to spot it in your own work is a skill, and the only way to demonstrate I have it is to show it happening and call it out. A portfolio that hides its failures is less informative than one that owns them.</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <span class="section-num">07 / The ML Mistake</span>
+    <h2 class="section-title">When your model is too good, <em>audit your features</em>.</h2>
+    <div class="leakage">
+      <div class="leakage-label">⚠ Two cases of target leakage</div>
+      <h3 class="leakage-title">The textbook <em>tells</em> — Accuracy 1.0, R² 0.998 — are not flexes.</h3>
+      <div class="leakage-body"><p>The notebook contains two ML models. Both report metrics that look elite. Both are reverse-engineering their own labeling functions. Here's exactly what went wrong, why the metrics are misleading, and what the honest version of each task would look like.</p></div>
+
+      <div class="leakage-case">
+        <div class="leakage-case-tag">CASE 01 — PITCH TYPE CLASSIFIER</div>
+        <h4 class="leakage-case-title">Predicting venue_type from the variables that define venue_type</h4>
+        <div class="leakage-case-metric">Reported: Accuracy 1.0 · F1 1.0 · CV 0.9318 · n_test = 24</div>
+        <div class="leakage-case-body">
+          <p>The label <code>venue_type</code> is computed from a three-condition rule on <code>first_innings_rr</code>, <code>second_innings_rr</code>, and <code>wicket_rate</code>. Those exact three columns are then passed as features to a RandomForest and an XGBoost classifier.</p>
+          <div class="leakage-case-formula"><span class="targ">venue_type</span> = f(<span class="feat">first_innings_rr</span>, <span class="feat">second_innings_rr</span>, <span class="feat">wicket_rate</span>)<br>features ⊇ {<span class="feat">first_innings_rr</span>, <span class="feat">second_innings_rr</span>, <span class="feat">wicket_rate</span>}<br>→ model learns f, not pitch behavior</div>
+          <p style="margin-top: 16px;"><strong>The honest version:</strong> predict pitch type from features that don't define it — weather conditions, soil type, days since the last match, time of year, time of day. That's a real prediction problem with no leakage.</p>
+        </div>
+      </div>
+
+      <div class="leakage-case">
+        <div class="leakage-case-tag">CASE 02 — FANTASY POINTS REGRESSOR</div>
+        <h4 class="leakage-case-title">Predicting total_fantasy_points from the variables that compute total_fantasy_points</h4>
+        <div class="leakage-case-metric">Reported: R² 0.9977 · MAE 0.328</div>
+        <div class="leakage-case-body">
+          <p>The target is literally <code>25 × wickets + 1 × runs + 1 × fours + 2 × sixes + bonus(runs)</code>. The regressor's features include <code>wickets, runs_scored, fours, sixes</code>. The model learns the linear combination of its own inputs.</p>
+          <div class="leakage-case-formula"><span class="targ">fantasy_pts</span> = 25·<span class="feat">wickets</span> + 1·<span class="feat">runs</span> + 1·<span class="feat">fours</span> + 2·<span class="feat">sixes</span> + bonus(<span class="feat">runs</span>)<br>features ⊇ {<span class="feat">runs</span>, <span class="feat">fours</span>, <span class="feat">sixes</span>, <span class="feat">wickets</span>}<br>→ model recovers the schema arithmetic</div>
+          <p style="margin-top: 16px;">The MAE of <code>0.328</code> on integer-stepped fantasy points is the giveaway. <strong>You don't get a sub-1 MAE on integer targets unless you're recovering the formula directly.</strong></p>
+          <p style="margin-top: 12px;"><strong>The honest version:</strong> predict expected <em>next-match</em> fantasy points from <em>pre-match</em> features only — recent form, opponent quality, venue type, pitch report. That's a forecasting task with real uncertainty.</p>
+        </div>
+      </div>
+
+      <div class="leakage-lesson">
+        <div class="leakage-lesson-tag">— The takeaway —</div>
+        <div class="leakage-lesson-text">If you can write the label as a function of the features in under five lines of pseudocode, you don't have a prediction problem. You have a relabeling problem. Check before training, not after.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <span class="section-num">08 / Other Limitations</span>
+    <h2 class="section-title">What else <em>needs</em> fixing.</h2>
+    <div class="prose" style="margin-bottom: 24px; max-width: 60ch;"><p>Beyond the leakage issue, the gaps between this and a production-grade fantasy cricket tool.</p></div>
+    <div class="limits">
+      <div class="limit-item"><div class="limit-num">01</div><div class="limit-text"><strong>LP role constraints silently fail.</strong> The role strings in the player metadata have trailing spaces (<code>'Bowler '</code> not <code>'Bowler'</code>) and inconsistent naming (<code>'Batsman'</code> vs the code's <code>'Batter'</code>). The check <code>'Bowler' in role_counts</code> evaluates False, so the constraints never get added to the LP. Output shows a player with role <code>None</code> — the tell.</div></div>
+      <div class="limit-item"><div class="limit-num">02</div><div class="limit-text"><strong>Credits are synthetic.</strong> Generated via <code>np.random.uniform</code> over buckets derived from average fantasy points — circular dependence between cost and value. Real Dream11 credits are exogenous; these aren't.</div></div>
+      <div class="limit-item"><div class="limit-num">03</div><div class="limit-text"><strong>Small-sample players dominate the LP output.</strong> DAJ Bracewell at 98 avg fantasy points, Vivrant Sharma at 88 — likely a handful of matches with one strong performance inflating the mean. Same root cause as the Impact Index LP. Fix: minimum-games filter.</div></div>
+      <div class="limit-item"><div class="limit-num">04</div><div class="limit-text"><strong>Dream11 schema is incomplete.</strong> No maiden over bonus (+12), no dot ball bonus (+1), no economy rate bonus/penalty, no fielding points (catches, run-outs, stumpings).</div></div>
+      <div class="limit-item"><div class="limit-num">05</div><div class="limit-text"><strong>Venue tagging thresholds aren't calibrated.</strong> RR &gt; 9 for Batting-friendly and RR &lt; 8 for Bowling-friendly are domain heuristics. V2 calibrates them against held-out match outcomes.</div></div>
+      <div class="limit-item"><div class="limit-num">06</div><div class="limit-text"><strong>Pitch dataset has duplicate rows per venue.</strong> Each venue appears twice (once per inning) with identical labels. Train/test split likely places the same venue on both sides — another layer of leakage on top of the feature-target dependence.</div></div>
+      <div class="limit-item"><div class="limit-num">07</div><div class="limit-text"><strong>Closing notebook summary claims a CNN.</strong> It doesn't exist — only the RandomForest classifier. The summary is aspirational, not descriptive. Rewriting that summary is part of the V2 cleanup.</div></div>
+    </div>
+    <div class="v2-block">
+      <div class="v2-label">Version 2 — Build Order</div>
+      <h3 class="v2-title">What ships next.</h3>
+      <ul class="v2-list">
+        <li><span class="v2-tag">01</span><span>Reframe both ML tasks as forecasting problems with pre-match features only — no more recovering the formula.</span></li>
+        <li><span class="v2-tag">02</span><span>Fix the LP role string matching: <code>.str.strip()</code> + normalize 'Batter' / 'Batsman' / 'WK-Batsman'.</span></li>
+        <li><span class="v2-tag">03</span><span>Source actual Dream11 credit values; drop the synthetic-credit generator entirely.</span></li>
+        <li><span class="v2-tag">04</span><span>Add minimum-games filter (≥ 30 matches) to the Fantasy XI eligible pool.</span></li>
+        <li><span class="v2-tag">05</span><span>Complete the Dream11 schema: maiden overs, dot balls, economy bonus, fielding points.</span></li>
+        <li><span class="v2-tag">06</span><span>Calibrate the venue tagger thresholds against held-out match scoring distributions.</span></li>
+        <li><span class="v2-tag">07</span><span>Rewrite the notebook summary to describe what was actually built — no aspirational CNN claims.</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="cta">
+  <div class="container">
+    <div class="cta-eyebrow">Read the code / Audit the bug</div>
+    <h2 class="cta-title">A portfolio that owns its <em>failures</em> beats one that hides them.</h2>
+    <p class="cta-sub">Full notebook on GitHub — the working pieces, the broken ML models, and exactly what target leakage looks like.</p>
+    <div class="cta-buttons">
+      <a href="https://github.com/yashv04/Smart-Pitch-Analysis-Fantasy-Cricket-AI" class="btn btn-primary" target="_blank" rel="noopener">View on GitHub</a>
+      <a href="/personal/" class="btn">Back to Personal Projects</a>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container footer-inner">
+    <div>Yash Vardhan — Sports CV Engineer / Cricket Analyst</div>
+    <div>
+      <a href="/">Portfolio</a> &nbsp;·&nbsp;
+      <a href="https://www.linkedin.com/in/yash-vardhan-5b3956169/">LinkedIn</a> &nbsp;·&nbsp;
+      <a href="https://github.com/yashv04">GitHub</a> &nbsp;·&nbsp;
+      <a href="mailto:yashv3110@gmail.com">Email</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

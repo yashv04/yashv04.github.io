@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Impact Index + Auction Strategy — Yash Vardhan</title>
+<meta name="description" content="A two-part franchise auction system: a contextual Player Impact Score and an Integer Linear Programming squad optimizer under real IPL constraints — 95-crore budget, role minimums, overseas cap.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;500;600&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/personal-detail.css">
+</head>
+<body>
+
+<nav class="nav">
+  <div class="container nav-inner">
+    <a href="/personal/" class="nav-back">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 11L5 7l4-4"/></svg>
+      Back to Personal Projects
+    </a>
+    <span class="nav-meta">Project / 04 / Auction Strategy</span>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="container">
+    <div class="hero-kicker">04 — Personal Analytics / Optimization</div>
+    <h1 class="hero-title">Impact Index + <em>Auction</em> Strategy</h1>
+    <p class="hero-sub">A two-part franchise system: a transparent Player Impact Score that scores batters and bowlers on contextual contribution by phase, and an Integer Linear Programming squad optimizer that constructs a 15-player squad under the real IPL constraints — 95-crore budget, ≥4 overseas, role minimums.</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item"><span class="label">Domain</span><span class="value">IPL Auctions</span></div>
+      <div class="hero-meta-item"><span class="label">Approach</span><span class="value">Scoring + ILP</span></div>
+      <div class="hero-meta-item"><span class="label">Solver</span><span class="value mono">PuLP · CBC</span></div>
+      <div class="hero-meta-item"><span class="label">Player Pool</span><span class="value mono">543</span></div>
+    </div>
+  </div>
+</header>
+
+<section class="section">
+  <div class="container">
+    <span class="section-num">01 / Problem</span>
+    <h2 class="section-title">Auctions are a <em>constrained</em> optimization. Treat them like one.</h2>
+    <div class="prose">
+      <p>An IPL franchise auction looks like a bidding war, but the math underneath is an integer program. You need <strong>exactly 15 players</strong>. You need <strong>at least 4 overseas</strong>. You need <strong>at least 5 batsmen, 5 bowlers, 3 all-rounders, 2 wicket-keepers</strong>. You have <strong>95 crore</strong> to spend. From a pool of 543 catalogued players, you're choosing 15 — that's <span class="highlight">10²⁸ possible combinations</span>.</p>
+      <p>Most cricket analytics work stops at the leaderboard: "here are the top 50 players by some metric." But a leaderboard isn't a squad. A scout's job ends where this project begins — translating "good players" into "the right 15 players we can actually afford under league rules."</p>
+      <p>That's a textbook operations research problem. So treat it like one.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <span class="section-num">02 / Part One</span>
+    <h2 class="section-title">A weighted, <em>transparent</em> Impact Score.</h2>
+    <div class="prose" style="margin-bottom: 28px;">
+      <p>The Impact Score is not learned — it's a hand-weighted composite of normalized features. The reason: there's no labeled "true impact" target to train against, and a learned regressor would just be predicting another proxy. A weighted index is <strong>auditable</strong> — a coach can see exactly why a player ranks where they do.</p>
+    </div>
+
+    <div class="formula">
+      <div class="formula-label">▸ Batting Impact Score ◂</div>
+      <div class="formula-line"><span class="out">impact</span> <span class="op">=</span> <span class="weight">0.25</span> <span class="op">·</span> <span class="var">total_runs</span></div>
+      <div class="formula-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="op">+</span> <span class="weight">0.25</span> <span class="op">·</span> <span class="var">impact_innings</span> &nbsp;<span class="op">// scored 30+ in match</span></div>
+      <div class="formula-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="op">+</span> <span class="weight">0.15</span> <span class="op">·</span> <span class="var">SR_vs_avg_SR</span></div>
+      <div class="formula-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="op">+</span> <span class="weight">0.15</span> <span class="op">·</span> <span class="var">powerplay_runs</span></div>
+      <div class="formula-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="op">+</span> <span class="weight">0.15</span> <span class="op">·</span> <span class="var">middle_runs</span></div>
+      <div class="formula-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="op">+</span> <span class="weight">0.05</span> <span class="op">·</span> <span class="var">death_runs</span></div>
+    </div>
+
+    <div class="formula" style="margin-top: 16px;">
+      <div class="formula-label">▸ Bowling Impact Score ◂</div>
+      <div class="formula-line"><span class="out">impact</span> <span class="op">=</span> <span class="weight">0.30</span> <span class="op">·</span> <span class="var">wickets</span></div>
+      <div class="formula-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="op">+</span> <span class="weight">0.20</span> <span class="op">·</span> <span class="var">eco_vs_avg_eco</span></div>
+      <div class="formula-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="op">+</span> <span class="weight">0.15</span> <span class="op">·</span> <span class="var">impact_matches</span> &nbsp;<span class="op">// 2+ wickets in match</span></div>
+      <div class="formula-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="op">+</span> <span class="weight">0.15</span> <span class="op">·</span> <span class="var">powerplay_overs</span></div>
+      <div class="formula-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="op">+</span> <span class="weight">0.15</span> <span class="op">·</span> <span class="var">middle_overs</span></div>
+      <div class="formula-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="op">+</span> <span class="weight">0.05</span> <span class="op">·</span> <span class="var">death_overs</span></div>
+    </div>
+
+    <div class="boards">
+      <div class="board">
+        <div class="board-label">Top Batters by Impact</div>
+        <div class="board-row" style="border-top: none;"><span class="board-row-rank">01</span><span class="board-row-name">V Kohli</span><span class="board-row-score">0.860</span></div>
+        <div class="board-row"><span class="board-row-rank">02</span><span class="board-row-name">S Dhawan</span><span class="board-row-score">0.747</span></div>
+        <div class="board-row"><span class="board-row-rank">03</span><span class="board-row-name">DA Warner</span><span class="board-row-score">0.742</span></div>
+        <div class="board-row"><span class="board-row-rank">04</span><span class="board-row-name">RG Sharma</span><span class="board-row-score">0.712</span></div>
+        <div class="board-row"><span class="board-row-rank">05</span><span class="board-row-name">SK Raina</span><span class="board-row-score">0.612</span></div>
+        <div class="board-row"><span class="board-row-rank">06</span><span class="board-row-name">RV Uthappa</span><span class="board-row-score">0.567</span></div>
+        <div class="board-row"><span class="board-row-rank">07</span><span class="board-row-name">CH Gayle</span><span class="board-row-score">0.557</span></div>
+        <div class="board-row"><span class="board-row-rank">08</span><span class="board-row-name">AB de Villiers</span><span class="board-row-score">0.544</span></div>
+        <div class="board-row"><span class="board-row-rank">09</span><span class="board-row-name">F du Plessis</span><span class="board-row-score">0.530</span></div>
+        <div class="board-row"><span class="board-row-rank">10</span><span class="board-row-name">AM Rahane</span><span class="board-row-score">0.529</span></div>
+      </div>
+      <div class="board">
+        <div class="board-label">Top Bowlers by Impact</div>
+        <div class="board-row" style="border-top: none;"><span class="board-row-rank">01</span><span class="board-row-name">R Ashwin</span><span class="board-row-score">0.620</span></div>
+        <div class="board-row"><span class="board-row-rank">02</span><span class="board-row-name">YS Chahal</span><span class="board-row-score">0.619</span></div>
+        <div class="board-row"><span class="board-row-rank">03</span><span class="board-row-name">B Kumar</span><span class="board-row-score">0.612</span></div>
+        <div class="board-row"><span class="board-row-rank">04</span><span class="board-row-name">PP Chawla</span><span class="board-row-score">0.595</span></div>
+        <div class="board-row"><span class="board-row-rank">05</span><span class="board-row-name">SP Narine</span><span class="board-row-score">0.582</span></div>
+        <div class="board-row"><span class="board-row-rank">06</span><span class="board-row-name">DJ Bravo</span><span class="board-row-score">0.553</span></div>
+        <div class="board-row"><span class="board-row-rank">07</span><span class="board-row-name">SL Malinga</span><span class="board-row-score">0.534</span></div>
+        <div class="board-row"><span class="board-row-rank">08</span><span class="board-row-name">JJ Bumrah</span><span class="board-row-score">0.532</span></div>
+        <div class="board-row"><span class="board-row-rank">09</span><span class="board-row-name">A Mishra</span><span class="board-row-score">0.532</span></div>
+        <div class="board-row"><span class="board-row-rank">10</span><span class="board-row-name">RA Jadeja</span><span class="board-row-score">0.517</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <span class="section-num">03 / Part Two</span>
+    <h2 class="section-title">The squad as an <em>integer</em> program.</h2>
+    <div class="prose" style="margin-bottom: 12px;">
+      <p>Binary decision variables — one per player. Linear objective — sum of performance scores. Linear constraints — budget, squad size, role minimums, overseas minimum. <strong>It's a textbook Integer Linear Program.</strong></p>
+    </div>
+
+    <div class="lp-wrap">
+      <svg viewBox="0 0 880 380" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="LP formulation diagram">
+        <defs><marker id="arrow2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#737373"/></marker></defs>
+        <g><rect x="20" y="160" width="200" height="80" rx="4" fill="#161616" stroke="#2a2a2a"/><text x="120" y="185" text-anchor="middle" fill="#737373" font-family="JetBrains Mono, monospace" font-size="11" letter-spacing="0.08em">INPUT</text><text x="120" y="208" text-anchor="middle" fill="#fafafa" font-family="JetBrains Mono, monospace" font-size="14">543 players</text><text x="120" y="226" text-anchor="middle" fill="#ede4d0" font-family="JetBrains Mono, monospace" font-size="12">x ∈ {0, 1}⁵⁴³</text></g>
+        <path d="M 220 200 L 290 200" stroke="#737373" stroke-width="1.2" fill="none" marker-end="url(#arrow2)"/>
+        <g>
+          <rect x="290" y="40" width="320" height="320" rx="4" fill="#0f0f0f" stroke="#dc2626" stroke-width="1.5"/>
+          <text x="450" y="68" text-anchor="middle" fill="#dc2626" font-family="JetBrains Mono, monospace" font-size="11" letter-spacing="0.12em">INTEGER LINEAR PROGRAM</text>
+          <text x="310" y="105" fill="#737373" font-family="JetBrains Mono, monospace" font-size="11">// MAXIMIZE</text>
+          <text x="310" y="128" fill="#fafafa" font-family="JetBrains Mono, monospace" font-size="13">Σ xᵢ · scoreᵢ</text>
+          <line x1="310" y1="148" x2="590" y2="148" stroke="#1f1f1f"/>
+          <text x="310" y="170" fill="#737373" font-family="JetBrains Mono, monospace" font-size="11">// SUBJECT TO</text>
+          <text x="310" y="194" fill="#ede4d0" font-family="JetBrains Mono, monospace" font-size="12">Σ xᵢ = 15</text><text x="500" y="194" fill="#525252" font-family="JetBrains Mono, monospace" font-size="11">squad size</text>
+          <text x="310" y="218" fill="#ede4d0" font-family="JetBrains Mono, monospace" font-size="12">Σ xᵢ · costᵢ ≤ 95cr</text><text x="500" y="218" fill="#525252" font-family="JetBrains Mono, monospace" font-size="11">budget cap</text>
+          <text x="310" y="242" fill="#ede4d0" font-family="JetBrains Mono, monospace" font-size="12">Σ xᵢ [overseas] ≥ 4</text><text x="500" y="242" fill="#525252" font-family="JetBrains Mono, monospace" font-size="11">league rule</text>
+          <text x="310" y="266" fill="#ede4d0" font-family="JetBrains Mono, monospace" font-size="12">Σ xᵢ [batsman] ≥ 5</text><text x="500" y="266" fill="#525252" font-family="JetBrains Mono, monospace" font-size="11">role min</text>
+          <text x="310" y="290" fill="#ede4d0" font-family="JetBrains Mono, monospace" font-size="12">Σ xᵢ [bowler] ≥ 5</text><text x="500" y="290" fill="#525252" font-family="JetBrains Mono, monospace" font-size="11">role min</text>
+          <text x="310" y="314" fill="#ede4d0" font-family="JetBrains Mono, monospace" font-size="12">Σ xᵢ [allrnd] ≥ 3</text><text x="500" y="314" fill="#525252" font-family="JetBrains Mono, monospace" font-size="11">role min</text>
+          <text x="310" y="338" fill="#ede4d0" font-family="JetBrains Mono, monospace" font-size="12">Σ xᵢ [wk] ≥ 2</text><text x="500" y="338" fill="#525252" font-family="JetBrains Mono, monospace" font-size="11">role min</text>
+        </g>
+        <path d="M 610 200 L 680 200" stroke="#737373" stroke-width="1.2" fill="none" marker-end="url(#arrow2)"/>
+        <g><rect x="680" y="160" width="180" height="80" rx="4" fill="#161616" stroke="#dc2626"/><text x="770" y="185" text-anchor="middle" fill="#dc2626" font-family="JetBrains Mono, monospace" font-size="11" letter-spacing="0.08em">OUTPUT</text><text x="770" y="208" text-anchor="middle" fill="#fafafa" font-family="JetBrains Mono, monospace" font-size="14">Optimal 15</text><text x="770" y="226" text-anchor="middle" fill="#ede4d0" font-family="JetBrains Mono, monospace" font-size="12">CBC · &lt; 1s</text></g>
+      </svg>
+      <div class="lp-caption">543 binary decision variables · 1 linear objective · 7 linear constraints · solved by branch-and-bound via CBC. Search space <strong style="color: var(--cream);">C(543, 15) ≈ 10²⁸</strong>, but LP relaxation prunes most of it in under a second.</div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <span class="section-num">04 / How It Works</span>
+    <h2 class="section-title">From ball-by-ball <em>to</em> auction squad.</h2>
+    <div class="flow">
+      <div class="flow-step"><div class="flow-step-num">01</div><div><h3 class="flow-step-title">Compute career stats from ball-by-ball</h3><p class="flow-step-body">For each batter: total runs, balls faced, fours, sixes, strike rate, phase-wise runs (PP/Middle/Death), count of innings ≥ 30 runs. For each bowler: legal-delivery economy (extras correctly filtered), valid wickets (excludes run-outs), phase-wise overs bowled, count of matches with ≥ 2 wickets.</p><div class="flow-step-tech"><span class="tech-pill">pandas</span><span class="tech-pill">groupby</span><span class="tech-pill">phase tagging</span></div></div></div>
+      <div class="flow-step"><div class="flow-step-num">02</div><div><h3 class="flow-step-title">Normalize and compute Impact Score</h3><p class="flow-step-body">MinMax-scale each feature to [0, 1]. Apply hand-weighted composite — 0.25 for volume, 0.25 for clutch innings, 0.15 each for PP/Middle and SR vs avg, 0.05 for death (the contested phase). Weights sum to 1.0 by construction. The score is transparent: every component is inspectable.</p><div class="flow-step-tech"><span class="tech-pill">MinMaxScaler</span><span class="tech-pill">composite scoring</span></div></div></div>
+      <div class="flow-step"><div class="flow-step-num">03</div><div><h3 class="flow-step-title">Join with auction price data</h3><p class="flow-step-body">Merge performance stats with <code>IPLPlayerAuctionData.csv</code> on Player name. Keep only players with auction data (amount > 0). Result: 543 eligible players with both Impact Score and price.</p><div class="flow-step-tech"><span class="tech-pill">merge</span><span class="tech-pill">filter</span></div></div></div>
+      <div class="flow-step"><div class="flow-step-num">04</div><div><h3 class="flow-step-title">Formulate the ILP in PuLP</h3><p class="flow-step-body">One binary decision variable per player: <code>select_i ∈ {0, 1}</code>. Linear objective: maximize the sum of (selected × performance score). Seven linear constraints — squad size, budget, overseas minimum, four role minimums. The whole formulation is &lt; 30 lines of PuLP.</p><div class="flow-step-tech"><span class="tech-pill">PuLP</span><span class="tech-pill">LpProblem</span><span class="tech-pill">LpVariable</span></div></div></div>
+      <div class="flow-step"><div class="flow-step-num">05</div><div><h3 class="flow-step-title">Solve with CBC, get the optimum</h3><p class="flow-step-body">COIN-OR's CBC solver applies branch-and-bound on the LP relaxation, pruning subtrees whose relaxed bound can't beat the best integer solution found so far. For 543 binary variables and 7 constraints, this converges in well under a second. The output: an exact-optimal 15-player squad under the given objective.</p><div class="flow-step-tech"><span class="tech-pill">CBC solver</span><span class="tech-pill">branch-and-bound</span></div></div></div>
+      <div class="flow-step"><div class="flow-step-num">06</div><div><h3 class="flow-step-title">Visualize squad composition</h3><p class="flow-step-body">Role distribution pie. Indian vs overseas bar plot. Cost vs performance bar plot. Role × origin heatmap. Standard squad-audit views a franchise analyst would want before signing off.</p><div class="flow-step-tech"><span class="tech-pill">matplotlib</span><span class="tech-pill">seaborn</span></div></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <span class="section-num">05 / Output</span>
+    <h2 class="section-title">The <em>optimal</em> 15.</h2>
+    <div class="squad-wrap">
+      <div class="squad-header">
+        <div class="squad-title">LP-selected squad</div>
+        <div class="squad-stats"><span class="total">15 players</span> · <span class="budget">12.55 / 95 cr</span> · 4 overseas</div>
+      </div>
+      <div class="squad-grid">
+        <div class="squad-cell head">Player</div>
+        <div class="squad-cell head hide-mobile">Role</div>
+        <div class="squad-cell head hide-mobile">Origin</div>
+        <div class="squad-cell head">Cost</div>
+        <div class="squad-cell name">Shubman Gill</div><div class="squad-cell hide-mobile">Batsman</div><div class="squad-cell hide-mobile">Indian</div><div class="squad-cell cost">1.8 cr</div>
+        <div class="squad-cell name">KL Rahul</div><div class="squad-cell hide-mobile">Batsman</div><div class="squad-cell hide-mobile">Indian</div><div class="squad-cell cost">1.0 cr</div>
+        <div class="squad-cell name">Anmolpreet Singh</div><div class="squad-cell hide-mobile">Batsman</div><div class="squad-cell hide-mobile">Indian</div><div class="squad-cell cost">80 lakh</div>
+        <div class="squad-cell name">Joe Denly</div><div class="squad-cell hide-mobile">Batsman</div><div class="squad-cell hide-mobile">Overseas</div><div class="squad-cell cost">1.0 cr</div>
+        <div class="squad-cell name">Sachin Baby</div><div class="squad-cell hide-mobile">Batsman</div><div class="squad-cell hide-mobile">Indian</div><div class="squad-cell cost">10 lakh</div>
+        <div class="squad-cell name">Harbhajan Singh</div><div class="squad-cell hide-mobile">Bowler</div><div class="squad-cell hide-mobile">Indian</div><div class="squad-cell cost">2.0 cr</div>
+        <div class="squad-cell name">Imran Tahir</div><div class="squad-cell hide-mobile">Bowler</div><div class="squad-cell hide-mobile">Overseas</div><div class="squad-cell cost">1.0 cr</div>
+        <div class="squad-cell name">Avesh Khan</div><div class="squad-cell hide-mobile">Bowler</div><div class="squad-cell hide-mobile">Indian</div><div class="squad-cell cost">70 lakh</div>
+        <div class="squad-cell name">Akash Deep</div><div class="squad-cell hide-mobile">Bowler</div><div class="squad-cell hide-mobile">Indian</div><div class="squad-cell cost">20 lakh</div>
+        <div class="squad-cell name">Shivam Sharma</div><div class="squad-cell hide-mobile">Bowler</div><div class="squad-cell hide-mobile">Indian</div><div class="squad-cell cost">10 lakh</div>
+        <div class="squad-cell name">Shakib Al Hasan</div><div class="squad-cell hide-mobile">All-Rounder</div><div class="squad-cell hide-mobile">Overseas</div><div class="squad-cell cost">2.8 cr</div>
+        <div class="squad-cell name">Mohammad Nabi</div><div class="squad-cell hide-mobile">All-Rounder</div><div class="squad-cell hide-mobile">Overseas</div><div class="squad-cell cost">30 lakh</div>
+        <div class="squad-cell name">Ramandeep Singh</div><div class="squad-cell hide-mobile">All-Rounder</div><div class="squad-cell hide-mobile">Indian</div><div class="squad-cell cost">20 lakh</div>
+        <div class="squad-cell name">Ishan Kishan</div><div class="squad-cell hide-mobile">Wicket Keeper</div><div class="squad-cell hide-mobile">Indian</div><div class="squad-cell cost">35 lakh</div>
+        <div class="squad-cell name">Dhruv Jurel</div><div class="squad-cell hide-mobile">Wicket Keeper</div><div class="squad-cell hide-mobile">Indian</div><div class="squad-cell cost">20 lakh</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <span class="section-num">06 / Honest Bug</span>
+    <h2 class="section-title">The LP is right. The <em>objective</em> is wrong.</h2>
+    <div class="honesty">
+      <div class="honesty-label">⚠ Real Bug Worth Confronting</div>
+      <h3 class="honesty-title">A 12.5-crore squad <em>under</em> a 95-crore cap is not a strategy. It's a tell.</h3>
+      <div class="honesty-body">
+        <p>If you opened the squad above and immediately thought <em>"why isn't Virat Kohli in here? Why is Sachin Baby? Why is the budget at 13%?"</em> — that's exactly the right question. The LP is doing its job correctly. The problem is upstream, in the objective design.</p>
+        <p>The optimizer maximizes <code>sum of performance_score</code>, where <code>performance_score = 0.6 × strike_rate + 0.4 × (wickets / matches × 25)</code>. That second term has a small-sample problem: a bowler who's played 3 matches and taken 4 wickets has <code>wickets / matches × 25 = 33</code>. The LP doesn't know to distrust low-sample players, so it picks them — they're cheap, the score is inflated, and the constraints are still satisfied.</p>
+      </div>
+      <div class="honesty-stat">
+        <div class="honesty-stat-num">13.2<span style="font-size: 0.5em;">%</span></div>
+        <div class="honesty-stat-text">Of the 95-crore cap is actually used by the LP-selected squad. Real franchises spend their cap because superstar talent is disproportionately valuable — but a linear objective can't see that.</div>
+      </div>
+      <div class="honesty-stat">
+        <div class="honesty-stat-num">0</div>
+        <div class="honesty-stat-text">Players from the Impact Score top 10 in the final squad. The full Impact Score from Part 1 — which has volume weighting that would naturally penalize small-sample players — is never used by the LP objective. The two halves were built sequentially and not unified.</div>
+      </div>
+      <div class="honesty-body" style="margin-top: 24px; margin-bottom: 0;"><p><strong>The fix is two lines of code:</strong> apply a minimum-games filter to the eligible set, and replace the LP objective with the full Impact Score from Part 1. Both ship in V2. The bug is in the writeup because <em>knowing why the LP found the wrong squad is more valuable than pretending it found the right one.</em></p></div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <span class="section-num">07 / Technical Decisions</span>
+    <h2 class="section-title">Why these <em>choices</em>.</h2>
+    <div class="decisions">
+      <div class="decision"><div class="decision-q">Why ILP over<br>a heuristic?</div><div class="decision-a">ILP guarantees the global optimum under the constraints. A greedy "best score-to-cost ratio" heuristic can violate the role minimums or pick a feasible-but-suboptimal squad. With 543 binary variables and 7 linear constraints, the CBC solver converges in under a second via branch-and-bound — the right tool for a problem this size. RL, genetic algorithms, and simulated annealing are <em>all</em> overkill here.</div></div>
+      <div class="decision"><div class="decision-q">Why hand-weighted<br>over learned scoring?</div><div class="decision-a">There's no labeled "true impact" target to train against. A learned regressor would just be predicting another proxy. A weighted composite is <strong>auditable</strong> — a coach can ask "why is Kohli at 0.86?" and you can break it down into six components with their weights visible. Honesty about non-validation: the weights weren't calibrated against MOM frequency or team-win contribution, which is the V2 work.</div></div>
+      <div class="decision"><div class="decision-q">Why 95 crore<br>budget cap?</div><div class="decision-a">That's the actual IPL franchise auction cap. The whole point of this project is to model the real constraint set a franchise faces, not a toy version.</div></div>
+      <div class="decision"><div class="decision-q">Why 5/5/3/2<br>role minimums?</div><div class="decision-a">Standard franchise squad composition. The minimums also sum to exactly 15, which means each role inequality binds as an equality in practice — a constraint-design choice that simplifies but also rigidifies. V2 should support strategic skews like "4 batsmen + 6 bowlers" by changing the squad-size constraint, not the role floors.</div></div>
+      <div class="decision"><div class="decision-q">Why 30 runs<br>for impact innings?</div><div class="decision-a">Domain heuristic — roughly the threshold where a T20 innings "made a difference." Not calibrated, not learned. A 15-ball 22 that wins a chase doesn't count, which is a real limitation. The proper replacement is <em>Win Probability Added per delivery</em>, similar to baseball's WPA — but that requires a win-probability model as a prerequisite, which is its own project.</div></div>
+      <div class="decision"><div class="decision-q">Why CBC<br>over Gurobi?</div><div class="decision-a">CBC is open-source, free, and more than fast enough for a problem with 543 binary variables. Gurobi would be required only at much larger scale (10⁴+ variables or hundreds of constraints) or when commercial-grade solver guarantees are needed. For this problem, CBC is the right cost-quality choice.</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <span class="section-num">08 / Limitations</span>
+    <h2 class="section-title">What this <em>misses</em>.</h2>
+    <div class="prose" style="margin-bottom: 24px; max-width: 60ch;"><p>Beyond the LP objective bug above, the realistic gaps between this and a production-grade franchise tool.</p></div>
+    <div class="limits">
+      <div class="limit-item"><div class="limit-num">01</div><div class="limit-text"><strong>Death weighted 0.05 is too low.</strong> Pure finishers (Dhoni, Russell, Hardik) rank lower than they should because their primary value is death overs. The 0.05 was a guard against death stats being dominated by the small subset of finishers — but the side effect is undervaluing exactly those finishers.</div></div>
+      <div class="limit-item"><div class="limit-num">02</div><div class="limit-text"><strong>Impact Score weights are not calibrated.</strong> 0.25 / 0.25 / 0.15 / 0.15 / 0.15 / 0.05 are domain reasoning, not fit to MOM frequency or win contribution. V2 calibrates them.</div></div>
+      <div class="limit-item"><div class="limit-num">03</div><div class="limit-text"><strong>No position-level constraints in the LP.</strong> A real franchise needs at least 2 openers, at least 1 left-arm bowler, at least 1 frontline spinner. Currently only roles are constrained.</div></div>
+      <div class="limit-item"><div class="limit-num">04</div><div class="limit-text"><strong>No bid contestation modeling.</strong> The LP assumes you can buy any player at the listed price. Real auctions have competing bids. V2 layers a Monte-Carlo over likely auction outcomes.</div></div>
+      <div class="limit-item"><div class="limit-num">05</div><div class="limit-text"><strong>Wides counted in batting balls_faced.</strong> Bowling correctly filters extras for economy; batting does not for balls faced. Marginal but real (~3-5% effect).</div></div>
+      <div class="limit-item"><div class="limit-num">06</div><div class="limit-text"><strong>No captaincy / leadership constraint.</strong> Real auctions need to secure a captain.</div></div>
+      <div class="limit-item"><div class="limit-num">07</div><div class="limit-text"><strong>No retention or right-to-match logic.</strong> Existing-squad considerations not modeled.</div></div>
+    </div>
+    <div class="v2-block">
+      <div class="v2-label">Version 2 — Build Order</div>
+      <h3 class="v2-title">What ships next.</h3>
+      <ul class="v2-list">
+        <li><span class="v2-tag">01</span><span>Unify the two halves — use the full Impact Score as the LP objective.</span></li>
+        <li><span class="v2-tag">02</span><span>Apply a minimum-games filter (≥ 30 matches) to the eligible player pool.</span></li>
+        <li><span class="v2-tag">03</span><span>Calibrate Impact Score weights against MOM frequency or team-win contribution.</span></li>
+        <li><span class="v2-tag">04</span><span>Add position-level constraints: openers, spinners, leftie batsmen, captain.</span></li>
+        <li><span class="v2-tag">05</span><span>Rebalance death-overs weighting by normalizing per opportunity.</span></li>
+        <li><span class="v2-tag">06</span><span>Layer Monte-Carlo bid contestation simulation to get realistic squad outcomes.</span></li>
+        <li><span class="v2-tag">07</span><span>Fix the wides-as-balls-faced bug for batting.</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="cta">
+  <div class="container">
+    <div class="cta-eyebrow">Read the code / Build a squad</div>
+    <h2 class="cta-title">Auctions are <em>linear</em>. Treat them like one.</h2>
+    <p class="cta-sub">Full notebook on GitHub — the Impact Score, the LP formulation, the solver output, the squad composition charts.</p>
+    <div class="cta-buttons">
+      <a href="https://github.com/yashv04/Impact-Model-IPL-Auction-Strategy" class="btn btn-primary" target="_blank" rel="noopener">View on GitHub</a>
+      <a href="/personal/" class="btn">Back to Personal Projects</a>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container footer-inner">
+    <div>Yash Vardhan — Sports CV Engineer / Cricket Analyst</div>
+    <div>
+      <a href="/">Portfolio</a> &nbsp;·&nbsp;
+      <a href="https://www.linkedin.com/in/yash-vardhan-5b3956169/">LinkedIn</a> &nbsp;·&nbsp;
+      <a href="https://github.com/yashv04">GitHub</a> &nbsp;·&nbsp;
+      <a href="mailto:yashv3110@gmail.com">Email</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

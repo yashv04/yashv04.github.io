@@ -3,94 +3,970 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ODI Full Match Predictor · Yash Vardhan</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/css/main.css">
+<title>ODI Full Match Predictor — Yash Vardhan</title>
+<meta name="description" content="A 3-stage end-to-end ML system predicting an ODI cricket match from before the toss to the final ball. Calibrated probabilities, temporal splits, deployed on Streamlit. 2,520 matches, 1.3M deliveries.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;500;600&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg: #0a0a0a;
+  --surface: #111111;
+  --surface-2: #161616;
+  --border: #1f1f1f;
+  --border-strong: #2a2a2a;
+  --text: #fafafa;
+  --text-body: #d4d4d4;
+  --text-muted: #737373;
+  --text-faint: #525252;
+  --accent: #dc2626;
+  --accent-soft: rgba(220, 38, 38, 0.12);
+  --cream: #ede4d0;
+  --warn: #f59e0b;
+  --ok: #65a30d;
+
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-body: 'Manrope', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  --container: 1240px;
+  --gutter: clamp(20px, 5vw, 64px);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+
+body {
+  background: var(--bg);
+  color: var(--text-body);
+  font-family: var(--font-body);
+  font-size: 17px;
+  line-height: 1.6;
+  font-weight: 400;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' /%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.18'/%3E%3C/svg%3E");
+  mix-blend-mode: overlay;
+  opacity: 0.4;
+}
+
+a { color: inherit; text-decoration: none; }
+
+.container {
+  max-width: var(--container);
+  margin: 0 auto;
+  padding: 0 var(--gutter);
+  position: relative;
+  z-index: 2;
+}
+
+/* ============ NAV ============ */
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(10, 10, 10, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+}
+.nav-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 0;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+}
+.nav-back {
+  color: var(--text-muted);
+  transition: color 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.nav-back:hover { color: var(--text); }
+.nav-meta { color: var(--text-faint); text-transform: uppercase; }
+
+/* ============ HERO ============ */
+.hero {
+  padding: clamp(60px, 12vw, 160px) 0 clamp(60px, 10vw, 140px);
+  border-bottom: 1px solid var(--border);
+  position: relative;
+}
+.hero-flagship {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--cream);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+.hero-flagship::before, .hero-flagship::after {
+  content: '';
+  display: inline-block;
+  width: 24px;
+  height: 1px;
+  background: var(--cream);
+  opacity: 0.5;
+}
+.hero-kicker {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--accent);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 32px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.hero-kicker::before {
+  content: '';
+  width: 32px;
+  height: 1px;
+  background: var(--accent);
+}
+.hero-title {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(44px, 8vw, 108px);
+  line-height: 0.96;
+  letter-spacing: -0.025em;
+  color: var(--text);
+  font-variation-settings: "opsz" 144, "SOFT" 30;
+  margin-bottom: 40px;
+  max-width: 18ch;
+}
+.hero-title em {
+  font-style: italic;
+  color: var(--cream);
+  font-weight: 300;
+}
+.hero-sub {
+  font-size: clamp(18px, 2vw, 22px);
+  line-height: 1.5;
+  color: var(--text-body);
+  max-width: 62ch;
+  margin-bottom: 56px;
+  font-weight: 300;
+}
+.hero-meta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 32px;
+  border-top: 1px solid var(--border);
+  padding-top: 36px;
+  max-width: 1000px;
+}
+.hero-meta-item .label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-faint);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  display: block;
+}
+.hero-meta-item .value {
+  font-size: 16px;
+  color: var(--text);
+  font-weight: 500;
+}
+.hero-meta-item .value.mono { font-family: var(--font-mono); font-size: 15px; }
+.hero-meta-item .value.accent { color: var(--accent); }
+
+.hero-cta {
+  margin-top: 48px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.hero-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-body);
+  letter-spacing: 0.04em;
+  transition: all 0.2s;
+}
+.hero-pill:hover { background: var(--surface-2); border-color: var(--text-muted); color: var(--text); }
+.hero-pill .dot {
+  width: 8px; height: 8px;
+  background: var(--ok);
+  border-radius: 50%;
+  animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
+
+/* ============ SECTION ============ */
+.section {
+  padding: clamp(64px, 10vw, 120px) 0;
+  border-bottom: 1px solid var(--border);
+}
+.section-num {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-faint);
+  letter-spacing: 0.12em;
+  margin-bottom: 20px;
+  display: block;
+}
+.section-title {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(32px, 5vw, 56px);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  margin-bottom: 48px;
+  max-width: 22ch;
+}
+.section-title em { font-style: italic; color: var(--cream); }
+
+.prose {
+  max-width: 68ch;
+  font-size: clamp(17px, 1.4vw, 19px);
+  line-height: 1.65;
+  color: var(--text-body);
+}
+.prose p { margin-bottom: 1.3em; }
+.prose p:last-child { margin-bottom: 0; }
+.prose strong { color: var(--text); font-weight: 600; }
+.prose .highlight { color: var(--cream); font-style: italic; font-family: var(--font-display); font-weight: 400; }
+.prose code { font-family: var(--font-mono); font-size: 0.9em; color: var(--cream); }
+
+/* ============ ARCHITECTURE DIAGRAM ============ */
+.arch-wrap {
+  margin-top: 32px;
+  padding: 48px 32px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  overflow-x: auto;
+}
+.arch-wrap svg { display: block; margin: 0 auto; max-width: 100%; height: auto; }
+.arch-caption {
+  margin-top: 32px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-faint);
+  text-align: center;
+  letter-spacing: 0.06em;
+  max-width: 70ch;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.7;
+}
+
+/* ============ STAGES ============ */
+.stages {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  margin-top: 32px;
+}
+@media (max-width: 880px) { .stages { grid-template-columns: 1fr; } }
+.stage {
+  background: var(--bg);
+  padding: 44px 32px;
+  position: relative;
+  transition: background 0.3s ease;
+}
+.stage:hover { background: var(--surface); }
+.stage-tag {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--accent);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+.stage-when {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-faint);
+  margin-bottom: 24px;
+  display: block;
+}
+.stage-title {
+  font-family: var(--font-display);
+  font-size: clamp(24px, 2.8vw, 32px);
+  font-weight: 400;
+  color: var(--text);
+  margin-bottom: 18px;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+}
+.stage-title em { color: var(--cream); font-style: italic; }
+.stage-model {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--cream);
+  margin-bottom: 24px;
+  padding: 8px 12px;
+  background: var(--accent-soft);
+  display: inline-block;
+}
+.stage-body {
+  font-size: 15px;
+  color: var(--text-body);
+  line-height: 1.65;
+  margin-bottom: 24px;
+}
+.stage-headline {
+  padding-top: 24px;
+  border-top: 1px solid var(--border-strong);
+}
+.stage-headline-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-faint);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.stage-headline-value {
+  font-family: var(--font-display);
+  font-size: clamp(32px, 3.5vw, 44px);
+  font-weight: 300;
+  color: var(--text);
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+.stage-headline-value.accent { color: var(--accent); }
+.stage-headline-value em { font-style: italic; color: var(--cream); }
+
+/* ============ FLOW ============ */
+.flow { margin-top: 24px; display: grid; gap: 0; }
+.flow-step {
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  gap: 28px;
+  padding: 32px 0;
+  border-top: 1px solid var(--border);
+  position: relative;
+  transition: background 0.3s ease;
+}
+.flow-step:last-child { border-bottom: 1px solid var(--border); }
+.flow-step:hover { background: linear-gradient(to right, var(--surface), transparent 50%); }
+.flow-step-num {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--accent);
+  letter-spacing: 0.08em;
+  padding-top: 6px;
+}
+.flow-step-title {
+  font-family: var(--font-display);
+  font-size: clamp(22px, 2.5vw, 28px);
+  font-weight: 400;
+  color: var(--text);
+  margin-bottom: 10px;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+.flow-step-body {
+  color: var(--text-body);
+  font-size: 16px;
+  line-height: 1.6;
+  max-width: 62ch;
+}
+.flow-step-body code { font-family: var(--font-mono); font-size: 0.9em; color: var(--cream); }
+.flow-step-tech { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 8px; }
+.tech-pill {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  padding: 5px 10px;
+  border-radius: 3px;
+  letter-spacing: 0.04em;
+}
+
+/* ============ PHASE TABLE ============ */
+.phase-table { margin-top: 32px; border: 1px solid var(--border); background: var(--surface); }
+.phase-table-head { padding: 24px 28px; border-bottom: 1px solid var(--border-strong); }
+.phase-table-title { font-family: var(--font-display); font-size: 24px; color: var(--text); font-weight: 400; margin-bottom: 8px; }
+.phase-table-sub { font-family: var(--font-mono); font-size: 12px; color: var(--text-muted); letter-spacing: 0.05em; }
+.phase-grid { display: grid; grid-template-columns: 1.5fr 1fr 1.5fr; font-family: var(--font-mono); font-size: 14px; }
+.phase-cell { padding: 18px 28px; border-top: 1px solid var(--border); color: var(--text-body); }
+.phase-cell.head { background: var(--surface-2); font-size: 11px; color: var(--text-faint); letter-spacing: 0.1em; text-transform: uppercase; border-top: none; }
+.phase-cell.range { color: var(--text); }
+.phase-cell.metric { color: var(--cream); font-weight: 600; }
+.phase-cell.metric.peak { color: var(--accent); font-size: 16px; }
+.phase-cell.note { color: var(--text-muted); font-family: var(--font-body); font-size: 13px; }
+
+/* ============ RESULTS GRID ============ */
+.results { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1px; background: var(--border); border: 1px solid var(--border); margin-top: 24px; }
+.result-cell { background: var(--bg); padding: 36px 28px; position: relative; transition: background 0.3s ease; }
+.result-cell:hover { background: var(--surface); }
+.result-label { font-family: var(--font-mono); font-size: 11px; color: var(--text-faint); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 18px; }
+.result-number { font-family: var(--font-display); font-size: clamp(40px, 5vw, 56px); font-weight: 300; color: var(--text); line-height: 1; letter-spacing: -0.03em; margin-bottom: 10px; }
+.result-number.accent { color: var(--accent); }
+.result-number.cream { color: var(--cream); font-style: italic; }
+.result-number.warn { color: var(--warn); }
+.result-caption { font-size: 13px; color: var(--text-muted); line-height: 1.5; max-width: 28ch; }
+
+/* ============ DECISIONS ============ */
+.decisions { display: grid; gap: 0; margin-top: 24px; }
+.decision { display: grid; grid-template-columns: 220px 1fr; gap: 48px; padding: 40px 0; border-top: 1px solid var(--border); align-items: start; }
+.decision:last-child { border-bottom: 1px solid var(--border); }
+.decision-q { font-family: var(--font-mono); font-size: 12px; color: var(--accent); letter-spacing: 0.1em; text-transform: uppercase; line-height: 1.5; padding-top: 4px; }
+.decision-a { font-size: 16px; color: var(--text-body); line-height: 1.65; max-width: 64ch; }
+.decision-a strong { color: var(--text); }
+.decision-a em { color: var(--cream); font-family: var(--font-display); font-style: italic; }
+.decision-a code { font-family: var(--font-mono); font-size: 0.9em; color: var(--cream); }
+@media (max-width: 768px) { .decision { grid-template-columns: 1fr; gap: 14px; } }
+
+/* ============ FEATURE TABLE ============ */
+.feature-table { margin-top: 32px; border: 1px solid var(--border); background: var(--surface); }
+.feature-row { display: grid; grid-template-columns: 220px 1fr; gap: 32px; padding: 22px 28px; border-top: 1px solid var(--border); }
+.feature-row:first-child { border-top: none; background: var(--surface-2); }
+.feature-row-cat { font-family: var(--font-mono); font-size: 12px; color: var(--accent); letter-spacing: 0.08em; text-transform: uppercase; padding-top: 4px; }
+.feature-row:first-child .feature-row-cat { color: var(--text-faint); font-size: 11px; }
+.feature-row-features { font-family: var(--font-mono); font-size: 13px; color: var(--text-body); line-height: 1.7; }
+.feature-row-features code { color: var(--cream); }
+.feature-row:first-child .feature-row-features { font-size: 11px; color: var(--text-faint); letter-spacing: 0.1em; text-transform: uppercase; }
+@media (max-width: 768px) { .feature-row { grid-template-columns: 1fr; gap: 10px; padding: 18px 22px; } }
+
+/* ============ LIMITATIONS ============ */
+.limits { display: grid; gap: 18px; margin-top: 24px; }
+.limit-item { display: grid; grid-template-columns: 28px 1fr; gap: 18px; padding: 22px 0; border-top: 1px solid var(--border); }
+.limit-item:last-child { border-bottom: 1px solid var(--border); }
+.limit-num { font-family: var(--font-mono); font-size: 12px; color: var(--text-faint); padding-top: 4px; }
+.limit-text { color: var(--text-body); font-size: 16px; line-height: 1.6; }
+.limit-text strong { color: var(--text); font-weight: 600; }
+
+.v2-block { background: var(--surface); border: 1px solid var(--border); padding: 36px; margin-top: 48px; }
+.v2-label { font-family: var(--font-mono); font-size: 11px; color: var(--accent); letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 18px; }
+.v2-title { font-family: var(--font-display); font-size: 24px; color: var(--text); margin-bottom: 22px; font-weight: 400; line-height: 1.2; }
+.v2-list { list-style: none; }
+.v2-list li { padding: 10px 0; border-top: 1px solid var(--border); color: var(--text-body); font-size: 15px; display: grid; grid-template-columns: 32px 1fr; gap: 12px; }
+.v2-list li:first-child { border-top: none; }
+.v2-list .v2-tag { font-family: var(--font-mono); font-size: 11px; color: var(--text-faint); padding-top: 3px; }
+
+/* ============ CTA ============ */
+.cta { padding: clamp(80px, 14vw, 160px) 0; text-align: left; border-bottom: 1px solid var(--border); background: radial-gradient(ellipse at top, var(--surface) 0%, var(--bg) 70%); position: relative; }
+.cta-eyebrow { font-family: var(--font-mono); font-size: 12px; color: var(--accent); letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 24px; }
+.cta-title { font-family: var(--font-display); font-size: clamp(40px, 6vw, 72px); line-height: 1.0; letter-spacing: -0.02em; color: var(--text); margin-bottom: 24px; max-width: 22ch; font-weight: 400; }
+.cta-title em { font-style: italic; color: var(--cream); }
+.cta-sub { font-size: 18px; color: var(--text-muted); margin-bottom: 48px; max-width: 56ch; line-height: 1.55; }
+.cta-buttons { display: flex; flex-wrap: wrap; gap: 14px; }
+.btn { display: inline-flex; align-items: center; gap: 12px; padding: 20px 32px; font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; border: 1px solid var(--border-strong); background: transparent; color: var(--text); transition: all 0.25s ease; cursor: pointer; }
+.btn:hover { background: var(--text); color: var(--bg); border-color: var(--text); }
+.btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.btn-primary:hover { background: #ef4444; border-color: #ef4444; color: #fff; }
+.btn svg { width: 14px; height: 14px; }
+.btn .live-dot { width: 8px; height: 8px; background: #fff; border-radius: 50%; animation: pulse 2s ease-in-out infinite; }
+
+/* ============ FOOTER ============ */
+.footer { padding: 48px 0 64px; font-family: var(--font-mono); font-size: 12px; color: var(--text-faint); letter-spacing: 0.04em; }
+.footer-inner { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 24px; }
+.footer a { color: var(--text-muted); transition: color 0.2s; }
+.footer a:hover { color: var(--text); }
+
+/* ============ ANIMATIONS ============ */
+@keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+.hero-flagship { animation: fadeUp 0.5s ease-out 0s both; }
+.hero-kicker { animation: fadeUp 0.6s ease-out 0.1s both; }
+.hero-title { animation: fadeUp 0.8s ease-out 0.2s both; }
+.hero-sub { animation: fadeUp 0.8s ease-out 0.4s both; }
+.hero-meta { animation: fadeUp 0.8s ease-out 0.6s both; }
+.hero-cta { animation: fadeUp 0.8s ease-out 0.8s both; }
+
+@media (max-width: 640px) {
+  .flow-step { grid-template-columns: 60px 1fr; gap: 16px; }
+  .nav-meta { display: none; }
+  body { font-size: 16px; }
+}
+</style>
 </head>
 <body>
-<div class="grid-bg"></div>
 
-<nav class="topnav">
-  <div class="topnav-inner">
-    <a href="/" class="brand">Yash<span>.</span>Vardhan</a>
-    <div class="nav-links">
-      <a href="/" class="nav-link">Home</a>
-      <a href="/about/" class="nav-link">About</a>
-      <a href="/work/" class="nav-link">Work</a>
-      <a href="/personal/" class="nav-link active">Personal</a>
-    </div>
+<!-- ============ NAV ============ -->
+<nav class="nav">
+  <div class="container nav-inner">
+    <a href="/personal/" class="nav-back">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 11L5 7l4-4"/></svg>
+      Back to Personal Projects
+    </a>
+    <span class="nav-meta">Project / 01 / Flagship</span>
   </div>
 </nav>
 
-<div class="page">
-
-  <a class="back-link" href="/personal/">← Back to Personal Projects</a>
-
-  <header class="detail-header fade-up d1">
-    <div class="detail-eyebrow">02 / End-to-End ODI · Live Dashboard</div>
-    <h1 class="detail-title">ODI Full Match <span>Predictor</span></h1>
-    <p class="detail-lead">A three-stage live engine — <strong>pre-match prediction · 1st-innings projection · 2nd-innings chase</strong>. Trained on 2,520 ODIs with <strong>91% accuracy on death-over outcomes</strong>.</p>
-    <div class="detail-links">
-      <a class="dl-btn primary" href="https://odi-full-match-predictor-mxvyyqyvgszg5krsutpqh9.streamlit.app/" target="_blank">Live Demo ↗</a>
-      <a class="dl-btn" href="https://github.com/yashv04/ODI-Full-Match-Predictor" target="_blank">GitHub ↗</a>
+<!-- ============ HERO ============ -->
+<header class="hero">
+  <div class="container">
+    <div class="hero-flagship">Flagship project</div>
+    <div class="hero-kicker">01 — Personal Analytics / End-to-End ML</div>
+    <h1 class="hero-title">
+      ODI Full <em>Match</em> Predictor
+    </h1>
+    <p class="hero-sub">
+      A 3-stage end-to-end ML system predicting an ODI cricket match from before the toss to the final ball. Calibrated probabilities, temporal train/val/test splits, ICC-style ratings, deployed as a public Streamlit app. Trained on 2,520 ODIs and 1.3 million deliveries from Cricsheet.
+    </p>
+    <div class="hero-meta">
+      <div class="hero-meta-item">
+        <span class="label">Domain</span>
+        <span class="value">ODI Cricket</span>
+      </div>
+      <div class="hero-meta-item">
+        <span class="label">Approach</span>
+        <span class="value">3-Stage Pipeline</span>
+      </div>
+      <div class="hero-meta-item">
+        <span class="label">Stack</span>
+        <span class="value mono">LR · GBM · XGBoost</span>
+      </div>
+      <div class="hero-meta-item">
+        <span class="label">Best Result</span>
+        <span class="value accent mono">91% Death Acc</span>
+      </div>
+      <div class="hero-meta-item">
+        <span class="label">Status</span>
+        <span class="value mono">Live · Public</span>
+      </div>
     </div>
-  </header>
-
-  <section class="detail-section fade-up d2">
-    <div class="ds-label">What</div>
-    <div class="ds-body">
-      <p class="placeholder">[Content coming — what each of the three stages does, and what the user sees at each one.]</p>
+    <div class="hero-cta">
+      <a href="https://odi-full-match-predictor.streamlit.app" target="_blank" rel="noopener" class="hero-pill">
+        <span class="dot"></span>
+        odi-full-match-predictor.streamlit.app
+      </a>
+      <a href="https://github.com/yashv04/ODI-Full-Match-Predictor" target="_blank" rel="noopener" class="hero-pill">
+        github.com/yashv04/ODI-Full-Match-Predictor
+      </a>
     </div>
-  </section>
+  </div>
+</header>
 
-  <section class="detail-section fade-up d2">
-    <div class="ds-label">Why</div>
-    <div class="ds-body">
-      <p class="placeholder">[Content coming — why three stages instead of one model; what each stage uniquely solves.]</p>
+<!-- ============ THE PROBLEM ============ -->
+<section class="section">
+  <div class="container">
+    <span class="section-num">01 / Problem</span>
+    <h2 class="section-title">Broadcast win-probability widgets are <em>opaque</em>. And often wrong.</h2>
+    <div class="prose">
+      <p>
+        Open any cricket telecast. There's a win-probability bar at the bottom of the screen. It moves. Sometimes it makes sense; sometimes it jumps 15% on a single dot ball. Nobody knows where the number comes from, whether it's calibrated, what features it uses, or how the model was trained. Most existing cricket-prediction tools fall into one of two camps: <strong>pre-match odds models</strong> that ignore the live state, or <strong>live-state models</strong> that ignore team strength and form. No tool covers the full match continuously, transparently, with calibrated probabilities.
+      </p>
+      <p>
+        And no public tool lets you ask the question scouts and broadcasters actually want to ask: <span class="highlight">"swap this player into the XI — what happens to the win probability?"</span>
+      </p>
+      <p>
+        That's the gap this project closes.
+      </p>
     </div>
-  </section>
+  </div>
+</section>
 
-  <section class="detail-section fade-up d3">
-    <div class="ds-label">How</div>
-    <div class="ds-body">
-      <ul>
-        <li class="placeholder">[Stage 1 — pre-match model: features, target, training data]</li>
-        <li class="placeholder">[Stage 2 — 1st-innings projection: features, target, training data]</li>
-        <li class="placeholder">[Stage 3 — 2nd-innings chase: features, target, training data]</li>
-        <li class="placeholder">[Deployment — Streamlit, refresh cadence, data sources]</li>
+<!-- ============ THE SOLUTION ============ -->
+<section class="section">
+  <div class="container">
+    <span class="section-num">02 / Solution</span>
+    <h2 class="section-title">Three stages. <em>One</em> match. End to end.</h2>
+    <div class="prose" style="margin-bottom: 8px;">
+      <p>The pipeline outputs a continuous, calibrated win probability from before the toss to the final ball. Each stage uses a different model — chosen for the data it has, not by default.</p>
+    </div>
+
+    <div class="stages">
+      <div class="stage">
+        <div class="stage-tag">Stage 01</div>
+        <span class="stage-when">Fires: before the toss</span>
+        <h3 class="stage-title">Pre-match <em>probability</em></h3>
+        <div class="stage-model">Logistic Regression · Calibrated</div>
+        <p class="stage-body">13 features per match — team Elo ratings, batting/bowling rating differentials, recent form, head-to-head record, toss winner, batting order, venue intelligence. Trained on 2,005 matches up to 2022. Beat XGBoost and Random Forest at validation.</p>
+        <div class="stage-headline">
+          <div class="stage-headline-label">Test Accuracy</div>
+          <div class="stage-headline-value">57.7<em>%</em></div>
+        </div>
+      </div>
+
+      <div class="stage">
+        <div class="stage-tag">Stage 02</div>
+        <span class="stage-when">Fires: every over of innings 1</span>
+        <h3 class="stage-title">1st innings <em>projection</em></h3>
+        <div class="stage-model">Gradient Boosting + Quantile</div>
+        <p class="stage-body">Snapshot the match at every over-end. 13 features: cumulative state, current run rate, phase encoding, venue context, team Elo. Point predictor plus q=0.10 and q=0.90 quantile regressors for honest 10/90% confidence bands.</p>
+        <div class="stage-headline">
+          <div class="stage-headline-label">Death-Over MAE</div>
+          <div class="stage-headline-value">±13<em>.1</em></div>
+        </div>
+      </div>
+
+      <div class="stage">
+        <div class="stage-tag">Stage 03</div>
+        <span class="stage-when">Fires: every over of innings 2</span>
+        <h3 class="stage-title">Chase <em>win prob</em></h3>
+        <div class="stage-model">XGBoost · Calibrated</div>
+        <p class="stage-body">14 features per over-snapshot — including the killer <code style="font-family: var(--font-mono); color: var(--cream); font-size: 0.9em;">rrr_crr_diff</code> (35.7% importance) and the pre-match probability as a prior. Sharp nonlinearities + sufficient samples make XGBoost the right call here.</p>
+        <div class="stage-headline">
+          <div class="stage-headline-label">Death-Over Acc</div>
+          <div class="stage-headline-value accent">91<em>%</em></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ HOW IT WORKS ============ -->
+<section class="section">
+  <div class="container">
+    <span class="section-num">03 / How It Works</span>
+    <h2 class="section-title">From YAML <em>to</em> live win probability.</h2>
+    <div class="flow">
+
+      <div class="flow-step">
+        <div class="flow-step-num">01</div>
+        <div>
+          <h3 class="flow-step-title">Parse Cricsheet YAMLs</h3>
+          <p class="flow-step-body">
+            Cricsheet ships each match as a YAML — match info plus a list of innings with delivery-level records. The tricky bit: delivery keys are floats like <code>0.1</code> and <code>14.7</code> meaning "over 0 ball 1" and "over 14 ball 7". Splitting on the decimal parses them. The parser handles 2,520 files into clean DataFrames.
+          </p>
+          <div class="flow-step-tech">
+            <span class="tech-pill">PyYAML</span>
+            <span class="tech-pill">pandas</span>
+            <span class="tech-pill">Cricsheet</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="flow-step-num">02</div>
+        <div>
+          <h3 class="flow-step-title">Build ICC-style team Elo ratings</h3>
+          <p class="flow-step-body">
+            Standard Elo with two ICC-specific tweaks. <strong>Variable K-factor:</strong> K=50 for World Cup / Champions Trophy matches, K=32 for bilateral series — a loss in a tournament says more than a loss in a friendly. <strong>Recency weighting:</strong> last 12 months count at weight 1.0, 12–24 months at 0.5, older ignored. Sanity check: top 6 weighted ratings come out as India, Australia, England, NZ, SA, Pakistan. ✓
+          </p>
+          <div class="flow-step-tech">
+            <span class="tech-pill">Variable-K Elo</span>
+            <span class="tech-pill">recency weighting</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="flow-step-num">03</div>
+        <div>
+          <h3 class="flow-step-title">Compute rolling player ratings</h3>
+          <p class="flow-step-body">
+            Per innings: batting rating = <code>runs × (SR/100) × opposition × venue × innings_factor</code> — rewards volume, speed, tougher bowling, harder pitches, chasing pressure. Bowling rating = <code>wickets × 25 + dots × 0.5 − economy × 3</code>. Each player gets a 10-match rolling weighted average (recent = 1.0, 10 ago = 0.1) plus a 5% decay if inactive 60+ days.
+          </p>
+          <div class="flow-step-tech">
+            <span class="tech-pill">rolling avg</span>
+            <span class="tech-pill">opposition factor</span>
+            <span class="tech-pill">decay</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="flow-step-num">04</div>
+        <div>
+          <h3 class="flow-step-title">Build per-venue intelligence (10 stats per ground)</h3>
+          <p class="flow-step-body">
+            Average 1st-innings score, PP/Middle/Death scoring averages, chasing win rate, toss-bat win rate, spin vs pace wicket ratio, frequency of 300+ scores. Wankhede and Chennai have completely different signatures — venue features capture that. Spin classification uses an economy &lt; 5.5 heuristic when bowl_style metadata is missing.
+          </p>
+          <div class="flow-step-tech">
+            <span class="tech-pill">groupby aggregation</span>
+            <span class="tech-pill">venue features</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="flow-step-num">05</div>
+        <div>
+          <h3 class="flow-step-title">Temporal split — non-negotiable</h3>
+          <p class="flow-step-body">
+            Train on matches up to <code>2022-12-31</code> (2,005 matches). Validate on 2023 (186 matches) — used for model selection and calibration fitting. Test on 2024+ (201 matches) — never touched until the end. A random split would let the model train on 2024 and test on 2020. That's deployment-impossible and unfaithfully optimistic.
+          </p>
+          <div class="flow-step-tech">
+            <span class="tech-pill">temporal split</span>
+            <span class="tech-pill">no leakage</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="flow-step-num">06</div>
+        <div>
+          <h3 class="flow-step-title">Train Stage 1 — Logistic Regression (and why it won)</h3>
+          <p class="flow-step-body">
+            All three models compared on the validation set: <strong>LR 68.8%, RF 65.1%, XGBoost 59.1%</strong>. LR wins because with 13 features × 2,005 rows, tree boosting has too many degrees of freedom and overfits. The team-strength-to-win-probability relationship is roughly monotonic — LR's linear decision boundary is the right inductive bias. Match the model to the data, not the trend.
+          </p>
+          <div class="flow-step-tech">
+            <span class="tech-pill">scikit-learn</span>
+            <span class="tech-pill">LogisticRegression</span>
+            <span class="tech-pill">model comparison</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="flow-step-num">07</div>
+        <div>
+          <h3 class="flow-step-title">Train Stage 2 — Gradient Boosting + Quantile bands</h3>
+          <p class="flow-step-body">
+            Snapshot the match state at every over-end (50 per match × 2,392 valid matches = ~120k rows). Train a <code>GradientBoostingRegressor</code> for the point prediction, plus two <code>XGBRegressor</code>s with <code>objective='reg:quantileerror'</code> at q=0.10 and q=0.90 for the confidence band. Bundle all three into one .pkl. Top feature: current run rate, ~55% importance.
+          </p>
+          <div class="flow-step-tech">
+            <span class="tech-pill">GBM</span>
+            <span class="tech-pill">XGB Quantile</span>
+            <span class="tech-pill">snapshot per over</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="flow-step-num">08</div>
+        <div>
+          <h3 class="flow-step-title">Train Stage 3 — XGBoost on live state</h3>
+          <p class="flow-step-body">
+            Same training size as Stage 1, but live state has sharp nonlinear interactions — <code>rrr_crr_diff</code> crossing zero is a regime change, wicket cliffs after a fall, partnership momentum compounding. Tree boosting handles these well. <strong>The pre-match probability is itself a feature here</strong> — Stage 3 inherits Stage 1's prior instead of relearning it.
+          </p>
+          <div class="flow-step-tech">
+            <span class="tech-pill">XGBoost</span>
+            <span class="tech-pill">forward info flow</span>
+            <span class="tech-pill">rrr_crr_diff</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="flow-step-num">09</div>
+        <div>
+          <h3 class="flow-step-title">Calibrate both classifiers</h3>
+          <p class="flow-step-body">
+            Wrap both Stage 1 and Stage 3 in <code>CalibratedClassifierCV</code> with isotonic regression, fitted on the 2023 validation set. A 70% prediction has to mean a true 70%, or the app lies. Brier scores: pre-match 0.248 (honest, barely beats random 0.25 — the modesty is real), 2nd innings 0.146 (well-calibrated).
+          </p>
+          <div class="flow-step-tech">
+            <span class="tech-pill">CalibratedClassifierCV</span>
+            <span class="tech-pill">isotonic</span>
+            <span class="tech-pill">Brier score</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="flow-step-num">10</div>
+        <div>
+          <h3 class="flow-step-title">Ship to Streamlit Community Cloud</h3>
+          <p class="flow-step-body">
+            Three .pkl bundles + small ratings CSVs load at cold-start (~10s). Phase 1: pre-match setup — probability. Phase 2: 1st innings, score per over — projected total + win prob. Phase 3: 2nd innings, score per over — chase prob. <strong>12 MB repo</strong> (training data lives elsewhere). Push to GitHub → Streamlit auto-redeploys → public URL stays live.
+          </p>
+          <div class="flow-step-tech">
+            <span class="tech-pill">Streamlit</span>
+            <span class="tech-pill">GitHub Actions</span>
+            <span class="tech-pill">12 MB repo</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============ RESULTS ============ -->
+<section class="section">
+  <div class="container">
+    <span class="section-num">04 / Results</span>
+    <h2 class="section-title">The <em>honest</em> numbers.</h2>
+
+    <div class="results">
+      <div class="result-cell">
+        <div class="result-label">Matches Modeled</div>
+        <div class="result-number">2,520</div>
+        <div class="result-caption">Full IPL/ODI match history through 2025.</div>
+      </div>
+      <div class="result-cell">
+        <div class="result-label">Deliveries Processed</div>
+        <div class="result-number cream">1.3M</div>
+        <div class="result-caption">Ball-by-ball records across 23 years.</div>
+      </div>
+      <div class="result-cell">
+        <div class="result-label">Test Set Size</div>
+        <div class="result-number">201</div>
+        <div class="result-caption">Matches from 2024+, never seen during training or tuning.</div>
+      </div>
+      <div class="result-cell">
+        <div class="result-label">Pre-match Brier</div>
+        <div class="result-number warn">0.248</div>
+        <div class="result-caption">Better than random (0.25) — modesty is honest. Pre-match is the hard stage.</div>
+      </div>
+      <div class="result-cell">
+        <div class="result-label">2nd Innings Brier</div>
+        <div class="result-number cream">0.146</div>
+        <div class="result-caption">Well-calibrated. A 70% prediction means a true 70%.</div>
+      </div>
+      <div class="result-cell">
+        <div class="result-label">Death-Over Accuracy</div>
+        <div class="result-number accent">91<span style="font-size: 0.55em;">%</span></div>
+        <div class="result-caption">The headline result. Strongest where it matters most — broadcast prime time.</div>
+      </div>
+    </div>
+
+    <div class="phase-table">
+      <div class="phase-table-head">
+        <div class="phase-table-title">Stage 02 — 1st Innings score MAE by over block</div>
+        <div class="phase-table-sub">test set · uncertainty decays sharply with each phase</div>
+      </div>
+      <div class="phase-grid">
+        <div class="phase-cell head">Over range</div>
+        <div class="phase-cell head">MAE (runs)</div>
+        <div class="phase-cell head">Insight</div>
+
+        <div class="phase-cell range">Overs 1–10</div>
+        <div class="phase-cell metric">48.7</div>
+        <div class="phase-cell note">Early overs — only 60 balls of CRR signal, team Elo is the strongest feature</div>
+
+        <div class="phase-cell range">Overs 11–20</div>
+        <div class="phase-cell metric">39.9</div>
+        <div class="phase-cell note">CRR stabilizing, wicket pattern starting to inform</div>
+
+        <div class="phase-cell range">Overs 21–30</div>
+        <div class="phase-cell metric">30.4</div>
+        <div class="phase-cell note">Middle overs — half the innings done, projection sharpens</div>
+
+        <div class="phase-cell range">Overs 31–40</div>
+        <div class="phase-cell metric">24.0</div>
+        <div class="phase-cell note">Acceleration phase, partnership data adds signal</div>
+
+        <div class="phase-cell range" style="color: var(--accent); font-weight: 600;">Overs 41–49</div>
+        <div class="phase-cell metric peak">13.1</div>
+        <div class="phase-cell note">Death overs — final score within ±13 runs. Tight bands.</div>
+      </div>
+    </div>
+
+    <div class="phase-table" style="margin-top: 16px;">
+      <div class="phase-table-head">
+        <div class="phase-table-title">Stage 03 — 2nd Innings chase accuracy by phase</div>
+        <div class="phase-table-sub">test set · the further the chase goes, the sharper the signal</div>
+      </div>
+      <div class="phase-grid">
+        <div class="phase-cell head">Phase</div>
+        <div class="phase-cell head">Accuracy</div>
+        <div class="phase-cell head">Insight</div>
+
+        <div class="phase-cell range">Powerplay (1–10)</div>
+        <div class="phase-cell metric">72.1<span style="font-family: var(--font-body); font-size: 12px;">%</span></div>
+        <div class="phase-cell note">Pre-match prior dominates; live state still noisy</div>
+
+        <div class="phase-cell range">Middle (11–30)</div>
+        <div class="phase-cell metric">79.0<span style="font-family: var(--font-body); font-size: 12px;">%</span></div>
+        <div class="phase-cell note">RRR-CRR diff starts dominating the prediction</div>
+
+        <div class="phase-cell range">Middle (31–40)</div>
+        <div class="phase-cell metric">84.5<span style="font-family: var(--font-body); font-size: 12px;">%</span></div>
+        <div class="phase-cell note">Wicket cliff patterns become visible</div>
+
+        <div class="phase-cell range" style="color: var(--accent); font-weight: 600;">Death (41–50)</div>
+        <div class="phase-cell metric peak">91.0<span style="font-family: var(--font-body); font-size: 14px;">%</span></div>
+        <div class="phase-cell note">The headline. Sharp interactions, abundant signal, calibration pays off.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ LIMITATIONS ============ -->
+<section class="section">
+  <div class="container">
+    <span class="section-num">05 / Limitations</span>
+    <h2 class="section-title">What this <em>doesn't</em> see — yet.</h2>
+    <div class="prose" style="margin-bottom: 24px; max-width: 60ch;">
+      <p>The honest gaps between this and a production-grade broadcast-quality system. Each one is a real V2 target, not hand-waving.</p>
+    </div>
+    <div class="limits">
+      <div class="limit-item">
+        <div class="limit-num">01</div>
+        <div class="limit-text"><strong>Pre-match test accuracy is 57.7%.</strong> Honestly modest. The val/test gap (68.8% → 57.7%) suggests era drift between 2023 and 2024+ cricket. Stage 1 is the weakest link in the pipeline. Live stages compensate, but pre-match deserves a V2 overhaul with player-level features.</div>
+      </div>
+      <div class="limit-item">
+        <div class="limit-num">02</div>
+        <div class="limit-text"><strong>No player-level live model.</strong> The chase model uses <code style="font-family: var(--font-mono); color: var(--cream); font-size: 0.9em;">batting_quality</code> — the team's average rating — not the specific batter at the crease. A 200-rated tailender at 80/3 and an 800-rated opener at 80/3 look identical to Stage 3.</div>
+      </div>
+      <div class="limit-item">
+        <div class="limit-num">03</div>
+        <div class="limit-text"><strong>No weather or pitch report features.</strong> Green-top or flat deck, dewy or dry — none of it visible to the model. Only the venue's historical average is used.</div>
+      </div>
+      <div class="limit-item">
+        <div class="limit-num">04</div>
+        <div class="limit-text"><strong>Manual score entry.</strong> No cricket-API integration. The user types in the score per over. Workable for a portfolio demo, not for a broadcaster.</div>
+      </div>
+      <div class="limit-item">
+        <div class="limit-num">05</div>
+        <div class="limit-text"><strong>Win probability is a point estimate.</strong> No uncertainty band on the probability itself. "62% likely" might really be 62% ± 8% on small evidence — V2 bootstraps the predictions to surface that.</div>
+      </div>
+    </div>
+
+    <div class="v2-block">
+      <div class="v2-label">Version 2 — Build Order</div>
+      <h3 class="v2-title">What ships next.</h3>
+      <ul class="v2-list">
+        <li><span class="v2-tag">01</span><span>Player-level live model — wire the specific batter and bowler into Stage 3's feature vector.</span></li>
+        <li><span class="v2-tag">02</span><span>Live data ingestion via Cricbuzz or ESPN Cricinfo API.</span></li>
+        <li><span class="v2-tag">03</span><span>Bootstrap win-probability uncertainty bands.</span></li>
+        <li><span class="v2-tag">04</span><span>Weather + pitch report features from pre-match conditions where available.</span></li>
+        <li><span class="v2-tag">05</span><span>Model monitoring infrastructure — log predictions and outcomes for drift detection.</span></li>
+        <li><span class="v2-tag">06</span><span>Parquet caching for ratings CSVs — bring cold-start under 3 seconds.</span></li>
+        <li><span class="v2-tag">07</span><span>T20 variant — same engine, retuned phase boundaries and feature weights.</span></li>
       </ul>
     </div>
-  </section>
+  </div>
+</section>
 
-  <section class="detail-section fade-up d3">
-    <div class="ds-label">Difficulties</div>
-    <div class="ds-body">
-      <ul>
-        <li class="placeholder">[Difficulty 1 — what the death-over model kept getting wrong before you fixed it]</li>
-        <li class="placeholder">[Difficulty 2 — handoff between innings stages]</li>
-        <li class="placeholder">[Difficulty 3 — handling rare events / blowout matches]</li>
-      </ul>
+<!-- ============ CTA ============ -->
+<section class="cta">
+  <div class="container">
+    <div class="cta-eyebrow">— The system is live. Pick a match. —</div>
+    <h2 class="cta-title">Run the full match. <em>Live</em>.</h2>
+    <p class="cta-sub">Public Streamlit app — set up a match, enter scores per over, watch all three stages predict in real time.</p>
+    <div class="cta-buttons">
+      <a href="https://odi-full-match-predictor.streamlit.app" class="btn btn-primary" target="_blank" rel="noopener">
+        <span class="live-dot"></span>
+        Open Live App
+      </a>
+      <a href="https://github.com/yashv04/ODI-Full-Match-Predictor" class="btn" target="_blank" rel="noopener">
+        View on GitHub
+      </a>
+      <a href="/personal/" class="btn">
+        Back to Personal Projects
+      </a>
     </div>
-  </section>
+  </div>
+</section>
 
-  <section class="detail-section fade-up d4">
-    <div class="ds-label">Numbers</div>
-    <div class="numbers-grid">
-      <div class="num-cell green"><div class="num-val">91%</div><div class="num-label">Death-over Accuracy</div></div>
-      <div class="num-cell"><div class="num-val">2,520</div><div class="num-label">ODIs in Training Data</div></div>
-      <div class="num-cell"><div class="num-val">3</div><div class="num-label">Prediction Stages</div></div>
-      <div class="num-cell"><div class="num-val">Live</div><div class="num-label">Streamlit Deployment</div></div>
+<!-- ============ FOOTER ============ -->
+<footer class="footer">
+  <div class="container footer-inner">
+    <div>Yash Vardhan — Sports CV Engineer / Cricket Analyst</div>
+    <div>
+      <a href="/">Portfolio</a> &nbsp;·&nbsp;
+      <a href="https://www.linkedin.com/in/yash-vardhan-5b3956169/">LinkedIn</a> &nbsp;·&nbsp;
+      <a href="https://github.com/yashv04">GitHub</a> &nbsp;·&nbsp;
+      <a href="mailto:yashv3110@gmail.com">Email</a>
     </div>
-  </section>
+  </div>
+</footer>
 
-  <footer class="foot">
-    <div class="foot-left">Source: <a class="foot-link" href="https://github.com/yashv04/ODI-Full-Match-Predictor" target="_blank">GitHub ↗</a></div>
-    <div class="foot-links">
-      <a class="foot-link" href="/personal/">← All Personal Projects</a>
-      <a class="foot-link" href="/personal/cricket-venue-intelligence-hub/">Next: Cricket Venue Intelligence →</a>
-    </div>
-  </footer>
-
-</div>
 </body>
 </html>

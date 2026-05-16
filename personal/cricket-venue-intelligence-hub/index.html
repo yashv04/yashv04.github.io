@@ -3,100 +3,258 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cricket Venue Intelligence Hub · Yash Vardhan</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/css/main.css">
+<title>Cricket Venue Intelligence Hub — Yash Vardhan</title>
+<meta name="description" content="A multi-page Streamlit dashboard turning four IPL data sources into an interactive venue-intelligence tool. Single-venue deep dive, side-by-side comparator with K-Means clustering, player rankings, and composite predictive scoring.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;500;600&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/personal-detail.css">
 </head>
 <body>
-<div class="grid-bg"></div>
 
-<nav class="topnav">
-  <div class="topnav-inner">
-    <a href="/" class="brand">Yash<span>.</span>Vardhan</a>
-    <div class="nav-links">
-      <a href="/" class="nav-link">Home</a>
-      <a href="/about/" class="nav-link">About</a>
-      <a href="/work/" class="nav-link">Work</a>
-      <a href="/personal/" class="nav-link active">Personal</a>
-    </div>
+<nav class="nav">
+  <div class="container nav-inner">
+    <a href="/personal/" class="nav-back">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 11L5 7l4-4"/></svg>
+      Back to Personal Projects
+    </a>
+    <span class="nav-meta">Project / 05 / Venue Intelligence</span>
   </div>
 </nav>
 
-<div class="page">
-
-  <a class="back-link" href="/personal/">← Back to Personal Projects</a>
-
-  <header class="detail-header fade-up d1">
-    <div class="detail-eyebrow">02 / Venue Intelligence · Live Dashboard</div>
-    <h1 class="detail-title">Cricket Venue <span>Intelligence Hub</span></h1>
-    <p class="detail-lead">A Streamlit dashboard that profiles every IPL venue across <strong>pitch behaviour, phase-wise scoring, toss impact, and home-ground advantage</strong>. One intelligence view per ground — built on 2024 IPL ball-by-ball data, curated stadium reports, and KMeans-based venue clustering.</p>
-    <div class="detail-links">
-      <a class="dl-btn primary" href="https://cricket-venue-intelligence-app-mkbwla6gsdfdxqpdguihnx.streamlit.app/" target="_blank">Live Demo ↗</a>
-      <a class="dl-btn" href="https://github.com/yashv04/Cricket-Venue-Intelligence-Hub" target="_blank">GitHub ↗</a>
+<header class="hero">
+  <div class="container">
+    <div class="hero-kicker">05 — Personal Analytics / Dashboard</div>
+    <h1 class="hero-title">Cricket Venue <em>Intelligence</em> Hub</h1>
+    <p class="hero-sub">A multi-page Streamlit dashboard turning four IPL data sources — ball-by-ball deliveries, match metadata, statistical venue profiles, and qualitative stadium reports — into an interactive venue-intelligence tool. Single-venue deep dive, side-by-side comparator with K-Means similarity clustering, player rankings, and composite predictive scoring. <strong style="color: var(--cream);">Reference tool, not a calibrated predictor</strong> — and the page is honest about which is which.</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item"><span class="label">Domain</span><span class="value">IPL Venues</span></div>
+      <div class="hero-meta-item"><span class="label">Approach</span><span class="value">Dashboard + Light ML</span></div>
+      <div class="hero-meta-item"><span class="label">Pages</span><span class="value mono">4 analytical views</span></div>
+      <div class="hero-meta-item"><span class="label">Data Sources</span><span class="value mono">4 merged</span></div>
     </div>
-  </header>
-
-  <section class="detail-section fade-up d2">
-    <div class="ds-label">What</div>
-    <div class="ds-body">
-      <p>An interactive Streamlit dashboard that gives you <strong>one intelligence view per IPL venue</strong>. For any ground, the app surfaces phase-wise scoring patterns, 1st-vs-2nd-innings averages, toss-decision impact, pace-vs-spin economy splits, boundary geometry, and dew effects.</p>
-      <p>Aggregates four data layers in one place — ball-by-ball deliveries, match metadata, hand-curated <code>venue_profiles</code>, and qualitative <code>Stadium_Reports</code> covering pitch type, outfield, bounce, weather, and dew impact.</p>
+    <div class="hero-cta">
+      <a href="https://cricket-venue-intelligence-app-mkbwla6gsdfdxqpdguihnx.streamlit.app/" target="_blank" rel="noopener" class="hero-pill"><span class="dot"></span>Live demo on Streamlit</a>
+      <a href="https://github.com/yashv04/Cricket-Venue-Intelligence-Hub" target="_blank" rel="noopener" class="hero-pill">github.com/yashv04/Cricket-Venue-Intelligence-Hub</a>
     </div>
-  </section>
+  </div>
+</header>
 
-  <section class="detail-section fade-up d2">
-    <div class="ds-label">Why</div>
-    <div class="ds-body">
-      <p>Generic "average score at venue X" stats hide what coaches and analysts actually need: <strong>which phase scores fastest here, whether toss really matters, how the boundary geometry favours one type of batter, and how dew swings the chasing-vs-batting-first calculus.</strong></p>
-      <p>The Hub centralises those answers in one place, per ground, for every IPL venue — so a team's pre-match prep doesn't depend on flipping between five different spreadsheets and a memory of "Chinnaswamy always chases."</p>
+<section class="section">
+  <div class="container">
+    <span class="section-num">01 / Problem</span>
+    <h2 class="section-title">Venues are a <em>reference</em>. Not a prediction.</h2>
+    <div class="prose">
+      <p>Cricket analysts don't ask "predict the venue type." They ask <strong>"what's Wankhede's profile? Who historically scores at Chepauk? What should we do at the toss here? Which venues are similar to where we're playing tomorrow?"</strong></p>
+      <p>Those are <span class="highlight">lookup-with-context</span> questions — they need a structured interactive tool, not a regression model. Most cricket analytics work overshoots this distinction: it tries to <em>predict</em> what should be a reference lookup, and ends up with overfit toy models that hide the actual signal a coach is looking for.</p>
+      <p>This project is what an analyst actually opens 30 minutes before a match. Four pages, four data sources, one tool.</p>
     </div>
-  </section>
+  </div>
+</section>
 
-  <section class="detail-section fade-up d3">
-    <div class="ds-label">How</div>
-    <div class="ds-body">
-      <ul>
-        <li><strong>Data pipeline</strong> — merges <code>deliveries_2024</code>, <code>matches_2024</code>, <code>venue_profiles</code>, and <code>Stadium_Reports</code> on <code>venue</code> and <code>match_id</code>; normalises 6+ name variants per ground (e.g. "Ekana Cricket Stadium, Lucknow" → "BRSABV Ekana Cricket Stadium") so the same physical venue isn't double-counted.</li>
-        <li><strong>Feature engineering</strong> — every ball tagged by phase: <code>Powerplay</code> (1–6), <code>Middle Overs</code> (7–15), <code>Death Overs</code> (16–20); per-venue aggregates compute run rate, strike rate, and balls-per-wicket by phase.</li>
-        <li><strong>Venue clustering</strong> — <code>KMeans</code> + <code>StandardScaler</code> over engineered features groups grounds into behavioural archetypes (batting-friendly, spin-friendly, balanced, two-paced) rather than relying on subjective labels.</li>
-        <li><strong>Analysis modules</strong> — 1st-vs-2nd-innings score deltas, toss-decision impact (bat-first win % vs chasing win %), pace-vs-spin economy split, boundary-dimension effects, dew impact scoring.</li>
-        <li><strong>Stack</strong> — Python · Pandas · Scikit-learn (KMeans / StandardScaler) · Plotly / Matplotlib / Seaborn for charts · Streamlit for the front-end · deployed free on Streamlit Cloud.</li>
+<section class="section">
+  <div class="container">
+    <span class="section-num">02 / The Four Pages</span>
+    <h2 class="section-title">Four analytical <em>views</em>.</h2>
+    <div class="pages-grid">
+      <div class="page-card">
+        <div class="page-card-tag">PAGE 01 — VENUE OVERVIEW</div>
+        <h3 class="page-card-title">Single-venue <em>deep dive</em></h3>
+        <p class="page-card-body">Three tabs for one venue — statistics (matches, avg score, runs/over, balls/wicket), phase analysis (PP/Middle/Death rates), and toss impact (bat-first vs bowl-first win %). The pitch profile from Stadium Reports surfaces qualitative tags too — pitch type, bounce, spin assistance, seam movement, dew impact.</p>
+        <ul class="page-card-list">
+          <li>3 tabs · Plotly visualizations</li>
+          <li>Quantitative + qualitative profile</li>
+          <li>Toss strategy recommendation</li>
+        </ul>
+      </div>
+      <div class="page-card">
+        <div class="page-card-tag">PAGE 02 — VENUE COMPARISON</div>
+        <h3 class="page-card-title">Side-by-side + <em>similarity</em></h3>
+        <p class="page-card-body">Pick two venues, see their metrics side by side and their phase-wise scoring profiles overlaid. Then K-Means clusters all venues on 3-feature space (PP / Middle / Death run rates) and surfaces "venues similar to X" — useful for travel days when you want a proxy for a venue you've never played.</p>
+        <ul class="page-card-list">
+          <li>K-Means · StandardScaler</li>
+          <li>3-feature similarity</li>
+          <li>Auto-grouped venue tiers</li>
+        </ul>
+      </div>
+      <div class="page-card">
+        <div class="page-card-tag">PAGE 03 — PLAYER PERFORMANCE</div>
+        <h3 class="page-card-title">Who <em>scores</em> here</h3>
+        <p class="page-card-body">For a chosen venue, rank batters by career runs at that ground with min-runs threshold. Surface top-5 by volume, plus a Strike Rate × Average quadrant scatter — Elite, Anchors, Slow-but-solid, Aggressive-but-prone. Each player point sized by total runs for instant scan.</p>
+        <ul class="page-card-list">
+          <li>Min-runs slider · live filter</li>
+          <li>Quadrant scatter analysis</li>
+          <li>Top-N leaderboard</li>
+        </ul>
+      </div>
+      <div class="page-card">
+        <div class="page-card-tag">PAGE 04 — PREDICTIVE ANALYTICS</div>
+        <h3 class="page-card-title">Composite <em>candidate</em> score</h3>
+        <p class="page-card-body">Two sub-tools. Batter Prediction: pick venue + opponent — composite-scored ranking of likely top performers. Match Strategy: toss recommendation + pitch-aware playing-XI tips. <strong>Honest framing</strong> — the composite score is a ranked candidate list, not a calibrated probability.</p>
+        <ul class="page-card-list">
+          <li>0.4 venue + 0.3 form + 0.3 vs-opp</li>
+          <li>Stacked factor-contribution chart</li>
+          <li>Stadium-Reports-driven strategy</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <span class="section-num">03 / Architecture</span>
+    <h2 class="section-title">Four data sources. <em>One</em> merge pipeline.</h2>
+    <div class="prose" style="margin-bottom: 12px;">
+      <p>The unglamorous foundation. Cricket data is messy — the same stadium appears under five name variants across sources. Without normalization, every groupby produces garbage. The pipeline below is what makes the rest of the dashboard correct.</p>
+    </div>
+    <div class="sources-wrap">
+      <svg viewBox="0 0 1000 460" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Data architecture">
+        <defs><marker id="arr3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#737373"/></marker></defs>
+        <g><rect x="40" y="20" width="200" height="64" rx="4" fill="#161616" stroke="#2a2a2a"/><text x="140" y="42" text-anchor="middle" fill="#737373" font-family="JetBrains Mono, monospace" font-size="11" letter-spacing="0.08em">SOURCE 01</text><text x="140" y="62" text-anchor="middle" fill="#fafafa" font-family="JetBrains Mono, monospace" font-size="12">deliveries_2024</text><text x="140" y="78" text-anchor="middle" fill="#ede4d0" font-family="JetBrains Mono, monospace" font-size="11">ball-by-ball</text></g>
+        <g><rect x="260" y="20" width="200" height="64" rx="4" fill="#161616" stroke="#2a2a2a"/><text x="360" y="42" text-anchor="middle" fill="#737373" font-family="JetBrains Mono, monospace" font-size="11" letter-spacing="0.08em">SOURCE 02</text><text x="360" y="62" text-anchor="middle" fill="#fafafa" font-family="JetBrains Mono, monospace" font-size="12">matches_2024</text><text x="360" y="78" text-anchor="middle" fill="#ede4d0" font-family="JetBrains Mono, monospace" font-size="11">metadata · toss</text></g>
+        <g><rect x="540" y="20" width="200" height="64" rx="4" fill="#161616" stroke="#2a2a2a"/><text x="640" y="42" text-anchor="middle" fill="#737373" font-family="JetBrains Mono, monospace" font-size="11" letter-spacing="0.08em">SOURCE 03</text><text x="640" y="62" text-anchor="middle" fill="#fafafa" font-family="JetBrains Mono, monospace" font-size="12">venue_profiles</text><text x="640" y="78" text-anchor="middle" fill="#ede4d0" font-family="JetBrains Mono, monospace" font-size="11">aggregates</text></g>
+        <g><rect x="760" y="20" width="200" height="64" rx="4" fill="#161616" stroke="#2a2a2a"/><text x="860" y="42" text-anchor="middle" fill="#737373" font-family="JetBrains Mono, monospace" font-size="11" letter-spacing="0.08em">SOURCE 04</text><text x="860" y="62" text-anchor="middle" fill="#fafafa" font-family="JetBrains Mono, monospace" font-size="12">Stadium_Reports</text><text x="860" y="78" text-anchor="middle" fill="#ede4d0" font-family="JetBrains Mono, monospace" font-size="11">pitch · dew · seam</text></g>
+        <path d="M 140 84 L 200 130" stroke="#737373" stroke-width="1.2" fill="none" marker-end="url(#arr3)"/>
+        <path d="M 360 84 L 380 130" stroke="#737373" stroke-width="1.2" fill="none" marker-end="url(#arr3)"/>
+        <path d="M 640 84 L 620 130" stroke="#737373" stroke-width="1.2" fill="none" marker-end="url(#arr3)"/>
+        <path d="M 860 84 L 800 130" stroke="#737373" stroke-width="1.2" fill="none" marker-end="url(#arr3)"/>
+        <g><rect x="180" y="140" width="640" height="60" rx="4" fill="#0f0f0f" stroke="#dc2626" stroke-width="1.5"/><text x="500" y="166" text-anchor="middle" fill="#dc2626" font-family="JetBrains Mono, monospace" font-size="11" letter-spacing="0.12em">VENUE NORMALIZATION — 11 mappings</text><text x="500" y="186" text-anchor="middle" fill="#fafafa" font-family="JetBrains Mono, monospace" font-size="12">"Ekana Cricket Stadium, Lucknow" → "BRSABV Ekana Cricket Stadium"</text></g>
+        <path d="M 500 200 L 500 230" stroke="#737373" stroke-width="1.2" fill="none" marker-end="url(#arr3)"/>
+        <g><rect x="280" y="240" width="440" height="60" rx="4" fill="#161616" stroke="#2a2a2a"/><text x="500" y="264" text-anchor="middle" fill="#ede4d0" font-family="JetBrains Mono, monospace" font-size="12">4-way merge · phase tagging · @st.cache_data</text><text x="500" y="284" text-anchor="middle" fill="#737373" font-family="JetBrains Mono, monospace" font-size="11">deliveries × matches × venue_profiles × stadium_reports</text></g>
+        <path d="M 500 300 L 500 330" stroke="#737373" stroke-width="1.2" fill="none" marker-end="url(#arr3)"/>
+        <g><rect x="40" y="340" width="200" height="74" rx="4" fill="#161616" stroke="#dc2626"/><text x="140" y="364" text-anchor="middle" fill="#dc2626" font-family="JetBrains Mono, monospace" font-size="11">PAGE 01</text><text x="140" y="384" text-anchor="middle" fill="#fafafa" font-family="JetBrains Mono, monospace" font-size="12">Overview</text><text x="140" y="402" text-anchor="middle" fill="#ede4d0" font-family="JetBrains Mono, monospace" font-size="10">stats · phase · toss</text></g>
+        <g><rect x="260" y="340" width="200" height="74" rx="4" fill="#161616" stroke="#dc2626"/><text x="360" y="364" text-anchor="middle" fill="#dc2626" font-family="JetBrains Mono, monospace" font-size="11">PAGE 02</text><text x="360" y="384" text-anchor="middle" fill="#fafafa" font-family="JetBrains Mono, monospace" font-size="12">Comparison</text><text x="360" y="402" text-anchor="middle" fill="#ede4d0" font-family="JetBrains Mono, monospace" font-size="10">K-Means · similarity</text></g>
+        <g><rect x="540" y="340" width="200" height="74" rx="4" fill="#161616" stroke="#dc2626"/><text x="640" y="364" text-anchor="middle" fill="#dc2626" font-family="JetBrains Mono, monospace" font-size="11">PAGE 03</text><text x="640" y="384" text-anchor="middle" fill="#fafafa" font-family="JetBrains Mono, monospace" font-size="12">Player</text><text x="640" y="402" text-anchor="middle" fill="#ede4d0" font-family="JetBrains Mono, monospace" font-size="10">SR × Avg quadrant</text></g>
+        <g><rect x="760" y="340" width="200" height="74" rx="4" fill="#161616" stroke="#dc2626"/><text x="860" y="364" text-anchor="middle" fill="#dc2626" font-family="JetBrains Mono, monospace" font-size="11">PAGE 04</text><text x="860" y="384" text-anchor="middle" fill="#fafafa" font-family="JetBrains Mono, monospace" font-size="12">Predictive</text><text x="860" y="402" text-anchor="middle" fill="#ede4d0" font-family="JetBrains Mono, monospace" font-size="10">composite score</text></g>
+      </svg>
+      <div class="sources-caption">Four sources merged on <strong style="color: var(--cream);">match_id</strong> and a normalized <strong style="color: var(--cream);">venue</strong> key. The 11-entry venue name map is the unglamorous piece that makes every downstream groupby trustworthy.</div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <span class="section-num">04 / How It Works</span>
+    <h2 class="section-title">From CSV <em>to</em> dashboard.</h2>
+    <div class="flow">
+      <div class="flow-step"><div class="flow-step-num">01</div><div><h3 class="flow-step-title">Load and merge four data sources</h3><p class="flow-step-body"><code>@st.cache_data</code> caches the heavy merge so each page navigation is instant. Inner-join deliveries × matches on <code>match_id</code>. Outer-join venue profiles + stadium reports on the normalized venue key. Filter to innings 1 and 2. Phase-tag every delivery (PP / Middle / Death).</p><div class="flow-step-tech"><span class="tech-pill">pandas</span><span class="tech-pill">st.cache_data</span><span class="tech-pill">4-way merge</span></div></div></div>
+      <div class="flow-step"><div class="flow-step-num">02</div><div><h3 class="flow-step-title">Normalize venue names</h3><p class="flow-step-body">11-entry hand-curated map collapses variants — "Ekana Cricket Stadium, Lucknow", "Bharat Ratna Shri Atal Bihari Vajpayee Ekana Cricket Stadium, Lucknow", "BRSABV Ekana Cricket Stadium" — into one canonical name. <em>This is the boring step that makes everything else correct.</em> Without it, every groupby splits one stadium into multiple rows.</p><div class="flow-step-tech"><span class="tech-pill">string normalization</span><span class="tech-pill">data cleaning</span></div></div></div>
+      <div class="flow-step"><div class="flow-step-num">03</div><div><h3 class="flow-step-title">Compute venue-level aggregates</h3><p class="flow-step-body">Per venue: total matches, total runs, runs per over, balls per wicket, average 1st-innings and 2nd-innings scores. Per (venue × phase): run rate, strike rate, balls per wicket. Per (venue × batter): runs, balls, dismissals, strike rate, average, runs per match.</p><div class="flow-step-tech"><span class="tech-pill">groupby</span><span class="tech-pill">aggregation</span><span class="tech-pill">pivot</span></div></div></div>
+      <div class="flow-step"><div class="flow-step-num">04</div><div><h3 class="flow-step-title">K-Means venue clustering</h3><p class="flow-step-body">Pivot phase rates to (venues × 3) matrix — PP, Middle, Death. <code>StandardScaler</code> normalizes. K-Means with <code>n_clusters = min(5, n_venues)</code> and <code>random_state=42</code>. Output: cluster ID per venue. "Similar venues to X" = same cluster.</p><div class="flow-step-tech"><span class="tech-pill">scikit-learn</span><span class="tech-pill">KMeans</span><span class="tech-pill">StandardScaler</span></div></div></div>
+      <div class="flow-step"><div class="flow-step-num">05</div><div><h3 class="flow-step-title">Composite batter prediction score</h3><p class="flow-step-body">For a (venue, opponent) pairing: compute each batter's avg-runs-at-venue, recent-form average, and average vs that opponent. MinMax-normalize each component within the result set. Weighted sum: <code>0.4 × venue + 0.3 × form + 0.3 × vs-opp</code>. <strong>Heuristic ranking, not a calibrated probability</strong> — labelled clearly in the UI.</p><div class="flow-step-tech"><span class="tech-pill">weighted composite</span><span class="tech-pill">MinMax normalization</span></div></div></div>
+      <div class="flow-step"><div class="flow-step-num">06</div><div><h3 class="flow-step-title">Strategy rules over Stadium Reports labels</h3><p class="flow-step-body">If <code>Spin Assistance == 'Very High'</code> → recommend extra spinners. If <code>Seam Movement == 'High'</code> → recommend quality pace bowlers. If <code>Dew Impact == 'High'</code> → flag dew factor for second-innings bowling. Combined with phase analysis (highest-scoring phase at venue) → playing-strategy brief.</p><div class="flow-step-tech"><span class="tech-pill">if-then rules</span><span class="tech-pill">decision-aid</span></div></div></div>
+      <div class="flow-step"><div class="flow-step-num">07</div><div><h3 class="flow-step-title">Streamlit sidebar nav + Plotly interactivity</h3><p class="flow-step-body">Sidebar radio button routes between the four pages. Each page uses Plotly Express for interactive bar/line/scatter charts and pie charts. Hover tooltips, click-to-zoom, all native. Tabs within each page for sub-sections (Stats / Phase / Toss).</p><div class="flow-step-tech"><span class="tech-pill">Streamlit</span><span class="tech-pill">Plotly Express</span><span class="tech-pill">st.tabs</span></div></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <span class="section-num">05 / The Composite</span>
+    <h2 class="section-title">The <em>one</em> formula on the Predictive page.</h2>
+    <div class="prose" style="margin-bottom: 12px;"><p>For full transparency — here's exactly what the "Predict Top Batters" feature computes. Three components, hand-set weights, MinMax-normalized within the result set. <strong>Ranked candidate list, not a probability.</strong></p></div>
+    <div class="formula">
+      <div class="formula-label">▸ Composite Predictive Score ◂</div>
+      <div class="formula-line"><span class="out">predicted_score</span> <span class="op">=</span> <span class="weight">0.4</span> <span class="op">·</span> <span class="var">normalized_avg_runs_at_venue</span></div>
+      <div class="formula-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="op">+</span> <span class="weight">0.3</span> <span class="op">·</span> <span class="var">normalized_recent_avg</span></div>
+      <div class="formula-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="op">+</span> <span class="weight">0.3</span> <span class="op">·</span> <span class="var">normalized_vs_opponent_avg</span></div>
+      <div class="formula-line" style="margin-top: 12px;">&nbsp;&nbsp;<span class="op">// weights hand-set, not calibrated</span></div>
+      <div class="formula-line">&nbsp;&nbsp;<span class="op">// all 3 components MinMax-normalized within result set</span></div>
+      <div class="formula-line">&nbsp;&nbsp;<span class="op">// ranked candidate list — NOT a forecast probability</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <span class="section-num">06 / Honest Framing</span>
+    <h2 class="section-title">A <em>dashboard</em>, not a predictor.</h2>
+    <div class="framing">
+      <div class="framing-label">— What this is and isn't —</div>
+      <h3 class="framing-title">The most honest thing about this project is what it <em>doesn't</em> claim.</h3>
+      <div class="framing-body">
+        <p>The "Predictive Analytics" page is <strong>not</strong> a calibrated probability forecast. It's a <em>ranked candidate list</em> from a transparent composite formula. There's no held-out test set, no accuracy metric, no AUC, no Brier score. Stating any of those would be dishonest.</p>
+        <p>The K-Means venue clusters are <strong>not</strong> validated by silhouette or Davies-Bouldin score. They're interpretable groupings that pass face-validity checks — high-scoring decks cluster together, low-scoring decks cluster together — but I haven't proven they're statistically optimal.</p>
+        <p>The Stadium Reports labels (<code>Spin Assistance: Very High</code>, <code>Dew Impact: Medium</code>) are <strong>manually compiled</strong>. They're useful for the strategy recommendations, but they're not BCCI-authoritative.</p>
+        <p>Where the project is genuinely strong: <strong>the foundational pipeline</strong>. The venue name normalization map, the four-way merge, the cached load, the phase tagging, the per-venue aggregates, the multi-page navigation. <em>That's the work most cricket dashboards skip and get wrong</em> — and getting it right is what makes every other view in the app correct.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <span class="section-num">07 / Technical Decisions</span>
+    <h2 class="section-title">Why these <em>choices</em>.</h2>
+    <div class="decisions">
+      <div class="decision"><div class="decision-q">Why a dashboard,<br>not a model?</div><div class="decision-a">Because the questions analysts ask about venues are <em>lookup-with-context</em>, not <em>prediction</em>. "What's Wankhede's phase profile?" isn't a regression problem — it's a structured query. A calibrated win-probability model (which I have separately, in the <strong>ODI Full Match Predictor</strong>) uses venue features as inputs. This dashboard makes venue features <em>the unit of analysis</em>. Different jobs, different tools.</div></div>
+      <div class="decision"><div class="decision-q">Why merge<br>four sources?</div><div class="decision-a">Each fills a gap. <strong>Deliveries</strong> gives ball-by-ball patterns. <strong>Matches</strong> gives outcomes and toss. <strong>Venue profiles</strong> gives pre-computed historical aggregates. <strong>Stadium Reports</strong> gives qualitative pitch character — pitch type, dew impact — that no statistical aggregate can recover. A single source would miss either the granular detail or the qualitative context.</div></div>
+      <div class="decision"><div class="decision-q">Why K-Means<br>for similarity?</div><div class="decision-a">Simple, interpretable, fast. With ~10–15 venues, k=5 gives meaningful tier groupings — high-scoring decks, balanced, bowler-friendly, dewy chase venues, anchor-friendly. The cluster centroids are inspectable. Hierarchical clustering or DBSCAN would add complexity without obvious payoff at this scale. <em>Honest caveat: silhouette score wasn't computed to validate k=5.</em></div></div>
+      <div class="decision"><div class="decision-q">Why hand-weighted<br>composite, not ML?</div><div class="decision-a">Three reasons. <strong>One:</strong> no labeled "future performance" target exists — no clean signal to train against. <strong>Two:</strong> the composite is auditable — a coach can ask "why is X projected to score?" and see the 40/30/30 factor breakdown. A learned model would obscure that. <strong>Three:</strong> the use case is exploratory comparison, not deployment-grade forecasting. The honest cost: no validation, hence the "ranked candidate list" framing.</div></div>
+      <div class="decision"><div class="decision-q">Why the venue<br>normalization map?</div><div class="decision-a">Real cricket data is dirty. The same stadium appears under five different name variants across the four data sources — "Ekana Cricket Stadium, Lucknow", "BRSABV Ekana Cricket Stadium", and "Bharat Ratna Shri Atal Bihari Vajpayee Ekana Cricket Stadium, Lucknow" are all the same ground. Without normalization, every groupby silently splits one stadium into multiple rows and the aggregates lie. <em>This is the boring step that makes everything else trustworthy.</em></div></div>
+      <div class="decision"><div class="decision-q">Why Streamlit<br>with sidebar nav?</div><div class="decision-a">Multi-page Streamlit lets each analyst stick to the view they need — Overview / Comparison / Player / Predictive — without rebuilding a custom SPA. Sidebar radio routing keeps the four pages clearly separated, and <code>@st.cache_data</code> on the heavy data load means page-switching is instant. A custom React frontend would take 10× the effort for no analyst-facing benefit.</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <span class="section-num">08 / Limitations</span>
+    <h2 class="section-title">What <em>needs</em> fixing.</h2>
+    <div class="prose" style="margin-bottom: 24px; max-width: 60ch;"><p>The honest gaps between this dashboard and what a production-grade franchise tool would look like. Every one is a real V2 target, not hand-waving.</p></div>
+    <div class="limits">
+      <div class="limit-item"><div class="limit-num">01</div><div class="limit-text"><strong>"Predict Top Batters" has no validation.</strong> No held-out test set checking whether the top-5 predicted batters actually outperform the rest in real matches. The label "Predictive" oversells; "Ranked Candidate List" would be more honest.</div></div>
+      <div class="limit-item"><div class="limit-num">02</div><div class="limit-text"><strong>Single-season data.</strong> Filenames suggest 2024 IPL only. Some venues hosted very few matches in one season — bat-first win percentages are noisy on small samples. Multi-year aggregation stabilizes the numbers.</div></div>
+      <div class="limit-item"><div class="limit-num">03</div><div class="limit-text"><strong>K-Means uses only 3 features.</strong> Powerplay / Middle / Death run rates. Misses wicket rates by phase, dew, pitch type, boundary %. "Similar" venues mean "similar scoring patterns," nothing deeper.</div></div>
+      <div class="limit-item"><div class="limit-num">04</div><div class="limit-text"><strong><code>n_clusters = 5</code> is fixed.</strong> No silhouette score, no elbow method. Reasonable for 10–15 venues, but not statistically validated.</div></div>
+      <div class="limit-item"><div class="limit-num">05</div><div class="limit-text"><strong>Stadium Reports labels are qualitative and manually compiled.</strong> "Spin Assistance: Very High" — source not cited. The strategy recommendations depend on these labels' accuracy.</div></div>
+      <div class="limit-item"><div class="limit-num">06</div><div class="limit-text"><strong>"Recent form" is partially double-counted.</strong> The <code>recent_avg</code> includes matches at the prediction venue, so venue history shows up in two of the three composite factors.</div></div>
+      <div class="limit-item"><div class="limit-num">07</div><div class="limit-text"><strong>Composite weights aren't calibrated.</strong> 0.4 / 0.3 / 0.3 are domain reasoning. V2 calibrates against historical outcomes.</div></div>
+      <div class="limit-item"><div class="limit-num">08</div><div class="limit-text"><strong>Venue normalization map is hardcoded.</strong> 11 mappings handle the known variants; a new typo would slip through silently. Fuzzy matching would self-handle new cases.</div></div>
+      <div class="limit-item"><div class="limit-num">09</div><div class="limit-text"><strong>File-upload feature is non-functional.</strong> The sidebar accepts a CSV but doesn't process it — a clear "not implemented in this demo" note appears.</div></div>
+    </div>
+    <div class="v2-block">
+      <div class="v2-label">Version 2 — Build Order</div>
+      <h3 class="v2-title">What ships next.</h3>
+      <ul class="v2-list">
+        <li><span class="v2-tag">01</span><span>Multi-year aggregation — roll forward through every IPL season (2008–2024+) so per-venue stats stabilize.</span></li>
+        <li><span class="v2-tag">02</span><span>Backtest the composite predictor — check correlation between predicted score and actual runs on past matches; recalibrate weights against the result.</span></li>
+        <li><span class="v2-tag">03</span><span>Expand K-Means features — add wicket rates by phase, dew impact, boundary %, ground shape; compute silhouette to pick k.</span></li>
+        <li><span class="v2-tag">04</span><span>Fuzzy-match venue normalization with <code>rapidfuzz</code>. New venues self-map.</span></li>
+        <li><span class="v2-tag">05</span><span>Cite Stadium Reports source — either link to official BCCI/ICC pitch reports or replace with a CNN classifier on pitch images.</span></li>
+        <li><span class="v2-tag">06</span><span>Add small-sample warnings — gray out toss percentages when n &lt; 5 matches at a venue.</span></li>
+        <li><span class="v2-tag">07</span><span>Wire up the file-upload feature so users can add their own match data.</span></li>
+        <li><span class="v2-tag">08</span><span>Add a backtest tab — pick a historical match, see what the dashboard would have recommended, compare to actual outcome.</span></li>
       </ul>
     </div>
-  </section>
+  </div>
+</section>
 
-  <section class="detail-section fade-up d3">
-    <div class="ds-label">Difficulties</div>
-    <div class="ds-body">
-      <ul>
-        <li><strong>Venue name disambiguation</strong> — the same ground was logged under 6+ different name spellings across seasons. Miss even one variant and a venue's numbers split into two ghost entries. Built a manual mapping table and kept growing it as new variants surfaced.</li>
-        <li><strong>Joining qualitative + quantitative</strong> — <code>Stadium_Reports</code> contained hand-curated text fields like "Dry, Dusty" outfield or "Dew Impact: High"; had to model these consistently alongside numeric features without losing their nuance.</li>
-        <li><strong>Cross-phase comparisons</strong> — raw run rates make the powerplay look slower than it really is (field restrictions vs early-overs caution). Reporting had to contextualise visually so users didn't draw the wrong conclusion.</li>
-        <li><strong>Rebranded / shifted franchises</strong> — team–home-venue mappings drifted between seasons. Mapped franchises to their canonical home venue rather than redoing the join match-by-match.</li>
-      </ul>
+<section class="cta">
+  <div class="container">
+    <div class="cta-eyebrow">— Open the dashboard / read the code —</div>
+    <h2 class="cta-title">A reference <em>tool</em>. Used like one.</h2>
+    <p class="cta-sub">Full code on GitHub — four data sources merged, four analytical pages, K-Means clustering, composite scoring, deployment config.</p>
+    <div class="cta-buttons">
+      <a href="https://cricket-venue-intelligence-app-mkbwla6gsdfdxqpdguihnx.streamlit.app/" class="btn btn-primary" target="_blank" rel="noopener"><span class="live-dot"></span>Open Live Demo</a>
+      <a href="https://github.com/yashv04/Cricket-Venue-Intelligence-Hub" class="btn" target="_blank" rel="noopener">View on GitHub</a>
+      <a href="/personal/" class="btn">Back to Personal Projects</a>
     </div>
-  </section>
+  </div>
+</section>
 
-  <section class="detail-section fade-up d4">
-    <div class="ds-label">Numbers</div>
-    <div class="numbers-grid">
-      <div class="num-cell"><div class="num-val">10</div><div class="num-label">IPL Franchise Home Venues Profiled</div></div>
-      <div class="num-cell"><div class="num-val">14+</div><div class="num-label">Stadiums in Reports Dataset</div></div>
-      <div class="num-cell"><div class="num-val">3</div><div class="num-label">Phase Splits per Venue</div></div>
-      <div class="num-cell green"><div class="num-val">Live</div><div class="num-label">Free on Streamlit Cloud</div></div>
-      <div class="num-cell orange"><div class="num-val">KMeans</div><div class="num-label">Venue archetype clusters</div></div>
-      <div class="num-cell"><div class="num-val">2024</div><div class="num-label">IPL ball-by-ball base layer</div></div>
+<footer class="footer">
+  <div class="container footer-inner">
+    <div>Yash Vardhan — Sports CV Engineer / Cricket Analyst</div>
+    <div>
+      <a href="/">Portfolio</a> &nbsp;·&nbsp;
+      <a href="https://www.linkedin.com/in/yash-vardhan-5b3956169/">LinkedIn</a> &nbsp;·&nbsp;
+      <a href="https://github.com/yashv04">GitHub</a> &nbsp;·&nbsp;
+      <a href="mailto:yashv3110@gmail.com">Email</a>
     </div>
-  </section>
+  </div>
+</footer>
 
-  <footer class="foot">
-    <div class="foot-left">Source: <a class="foot-link" href="https://github.com/yashv04/Cricket-Venue-Intelligence-Hub" target="_blank">GitHub ↗</a></div>
-    <div class="foot-links">
-      <a class="foot-link" href="/personal/odi-full-match-predictor/">← ODI Full Match Predictor</a>
-      <a class="foot-link" href="/personal/ai-powered-player-scouting/">Next: AI Player Scouting →</a>
-    </div>
-  </footer>
-
-</div>
 </body>
 </html>

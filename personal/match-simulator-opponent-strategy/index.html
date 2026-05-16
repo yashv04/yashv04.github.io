@@ -3,93 +3,198 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Match Simulator + Opponent Strategy AI · Yash Vardhan</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/css/main.css">
+<title>Match Simulator + Opponent Strategy AI — Yash Vardhan</title>
+<meta name="description" content="A ball-by-ball T20 cricket simulator built on Markov chains over 17 seasons of IPL data, with venue, phase, and bowler-type multipliers and a prototype Opponent Strategy AI layer.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;500;600&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/personal-detail.css">
 </head>
 <body>
-<div class="grid-bg"></div>
 
-<nav class="topnav">
-  <div class="topnav-inner">
-    <a href="/" class="brand">Yash<span>.</span>Vardhan</a>
-    <div class="nav-links">
-      <a href="/" class="nav-link">Home</a>
-      <a href="/about/" class="nav-link">About</a>
-      <a href="/work/" class="nav-link">Work</a>
-      <a href="/personal/" class="nav-link active">Personal</a>
-    </div>
+<nav class="nav">
+  <div class="container nav-inner">
+    <a href="/personal/" class="nav-back">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 11L5 7l4-4"/></svg>
+      Back to Personal Projects
+    </a>
+    <span class="nav-meta">Project / 03 / Match Simulator</span>
   </div>
 </nav>
 
-<div class="page">
-
-  <a class="back-link" href="/personal/">← Back to Personal Projects</a>
-
-  <header class="detail-header fade-up d1">
-    <div class="detail-eyebrow">04 / Match Strategy · Jupyter</div>
-    <h1 class="detail-title">Match Simulator + <span>Opponent Strategy AI</span></h1>
-    <p class="detail-lead">A phase-wise match simulator that models <strong>powerplay intent, middle-overs control, bowling sequencing, and death-over strategy</strong> against a specific opponent lineup.</p>
-    <div class="detail-links">
-      <a class="dl-btn" href="https://github.com/yashv04/Match-Simulator-Opponent-Strategy-AI" target="_blank">GitHub ↗</a>
+<header class="hero">
+  <div class="container">
+    <div class="hero-kicker">03 — Personal Analytics / Simulation</div>
+    <h1 class="hero-title">Match <em>Simulator</em> + Opponent Strategy AI</h1>
+    <p class="hero-sub">A ball-by-ball T20 cricket engine built on Markov chains over 17 seasons of IPL ball-by-ball data. Every transition is a real historical transition. Venue, phase, and bowler-type multipliers re-weight the probabilities. The Opponent Strategy AI sits on top as a prototype classifier layer — and I'm honest about which parts of it work and which don't.</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item"><span class="label">Domain</span><span class="value">T20 Cricket / IPL</span></div>
+      <div class="hero-meta-item"><span class="label">Approach</span><span class="value">Markov Chain</span></div>
+      <div class="hero-meta-item"><span class="label">State Space</span><span class="value mono">(r, w, b)</span></div>
+      <div class="hero-meta-item"><span class="label">Interface</span><span class="value mono">ipywidgets</span></div>
     </div>
-  </header>
+  </div>
+</header>
 
-  <section class="detail-section fade-up d2">
-    <div class="ds-label">What</div>
-    <div class="ds-body">
-      <p class="placeholder">[Content coming — what the simulator takes as input (lineups? conditions?) and what scenarios it runs.]</p>
+<section class="section">
+  <div class="container">
+    <span class="section-num">01 / Problem</span>
+    <h2 class="section-title">A match is a <em>sequence</em>, not a final score.</h2>
+    <div class="prose">
+      <p>Most cricket prediction work asks the wrong question: <em>what will the final score be?</em> A coach asks a different question — <strong>what does the rest of the match look like from here?</strong> If we're 80/4 in over 12 chasing 170, what's the realistic distribution of where the innings ends? If the same situation moves from Wankhede to Chepauk, how does that distribution shift?</p>
+      <p>A point-estimate score predictor can't answer that. A bootstrap from historical matches can't either, unless an exact past match matches the current state. What's needed is something that can <strong>simulate the rest of an innings from any state</strong>, ball by ball, with a stochastic engine that's grounded in real cricket — not a regression artifact.</p>
+      <p>That's what this is.</p>
     </div>
-  </section>
+  </div>
+</section>
 
-  <section class="detail-section fade-up d2">
-    <div class="ds-label">Why</div>
-    <div class="ds-body">
-      <p class="placeholder">[Content coming — why phase-wise modelling beats a single end-to-end predictor for strategic decisions.]</p>
+<section class="section">
+  <div class="container">
+    <span class="section-num">02 / Solution</span>
+    <h2 class="section-title">A Markov chain over <em>real</em> cricket states.</h2>
+    <div class="prose" style="margin-bottom: 48px;">
+      <p>The simulator represents an innings as a sequence of states. Each state is three integers: <strong>cumulative runs, cumulative wickets, ball number.</strong> From the IPL ball-by-ball dataset, every observed transition between consecutive states across 17 seasons is counted, and the counts become transition probabilities. To simulate a match, you start at <code style="font-family: var(--font-mono); color: var(--cream); font-size: 0.9em;">(0, 0, 0)</code>, sample a next state proportional to its historical frequency, jump to it, repeat. <span class="highlight">Every transition is real.</span></p>
     </div>
-  </section>
 
-  <section class="detail-section fade-up d3">
-    <div class="ds-label">How</div>
-    <div class="ds-body">
-      <ul>
-        <li class="placeholder">[Phase models — powerplay / middle / death, what each predicts]</li>
-        <li class="placeholder">[Bowling sequencing logic — how the AI picks the next bowler]</li>
-        <li class="placeholder">[Opponent modelling — how lineup-specific tendencies are encoded]</li>
-        <li class="placeholder">[Simulation loop — how a full match is played out]</li>
+    <div class="diagram-wrap">
+      <svg viewBox="0 0 800 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="State transition diagram">
+        <defs>
+          <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#737373"/></marker>
+          <marker id="arrowRed" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#dc2626"/></marker>
+        </defs>
+        <g><rect x="320" y="110" width="160" height="60" rx="4" fill="#161616" stroke="#dc2626" stroke-width="1.5"/><text x="400" y="135" text-anchor="middle" fill="#fafafa" font-family="JetBrains Mono, monospace" font-size="15" font-weight="600">(80, 3, 71)</text><text x="400" y="155" text-anchor="middle" fill="#737373" font-family="JetBrains Mono, monospace" font-size="11">current state</text></g>
+        <g><rect x="600" y="20" width="160" height="50" rx="4" fill="#161616" stroke="#2a2a2a"/><text x="680" y="40" text-anchor="middle" fill="#d4d4d4" font-family="JetBrains Mono, monospace" font-size="13">(81, 3, 72)</text><text x="680" y="56" text-anchor="middle" fill="#ede4d0" font-family="JetBrains Mono, monospace" font-size="11">single · 0.34</text></g>
+        <g><rect x="600" y="90" width="160" height="50" rx="4" fill="#161616" stroke="#2a2a2a"/><text x="680" y="110" text-anchor="middle" fill="#d4d4d4" font-family="JetBrains Mono, monospace" font-size="13">(80, 3, 72)</text><text x="680" y="126" text-anchor="middle" fill="#ede4d0" font-family="JetBrains Mono, monospace" font-size="11">dot · 0.31</text></g>
+        <g><rect x="600" y="160" width="160" height="50" rx="4" fill="#161616" stroke="#2a2a2a"/><text x="680" y="180" text-anchor="middle" fill="#d4d4d4" font-family="JetBrains Mono, monospace" font-size="13">(84, 3, 72)</text><text x="680" y="196" text-anchor="middle" fill="#ede4d0" font-family="JetBrains Mono, monospace" font-size="11">four · 0.21</text></g>
+        <g><rect x="600" y="230" width="160" height="50" rx="4" fill="#161616" stroke="#dc2626" stroke-width="1.2" opacity="0.6"/><text x="680" y="250" text-anchor="middle" fill="#d4d4d4" font-family="JetBrains Mono, monospace" font-size="13">(80, 4, 72)</text><text x="680" y="266" text-anchor="middle" fill="#dc2626" font-family="JetBrains Mono, monospace" font-size="11">wicket · 0.14</text></g>
+        <path class="diagram-edge" d="M 480 130 Q 540 50 600 45" stroke="#737373" stroke-width="1.2" fill="none" marker-end="url(#arrow)"/>
+        <path class="diagram-edge" d="M 480 140 L 600 115" stroke="#737373" stroke-width="1.2" fill="none" marker-end="url(#arrow)"/>
+        <path class="diagram-edge" d="M 480 150 L 600 185" stroke="#737373" stroke-width="1.2" fill="none" marker-end="url(#arrow)"/>
+        <path class="diagram-edge" d="M 480 160 Q 540 230 600 255" stroke="#dc2626" stroke-width="1.2" fill="none" marker-end="url(#arrowRed)" opacity="0.7"/>
+        <g><text x="50" y="110" fill="#737373" font-family="JetBrains Mono, monospace" font-size="11" letter-spacing="0.05em">RUNS · WICKETS · BALL</text><text x="50" y="135" fill="#525252" font-family="JetBrains Mono, monospace" font-size="11">17 IPL seasons</text><text x="50" y="151" fill="#525252" font-family="JetBrains Mono, monospace" font-size="11">240k+ deliveries</text><path d="M 50 165 L 320 140" stroke="#262626" stroke-width="1" fill="none" stroke-dasharray="3,4"/></g>
+        <text x="400" y="200" text-anchor="middle" fill="#525252" font-family="JetBrains Mono, monospace" font-size="11" letter-spacing="0.08em">SAMPLE PROPORTIONAL TO HISTORICAL FREQUENCY</text>
+      </svg>
+      <div class="diagram-caption">From state <strong style="color: var(--cream);">(80, 3, 71)</strong> — 80 runs, 3 wickets, 71 balls in — the chain has four observed next-states from historical IPL data, with the listed probabilities. The simulator samples one stochastically. Numbers are illustrative.</div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <span class="section-num">03 / How It Works</span>
+    <h2 class="section-title">From ball-by-ball <em>to</em> simulated innings.</h2>
+    <div class="flow">
+      <div class="flow-step"><div class="flow-step-num">01</div><div><h3 class="flow-step-title">Ingest IPL ball-by-ball + match metadata</h3><p class="flow-step-body">Deliveries and matches tables joined on match_id. Compute ball_number, mark is_wicket from dismissal_kind, compute cumulative runs and wickets per match.</p><div class="flow-step-tech"><span class="tech-pill">pandas</span><span class="tech-pill">cricsheet</span></div></div></div>
+      <div class="flow-step"><div class="flow-step-num">02</div><div><h3 class="flow-step-title">Define the state and the transitions</h3><p class="flow-step-body">Each delivery becomes a tuple (cumulative_runs, cumulative_wickets, ball_number). Using shift(-1) within each match, pair every state with its next state. The result is a long list of (current_state → next_state) pairs across hundreds of thousands of deliveries.</p><div class="flow-step-tech"><span class="tech-pill">state engineering</span><span class="tech-pill">shift / groupby</span></div></div></div>
+      <div class="flow-step"><div class="flow-step-num">03</div><div><h3 class="flow-step-title">Build the transition probability table</h3><p class="flow-step-body">For every observed current_state, collect all the next_states that followed it. Count each unique next-state; divide by the total to get a probability. The result is a dictionary mapping each state to a list of (next_state, probability) pairs — the trained Markov chain.</p><div class="flow-step-tech"><span class="tech-pill">probability estimation</span></div></div></div>
+      <div class="flow-step"><div class="flow-step-num">04</div><div><h3 class="flow-step-title">Layer venue, phase, and bowler-type multipliers</h3><p class="flow-step-body">Hand-tuned re-weights on top of the base probabilities. Wankhede (1.1), Chepauk (0.9), Chinnaswamy (1.2) reflect pitch character. Phase factors push Powerplay (1.1) and Death (1.3) over the Middle. Spin (0.8) restricts vs Pace (1.0). Probabilities normalized to sum to 1 after re-weighting. <strong>Honest note:</strong> these are domain-informed guesses, not learned parameters. V2 replaces them with venue-conditional transition tables.</p><div class="flow-step-tech"><span class="tech-pill">hand-tuned</span><span class="tech-pill">normalization</span></div></div></div>
+      <div class="flow-step"><div class="flow-step-num">05</div><div><h3 class="flow-step-title">Simulate the innings</h3><p class="flow-step-body">Start at (0, 0, 0). At each step: look up the current state's transitions, apply the multipliers, sample the next state via random.choices() weighted by adjusted probabilities. Walk until 120 balls used or 10 wickets lost. Output is a DataFrame of every state visited — a complete simulated innings trajectory.</p><div class="flow-step-tech"><span class="tech-pill">Monte Carlo</span><span class="tech-pill">stochastic walk</span></div></div></div>
+      <div class="flow-step"><div class="flow-step-num">06</div><div><h3 class="flow-step-title">Wrap in an interactive dashboard</h3><p class="flow-step-body">ipywidgets dropdowns for venue and bowler type, with a Simulate button that runs the chain and plots runs and wickets progression with Plotly. Visualizes the trajectory ball-by-ball.</p><div class="flow-step-tech"><span class="tech-pill">ipywidgets</span><span class="tech-pill">Plotly</span><span class="tech-pill">matplotlib</span></div></div></div>
+      <div class="flow-step"><div class="flow-step-num">07</div><div><h3 class="flow-step-title">Layer the Opponent Strategy AI (prototype)</h3><p class="flow-step-body">Three RandomForest classifiers — one per phase — attempting to predict opposition tactics from match metadata (team, venue, toss). This layer is exploratory; the next section explains exactly what works in it and what doesn't.</p><div class="flow-step-tech"><span class="tech-pill">RandomForest</span><span class="tech-pill">XGBoost</span><span class="tech-pill">scikit-learn</span></div></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <span class="section-num">04 / Results</span>
+    <h2 class="section-title">The simulator's <em>numbers</em>.</h2>
+    <div class="results">
+      <div class="result-cell"><div class="result-label">IPL Seasons</div><div class="result-number">17</div><div class="result-caption">Every delivery from IPL men's competition feeding the transition table.</div></div>
+      <div class="result-cell"><div class="result-label">Deliveries</div><div class="result-number cream">240k<span style="font-size: 0.4em; color: var(--text-faint);">+</span></div><div class="result-caption">Ball-by-ball transitions counted across all matches in the dataset.</div></div>
+      <div class="result-cell"><div class="result-label">State Dimensions</div><div class="result-number accent">3</div><div class="result-caption">Runs, wickets, ball number — the compact state that keeps the chain tractable.</div></div>
+      <div class="result-cell"><div class="result-label">Sample Sim Score</div><div class="result-number">176<span style="font-size: 0.45em; color: var(--text-faint);"> / 8</span></div><div class="result-caption">Single run with Wankhede multiplier — par T20 first innings.</div></div>
+      <div class="result-cell"><div class="result-label">Sample Run Rate</div><div class="result-number cream">8.80</div><div class="result-caption">Runs per over from the same simulation. Within the realistic IPL band.</div></div>
+      <div class="result-cell"><div class="result-label">Adjustable Factors</div><div class="result-number" style="font-size: clamp(28px, 3vw, 36px); font-family: var(--font-mono); font-weight: 500;">venue · phase · bowler</div><div class="result-caption">Three hand-tuned dimensions re-weighting the base chain.</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <span class="section-num">05 / Technical Decisions</span>
+    <h2 class="section-title">Why these <em>choices</em>.</h2>
+    <div class="decisions">
+      <div class="decision"><div class="decision-q">Why Markov<br>over RNN/regression?</div><div class="decision-a">A Markov chain over real states gives you three things a regression or RNN can't: <strong>empirical grounding</strong> (every transition is a real cricket transition, not a model artifact), <strong>native stochasticity</strong> (run a thousand simulations, get a distribution), and <strong>conditional simulation</strong> (start the chain at any state — "what does the rest of the innings look like from 80/4 in over 12?"). An RNN would need vastly more data, isn't interpretable to a coach, and gives you a point estimate per ball rather than a sampling distribution.</div></div>
+      <div class="decision"><div class="decision-q">Why exclude<br>batter / bowler identity?</div><div class="decision-a">Including identity collapses the state space. With ~70 batters × ~70 bowlers × 300 runs × 10 wickets × 120 balls, almost every state would be unique and the transition table would be useless. The v1 trade-off: <em>lose player identity to keep enough observations per state to estimate probabilities</em>. V2 fix is adding a 3-to-5 tier player class to the state (e.g., top-order, anchor, finisher, all-rounder, tailender) — keeps cardinality manageable while letting Kohli and a tailender produce different next-state distributions.</div></div>
+      <div class="decision"><div class="decision-q">Why hand-tune<br>the multipliers?</div><div class="decision-a">Speed. Wankhede 1.1, Chepauk 0.9, Death 1.3 are <em>informed guesses</em>, not fit parameters — and I'm explicit about that. They make the simulator responsive to context for v1. The proper version is <strong>venue-conditional transition tables</strong> — separately estimate transitions for "ball 16, death overs, at Wankhede" from the actual delivery-level data. That's strictly better, because it captures <em>what kind</em> of transitions get more probable, not just a uniform boost.</div></div>
+      <div class="decision"><div class="decision-q">Why single<br>innings only?</div><div class="decision-a">A chase needs a different state — at minimum (runs, wickets, balls, target, balls_remaining) with required run rate, and aggression shifts non-linearly as the chase tightens. Treating the chase as the same chain misses everything important about the second innings. V2 is a separate but linked chain that conditions on the first-innings target.</div></div>
+      <div class="decision"><div class="decision-q">Why ipywidgets<br>over Streamlit?</div><div class="decision-a">Honest answer: fastest path to a working in-notebook UI while iterating on the simulator. The conversion to Streamlit is mechanical because the simulation function is already pure. V2 ships the Streamlit version with multi-run distribution plots.</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <span class="section-num">06 / Honesty Check</span>
+    <h2 class="section-title">The Strategy AI is a <em>prototype</em>.</h2>
+    <div class="honesty">
+      <div class="honesty-label">⚠ Prototype Quality — Read Before Citing</div>
+      <h3 class="honesty-title">If you saw <em>"Accuracy: 1.0"</em> on a portfolio, you'd close the tab.</h3>
+      <div class="honesty-body"><p>The Strategy AI layer has three RandomForest sub-models. <strong>None of them are publication-grade.</strong> They're in the notebook as scaffolding for V2 — and rather than hiding the inflated metrics or quietly cutting the section, the right move is to lay them out and explain exactly why each accuracy number is a red flag instead of a result.</p></div>
+      <div class="honesty-table">
+        <div class="honesty-row" style="border-top: 1px solid var(--border-strong);"><div class="honesty-row-name">Powerplay batting strategy</div><div class="honesty-row-num">1.00</div><div class="honesty-row-truth">Data leakage. Only 3 low-cardinality categorical features (team, venue, toss) — train and test draw from the same combinations, so RandomForest memorizes the majority label per combo. Not generalization.</div></div>
+        <div class="honesty-row"><div class="honesty-row-name">Middle-overs bowling strategy</div><div class="honesty-row-num">0.53</div><div class="honesty-row-truth">The features <code style="font-family: var(--font-mono); color: var(--cream); font-size: 0.9em;">spin_overs</code>, <code style="font-family: var(--font-mono); color: var(--cream); font-size: 0.9em;">team_bowling_strength</code>, and <code style="font-family: var(--font-mono); color: var(--cream); font-size: 0.9em;">opposition_weakness</code> are all generated by <code style="font-family: var(--font-mono); color: var(--cream); font-size: 0.9em;">np.random.randint</code>. Noise predicting noise. The 0.53 is exactly what you'd expect from chance.</div></div>
+        <div class="honesty-row"><div class="honesty-row-name">Death-overs bowler type</div><div class="honesty-row-num">1.00</div><div class="honesty-row-truth">Trivial label leakage. The label is "Pace if bowler in [SM Curran, CJ Jordan] else Spin" — and bowler is also a feature. The model is just learning a lookup table from an input feature.</div></div>
+      </div>
+      <div class="honesty-body" style="margin-top: 32px; margin-bottom: 0;"><p>The reason these are in the writeup is the same reason the 1.0 accuracy is left in the notebook: <strong>knowing what overfitting looks like in a small categorical feature space is more useful than pretending the number is real.</strong> V2 rebuilds the strategy classifiers with stratified train/test, leave-one-team-out cross-validation, and features that aren't randomly generated.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <span class="section-num">07 / Limitations</span>
+    <h2 class="section-title">What the simulator <em>can't</em> see.</h2>
+    <div class="prose" style="margin-bottom: 24px; max-width: 60ch;"><p>The simulator is the strong half. These are the specific things I'd attack first in V2.</p></div>
+    <div class="limits">
+      <div class="limit-item"><div class="limit-num">01</div><div class="limit-text"><strong>State excludes player identity.</strong> Kohli batting at 80/3 and a tailender batting at 80/3 transition the same way. The model can't distinguish them.</div></div>
+      <div class="limit-item"><div class="limit-num">02</div><div class="limit-text"><strong>Sparse states.</strong> Many (runs, wickets, ball) triples appear only once in 17 seasons. From those states, the next-state is essentially deterministic — the chain loses variance there.</div></div>
+      <div class="limit-item"><div class="limit-num">03</div><div class="limit-text"><strong>Multipliers are hand-tuned, not learned.</strong> Wankhede 1.1, Chepauk 0.9, Death 1.3 are domain-informed guesses. Reasonable, but not fit to data.</div></div>
+      <div class="limit-item"><div class="limit-num">04</div><div class="limit-text"><strong>No distribution validation.</strong> The simulator's score distribution hasn't been KS-tested against the real IPL first-innings score distribution. That's the first V2 check.</div></div>
+      <div class="limit-item"><div class="limit-num">05</div><div class="limit-text"><strong>Dead-end fallback is too crude.</strong> If the walk hits a state not in the transition table, the simulation just ends. Better: fall back to nearest-neighbour state or phase-conditional empirical distribution.</div></div>
+      <div class="limit-item"><div class="limit-num">06</div><div class="limit-text"><strong>Single-innings only.</strong> No chase logic — no required run rate, no aggression shift as the target gets closer.</div></div>
+      <div class="limit-item"><div class="limit-num">07</div><div class="limit-text"><strong>ipywidgets is Colab-only.</strong> Not a real deployed web app yet. Streamlit conversion is mechanical and on the V2 list.</div></div>
+    </div>
+    <div class="v2-block">
+      <div class="v2-label">Version 2 — Build Order</div>
+      <h3 class="v2-title">What ships next.</h3>
+      <ul class="v2-list">
+        <li><span class="v2-tag">01</span><span>Run 1000 simulations and KS-test against the real IPL first-innings score distribution.</span></li>
+        <li><span class="v2-tag">02</span><span>Add a player-tier dimension to the state — top-order / anchor / finisher / all-rounder / tailender.</span></li>
+        <li><span class="v2-tag">03</span><span>Replace hand-tuned multipliers with venue-conditional and phase-conditional transition tables.</span></li>
+        <li><span class="v2-tag">04</span><span>Rebuild the Strategy AI classifiers with real features and leave-one-team-out cross-validation.</span></li>
+        <li><span class="v2-tag">05</span><span>Second-innings chase chain conditioned on target and required run rate.</span></li>
+        <li><span class="v2-tag">06</span><span>Deploy to Streamlit with a multi-run distribution view.</span></li>
+        <li><span class="v2-tag">07</span><span>Smarter dead-end handling: nearest-neighbour fallback when state is unseen.</span></li>
       </ul>
     </div>
-  </section>
+  </div>
+</section>
 
-  <section class="detail-section fade-up d3">
-    <div class="ds-label">Difficulties</div>
-    <div class="ds-body">
-      <ul>
-        <li class="placeholder">[Difficulty 1 — sequencing decisions vs greedy outcome optimisation]</li>
-        <li class="placeholder">[Difficulty 2 — capturing momentum / cascade effects]</li>
-        <li class="placeholder">[Difficulty 3 — validating a simulator against real outcomes]</li>
-      </ul>
+<section class="cta">
+  <div class="container">
+    <div class="cta-eyebrow">Look at the code / Run the chain</div>
+    <h2 class="cta-title">The simulator <em>walks</em> on real cricket.</h2>
+    <p class="cta-sub">Notebook on GitHub. Open the Markov chain, inspect any state's transitions, run the simulation yourself.</p>
+    <div class="cta-buttons">
+      <a href="https://github.com/yashv04/Match-Simulator-Opponent-Strategy-AI" class="btn btn-primary" target="_blank" rel="noopener">View on GitHub</a>
+      <a href="/personal/" class="btn">Back to Personal Projects</a>
     </div>
-  </section>
+  </div>
+</section>
 
-  <section class="detail-section fade-up d4">
-    <div class="ds-label">Numbers</div>
-    <div class="numbers-grid">
-      <div class="num-cell"><div class="num-val">—</div><div class="num-label">Phase Models</div></div>
-      <div class="num-cell"><div class="num-val">—</div><div class="num-label">Matches Simulated</div></div>
-      <div class="num-cell"><div class="num-val">—</div><div class="num-label">Simulator vs Real Win-Rate Δ</div></div>
-      <div class="num-cell"><div class="num-val">—</div><div class="num-label">Other Headline Metric</div></div>
+<footer class="footer">
+  <div class="container footer-inner">
+    <div>Yash Vardhan — Sports CV Engineer / Cricket Analyst</div>
+    <div>
+      <a href="/">Portfolio</a> &nbsp;·&nbsp;
+      <a href="https://www.linkedin.com/in/yash-vardhan-5b3956169/">LinkedIn</a> &nbsp;·&nbsp;
+      <a href="https://github.com/yashv04">GitHub</a> &nbsp;·&nbsp;
+      <a href="mailto:yashv3110@gmail.com">Email</a>
     </div>
-  </section>
+  </div>
+</footer>
 
-  <footer class="foot">
-    <div class="foot-left">Source: <a class="foot-link" href="https://github.com/yashv04/Match-Simulator-Opponent-Strategy-AI" target="_blank">GitHub ↗</a></div>
-    <div class="foot-links">
-      <a class="foot-link" href="/personal/ai-powered-player-scouting/">← AI Player Scouting</a>
-      <a class="foot-link" href="/personal/">All Personal Projects →</a>
-    </div>
-  </footer>
-
-</div>
 </body>
 </html>

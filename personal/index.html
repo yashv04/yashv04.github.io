@@ -27,45 +27,63 @@
   <header class="page-header fade-up d1">
     <div class="ph-tag">03 / Personal Projects</div>
     <h1 class="ph-title">Personal <span>Projects</span></h1>
-    <p class="ph-desc">Public cricket analytics — predictors, simulators, scouting models, and tactical AI. <strong>Source on GitHub, demos live on Streamlit.</strong> Click any card for the full breakdown.</p>
+    <p class="ph-desc">Public cricket analytics — predictors, simulators, optimisers, scouting models, and fantasy AI. <strong>Source on GitHub, two live demos on Streamlit.</strong> Click any card for the full breakdown: what, why, how, results, decisions, and the honest limitations.</p>
   </header>
 
   <div class="proj-grid fade-up d2">
 
     <a class="proj-card" href="/personal/odi-full-match-predictor/">
       <div class="proj-arrow">↗</div>
-      <div class="proj-num">01 / End-to-End ODI</div>
+      <div class="proj-num">01 / Flagship · End-to-End ODI</div>
       <div class="proj-eyebrow">Live · Streamlit</div>
       <div class="proj-title">ODI Full Match Predictor</div>
-      <div class="proj-desc">Three-stage live engine: <strong>pre-match · 1st innings projection · 2nd innings chase</strong>. Trained on 2,520 ODIs. 91% death-over accuracy.</div>
-      <div class="proj-tags"><span class="tag">Python</span><span class="tag">ML Pipeline</span><span class="tag">2,520 ODIs</span></div>
-    </a>
-
-    <a class="proj-card" href="/personal/cricket-venue-intelligence-hub/">
-      <div class="proj-arrow">↗</div>
-      <div class="proj-num">02 / Venue Intelligence</div>
-      <div class="proj-eyebrow">Live · Streamlit</div>
-      <div class="proj-title">Cricket Venue Intelligence Hub</div>
-      <div class="proj-desc">Phase-wise venue profiling with <strong>KMeans</strong> clustering — pitch type, toss impact, boundary geometry, dew effect. Built to answer "what's a par score here, in these conditions?"</div>
-      <div class="proj-tags"><span class="tag">KMeans</span><span class="tag">Streamlit</span><span class="tag">Pandas</span></div>
+      <div class="proj-desc">Three-stage live engine: <strong>pre-match · 1st innings projection · 2nd innings chase</strong>. Calibrated probabilities on 2,520 ODIs, 1.3M deliveries. <strong>91% death-over accuracy</strong>.</div>
+      <div class="proj-tags"><span class="tag">LR · GBM · XGBoost</span><span class="tag">Calibrated</span><span class="tag">Temporal split</span></div>
     </a>
 
     <a class="proj-card" href="/personal/ai-powered-player-scouting/">
       <div class="proj-arrow">↗</div>
-      <div class="proj-num">03 / Scouting</div>
-      <div class="proj-eyebrow">Notebook</div>
-      <div class="proj-title">AI-Powered Player Scouting</div>
-      <div class="proj-desc">Data-driven scouting model that surfaces players by role-fit, form, and matchup-vulnerability — not just averages and strike rates.</div>
-      <div class="proj-tags"><span class="tag">Jupyter</span><span class="tag">Scouting</span></div>
+      <div class="proj-num">02 / Scouting</div>
+      <div class="proj-eyebrow">Live · Streamlit</div>
+      <div class="proj-title">AI Player Scouting Model</div>
+      <div class="proj-desc">Unsupervised <strong>K-Means clustering</strong> over 18-D phase-wise features — surfaces four behavioural batter roles (PP Specialist · Anchor · Finisher · All-Phase) across 17 IPL seasons.</div>
+      <div class="proj-tags"><span class="tag">K-Means · k=4</span><span class="tech-pill">18-D features</span><span class="tag">Team Builder</span></div>
     </a>
 
     <a class="proj-card" href="/personal/match-simulator-opponent-strategy/">
       <div class="proj-arrow">↗</div>
-      <div class="proj-num">04 / Match Strategy</div>
+      <div class="proj-num">03 / Simulation</div>
       <div class="proj-eyebrow">Notebook</div>
       <div class="proj-title">Match Simulator + Opponent Strategy AI</div>
-      <div class="proj-desc">Phase-wise simulation for powerplay intent, bowling sequencing, and death-over strategy against a specific opponent lineup.</div>
-      <div class="proj-tags"><span class="tag">Simulation</span><span class="tag">Tactics</span></div>
+      <div class="proj-desc"><strong>Markov chain</strong> over real cricket states <code>(runs, wickets, ball)</code> trained on 17 IPL seasons. Venue / phase / bowler multipliers; honest prototype Strategy AI layer on top.</div>
+      <div class="proj-tags"><span class="tag">Markov Chain</span><span class="tag">240k+ deliveries</span><span class="tag">Monte Carlo</span></div>
+    </a>
+
+    <a class="proj-card" href="/personal/impact-index-ipl-auction/">
+      <div class="proj-arrow">↗</div>
+      <div class="proj-num">04 / Optimization</div>
+      <div class="proj-eyebrow">Notebook</div>
+      <div class="proj-title">Impact Index + Auction Strategy</div>
+      <div class="proj-desc">A transparent Player Impact Score + <strong>Integer Linear Program</strong> (PuLP / CBC) that builds an IPL squad under real constraints — 95-crore cap, role minimums, overseas cap. From 543 players, 10²⁸ combinations.</div>
+      <div class="proj-tags"><span class="tag">PuLP · CBC</span><span class="tag">ILP</span><span class="tag">543 players</span></div>
+    </a>
+
+    <a class="proj-card" href="/personal/cricket-venue-intelligence-hub/">
+      <div class="proj-arrow">↗</div>
+      <div class="proj-num">05 / Dashboard</div>
+      <div class="proj-eyebrow">Live · Streamlit</div>
+      <div class="proj-title">Cricket Venue Intelligence Hub</div>
+      <div class="proj-desc">Multi-page Streamlit dashboard merging four IPL data sources — single-venue deep dive, K-Means similarity comparator, player rankings, composite scoring. <strong>Reference tool, not a calibrated predictor.</strong></div>
+      <div class="proj-tags"><span class="tag">Streamlit</span><span class="tag">K-Means</span><span class="tag">4 sources merged</span></div>
+    </a>
+
+    <a class="proj-card" href="/personal/smart-pitch-analysis-fantasy-ai/">
+      <div class="proj-arrow">↗</div>
+      <div class="proj-num">06 / Fantasy AI</div>
+      <div class="proj-eyebrow">Notebook</div>
+      <div class="proj-title">Smart Pitch + Fantasy XI</div>
+      <div class="proj-desc">Rule-based venue tagger + faithful <strong>Dream11 schema</strong> calculator + <strong>PuLP LP</strong> for optimal XI under credit cap. Includes two ML experiments kept in the writeup as an honest lesson on target leakage.</div>
+      <div class="proj-tags"><span class="tag">PuLP · ILP</span><span class="tag">Dream11 schema</span><span class="tag">Honest cut</span></div>
     </a>
 
   </div>
