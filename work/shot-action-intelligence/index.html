@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shot &amp; Action Intelligence · Yash Vardhan</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/main.css">
+</head>
+<body>
+<div class="grid-bg"></div>
+
+<nav class="topnav">
+  <div class="topnav-inner">
+    <a href="/" class="brand">Yash<span>.</span>Vardhan</a>
+    <div class="nav-links">
+      <a href="/" class="nav-link">Home</a>
+      <a href="/about/" class="nav-link">About</a>
+      <a href="/work/" class="nav-link active">Work</a>
+      <a href="/personal/" class="nav-link">Personal</a>
+    </div>
+  </div>
+</nav>
+
+<div class="page">
+
+  <a class="back-link" href="/work/">← Back to Work Projects</a>
+
+  <header class="detail-header fade-up d1">
+    <div class="detail-eyebrow">
+      03 / Action Recognition · Temporal Modeling
+      <span class="internal-tag">Internal · Not Public</span>
+    </div>
+    <h1 class="detail-title">Shot &amp; Action <span>Intelligence</span></h1>
+    <p class="detail-lead">Temporal clip classification for cricket and badminton — <strong>automated shot tagging</strong> that eliminates manual breakdown work and enables tactical analysis at scale.</p>
+  </header>
+
+  <section class="detail-section fade-up d2">
+    <div class="ds-label">What</div>
+    <div class="ds-body">
+      <p>Given a short video clip, classify what just happened — the type of shot, the type of action, the player intent. Cricket: drive, cut, pull, sweep, defence. Badminton: smash, drop, clear, net shot.</p>
+      <p>Output integrates with the annotation engine and ball / shuttle tracker so each event has a label, a trajectory, and a coordinate footprint.</p>
+    </div>
+  </section>
+
+  <section class="detail-section fade-up d2">
+    <div class="ds-label">Why</div>
+    <div class="ds-body">
+      <p>Manual shot tagging is the single biggest bottleneck in cricket analytics. A single T20 innings needs hundreds of labels; a full season is a small team's full-time job.</p>
+      <p>Automating it unlocks <strong>scale</strong> — tactical patterns across thousands of innings, opponent vulnerability maps, player-shot heatmaps that were previously impossible to compile.</p>
+    </div>
+  </section>
+
+  <section class="detail-section fade-up d3">
+    <div class="ds-label">How</div>
+    <div class="ds-body">
+      <ul>
+        <li>Temporal model over short clips — frames of player motion as input, multi-class shot taxonomy as output.</li>
+        <li>Sport-specific class hierarchies built with domain experts, not pulled from generic action-recognition datasets.</li>
+        <li>Trained on labels harvested through the internal annotation engine, with iterative class refinement as edge cases surfaced.</li>
+        <li>Designed to fail gracefully — low-confidence clips get routed back to analysts via the annotation tool.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="detail-section fade-up d3">
+    <div class="ds-label">Difficulties</div>
+    <div class="ds-body">
+      <ul>
+        <li><strong>Class boundaries</strong> — a pull and a hook are biomechanically close; the taxonomy needed sport-expert input to be useful, not just statistically separable.</li>
+        <li><strong>Camera variation</strong> — same shot looks very different from main-camera vs square-leg-camera.</li>
+        <li><strong>Class imbalance</strong> — defensive shots dominate the dataset; rare-but-decisive shots needed targeted oversampling.</li>
+        <li><strong>Useful confusion</strong> — analysts care about <em>which</em> mistakes the model makes, not just the headline accuracy.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="detail-section fade-up d4">
+    <div class="ds-label">Numbers</div>
+    <div class="numbers-grid">
+      <div class="num-cell"><div class="num-val">Multi</div><div class="num-label">Shot / Action Classes</div></div>
+      <div class="num-cell"><div class="num-val">2</div><div class="num-label">Sports (Cricket · Badminton)</div></div>
+      <div class="num-cell green"><div class="num-val">Auto</div><div class="num-label">Tagging at scale</div></div>
+      <div class="num-cell orange"><div class="num-val">↻</div><div class="num-label">Confidence-routed HITL</div></div>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <div class="foot-left">Internal company project · screenshots and source not available.</div>
+    <div class="foot-links">
+      <a class="foot-link" href="/work/ball-shuttle-intelligence/">← Ball &amp; Shuttle Intelligence</a>
+      <a class="foot-link" href="/work/smash-biomechanics/">Next: Smash Biomechanics →</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

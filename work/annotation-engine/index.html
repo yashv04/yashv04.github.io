@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Annotation &amp; Ground Truth Engine · Yash Vardhan</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/main.css">
+</head>
+<body>
+<div class="grid-bg"></div>
+
+<nav class="topnav">
+  <div class="topnav-inner">
+    <a href="/" class="brand">Yash<span>.</span>Vardhan</a>
+    <div class="nav-links">
+      <a href="/" class="nav-link">Home</a>
+      <a href="/about/" class="nav-link">About</a>
+      <a href="/work/" class="nav-link active">Work</a>
+      <a href="/personal/" class="nav-link">Personal</a>
+    </div>
+  </div>
+</nav>
+
+<div class="page">
+
+  <a class="back-link" href="/work/">← Back to Work Projects</a>
+
+  <header class="detail-header fade-up d1">
+    <div class="detail-eyebrow">
+      01 / Infrastructure · Foundation Layer
+      <span class="internal-tag">Internal · Not Public</span>
+    </div>
+    <h1 class="detail-title">Sports Annotation &amp; <span>Ground Truth Engine</span></h1>
+    <p class="detail-lead">A production labelling system for <strong>shuttle, cricket ball, bat, and court</strong> annotation. Handles manual and model-predicted data in one interface — the infrastructure every downstream CV system at the company depends on.</p>
+  </header>
+
+  <section class="detail-section fade-up d2">
+    <div class="ds-label">What</div>
+    <div class="ds-body">
+      <p>A web-based annotation platform that lets analysts and ML engineers label sport-specific objects across video frames. Four object types — <strong>shuttle, cricket ball, bat, court markings</strong> — across two sports.</p>
+      <p>One workflow handles both <strong>manual ground-truth labelling</strong> and <strong>review-and-correct over model predictions</strong>, so the same tool drives dataset creation, benchmarking, and human-in-the-loop retraining.</p>
+    </div>
+  </section>
+
+  <section class="detail-section fade-up d2">
+    <div class="ds-label">Why</div>
+    <div class="ds-body">
+      <p>Every downstream system — ball tracking, shot recognition, biomechanics — needs <strong>clean, consistent, sport-aware ground truth</strong>. Generic annotation tools weren't built for shuttle visibility under arena lighting, partial bat occlusion, or the frame-rate quirks of broadcast feeds.</p>
+      <p>Without a purpose-built engine, every CV project would re-invent its own labelling pipeline. With one, we get a <strong>single source of truth</strong> and the ability to retrain models against newly-corrected frames in days, not weeks.</p>
+    </div>
+  </section>
+
+  <section class="detail-section fade-up d3">
+    <div class="ds-label">How</div>
+    <div class="ds-body">
+      <ul>
+        <li>Web frontend optimized for <strong>frame-accurate point and bounding-box labelling</strong> with keyboard-first navigation.</li>
+        <li>Backend hosted on <strong>Google Cloud Run</strong> for elastic scaling during labelling sprints.</li>
+        <li>Predicted-vs-manual diff view — analysts review model output and correct only where it's wrong.</li>
+        <li>Versioned dataset exports feed directly into the training pipeline.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="detail-section fade-up d3">
+    <div class="ds-label">Difficulties</div>
+    <div class="ds-body">
+      <ul>
+        <li><strong>Shuttle visibility</strong> — a shuttlecock at smash speed crosses several frames as a blur; labellers need sub-pixel precision tools, not generic boxes.</li>
+        <li><strong>Predicted/manual UX</strong> — designing one interface that didn't bias annotators toward accepting model output.</li>
+        <li><strong>Cross-sport reuse</strong> — keeping shared infrastructure clean while supporting sport-specific quirks (cricket pitch markings vs badminton court lines).</li>
+        <li><strong>Labelling velocity</strong> — every UX decision was measured in seconds per frame, because labels at scale are the real cost.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="detail-section fade-up d4">
+    <div class="ds-label">Numbers</div>
+    <div class="numbers-grid">
+      <div class="num-cell gold"><div class="num-val">4</div><div class="num-label">Object Types Supported</div></div>
+      <div class="num-cell gold"><div class="num-val">2</div><div class="num-label">Sports (Cricket · Badminton)</div></div>
+      <div class="num-cell gold"><div class="num-val">1</div><div class="num-label">Unified Manual + Predicted UI</div></div>
+      <div class="num-cell"><div class="num-val">E2E</div><div class="num-label">Labelling → Training Pipeline</div></div>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <div class="foot-left">Internal company project · screenshots and source not available.</div>
+    <div class="foot-links">
+      <a class="foot-link" href="/work/ball-shuttle-intelligence/">Next: Ball &amp; Shuttle Intelligence →</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

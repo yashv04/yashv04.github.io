@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Audio-Visual Bat-Ball Detection · Yash Vardhan</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/main.css">
+</head>
+<body>
+<div class="grid-bg"></div>
+
+<nav class="topnav">
+  <div class="topnav-inner">
+    <a href="/" class="brand">Yash<span>.</span>Vardhan</a>
+    <div class="nav-links">
+      <a href="/" class="nav-link">Home</a>
+      <a href="/about/" class="nav-link">About</a>
+      <a href="/work/" class="nav-link active">Work</a>
+      <a href="/personal/" class="nav-link">Personal</a>
+    </div>
+  </div>
+</nav>
+
+<div class="page">
+
+  <a class="back-link" href="/work/">← Back to Work Projects</a>
+
+  <header class="detail-header fade-up d1">
+    <div class="detail-eyebrow">
+      05 / Multimodal AI · Audio + Vision
+      <span class="internal-tag">Internal · Not Public</span>
+    </div>
+    <h1 class="detail-title">Audio-Visual <span>Bat-Ball Detection</span></h1>
+    <p class="detail-lead">An <strong>audio-first</strong> hit / miss classifier that works where vision alone fails — noisy training-net environments, low-light sessions, and feeds where the ball is occluded by the batter at contact.</p>
+  </header>
+
+  <section class="detail-section fade-up d2">
+    <div class="ds-label">What</div>
+    <div class="ds-body">
+      <p>Detects the <strong>bat-ball contact event</strong> from audio (and, where available, fuses it with vision). Outputs a frame-aligned timestamp and a hit / miss / edge classification.</p>
+      <p>Used to anchor downstream analysis — shot type starts at contact, ball speed is measured from contact, biomechanics segments split at contact.</p>
+    </div>
+  </section>
+
+  <section class="detail-section fade-up d2">
+    <div class="ds-label">Why</div>
+    <div class="ds-body">
+      <p>Bat-ball contact is the most informative moment in cricket video — but vision-based detection is unreliable. The batter's body occludes the ball; broadcast cameras don't always hold focus.</p>
+      <p>Audio gives a clean signal where vision is noisy. A multimodal system that <strong>leads with audio and supports with video</strong> works in training nets where pure-vision systems are useless.</p>
+    </div>
+  </section>
+
+  <section class="detail-section fade-up d3">
+    <div class="ds-label">How</div>
+    <div class="ds-body">
+      <ul>
+        <li><strong>Audio signal processing</strong> pipeline — spectral features tuned to the bat-ball impact signature.</li>
+        <li>Hit / miss / edge classifier trained on labelled training-net audio.</li>
+        <li>Vision fallback / fusion where the broadcast feed includes a clear contact frame.</li>
+        <li>Robust noise-floor calibration so the system works in echoey indoor nets as well as on open grounds.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="detail-section fade-up d3">
+    <div class="ds-label">Difficulties</div>
+    <div class="ds-body">
+      <ul>
+        <li><strong>Acoustic variability</strong> — wooden bat, training bat, throwdown sessions, leather vs tennis ball all produce different impact signatures.</li>
+        <li><strong>Background noise</strong> — coaches shouting, crowd noise, other players hitting in adjacent nets.</li>
+        <li><strong>Edge cases</strong> — a faint edge sounds nothing like a middle; the classifier had to handle a wide acoustic range without false-positiving on bat-pad contact.</li>
+        <li><strong>Cross-modal alignment</strong> — getting audio timestamps frame-aligned with video for downstream consumers.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="detail-section fade-up d4">
+    <div class="ds-label">Numbers</div>
+    <div class="numbers-grid">
+      <div class="num-cell"><div class="num-val">Audio</div><div class="num-label">Primary modality</div></div>
+      <div class="num-cell"><div class="num-val">3</div><div class="num-label">Classes (Hit · Miss · Edge)</div></div>
+      <div class="num-cell green"><div class="num-val">Net</div><div class="num-label">Works in training-net conditions</div></div>
+      <div class="num-cell"><div class="num-val">Sync</div><div class="num-label">Frame-aligned timestamps</div></div>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <div class="foot-left">Internal company project · screenshots and source not available.</div>
+    <div class="foot-links">
+      <a class="foot-link" href="/work/smash-biomechanics/">← Smash Biomechanics</a>
+      <a class="foot-link" href="/personal/">Personal Projects →</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

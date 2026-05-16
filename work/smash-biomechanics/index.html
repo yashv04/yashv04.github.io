@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smash Technique &amp; Biomechanics · Yash Vardhan</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/main.css">
+</head>
+<body>
+<div class="grid-bg"></div>
+
+<nav class="topnav">
+  <div class="topnav-inner">
+    <a href="/" class="brand">Yash<span>.</span>Vardhan</a>
+    <div class="nav-links">
+      <a href="/" class="nav-link">Home</a>
+      <a href="/about/" class="nav-link">About</a>
+      <a href="/work/" class="nav-link active">Work</a>
+      <a href="/personal/" class="nav-link">Personal</a>
+    </div>
+  </div>
+</nav>
+
+<div class="page">
+
+  <a class="back-link" href="/work/">← Back to Work Projects</a>
+
+  <header class="detail-header fade-up d1">
+    <div class="detail-eyebrow">
+      04 / Biomechanics · Pose Estimation
+      <span class="internal-tag">Internal · Not Public</span>
+    </div>
+    <h1 class="detail-title">Smash Technique &amp; <span>Biomechanics</span></h1>
+    <p class="detail-lead">A <strong>video-only</strong> biomechanics pipeline that derives joint kinematics and smash speed from shuttle trajectory and player keypoints. <strong>Zero wearables, zero markers.</strong></p>
+  </header>
+
+  <section class="detail-section fade-up d2">
+    <div class="ds-label">What</div>
+    <div class="ds-body">
+      <p>Takes a smash sequence as input — outputs the player's <strong>joint angles, segment velocities, kinetic-chain timing</strong>, and the <strong>shuttle's smash speed</strong> derived from its trajectory.</p>
+      <p>Designed to give coaches a quantitative breakdown of technique without strapping sensors on athletes.</p>
+    </div>
+  </section>
+
+  <section class="detail-section fade-up d2">
+    <div class="ds-label">Why</div>
+    <div class="ds-body">
+      <p>Lab-based biomechanics requires markers, motion capture rigs, and controlled environments — none of which translate to a training session or a real match. Coaches don't get the data when they need it most.</p>
+      <p>A video-only pipeline puts <strong>biomechanics analysis into the gym, the academy court, and the broadcast feed</strong> — wherever the camera is, you get the numbers.</p>
+    </div>
+  </section>
+
+  <section class="detail-section fade-up d3">
+    <div class="ds-label">How</div>
+    <div class="ds-body">
+      <ul>
+        <li><strong>Mediapipe</strong> pose estimation for 2D keypoints; sport-specific joint definitions derived from those.</li>
+        <li>Shuttle trajectory (from the tracking system) converted into <strong>smash speed</strong> via frame-rate calibration and known court geometry.</li>
+        <li>Kinetic-chain timing extracted from joint-angle velocity profiles — shoulder-elbow-wrist sequencing.</li>
+        <li>Outputs visualized as overlaid kinematic plots a coach can read in seconds.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="detail-section fade-up d3">
+    <div class="ds-label">Difficulties</div>
+    <div class="ds-body">
+      <ul>
+        <li><strong>Single-camera depth ambiguity</strong> — 2D pose is fundamentally lossy; the pipeline had to be honest about what it could and couldn't infer.</li>
+        <li><strong>Frame-rate sensitivity</strong> — at smash speeds, 30 fps video loses the peak; 60 fps was the practical minimum.</li>
+        <li><strong>Court calibration</strong> — converting pixels to metres reliably across different camera placements without manual rig setup.</li>
+        <li><strong>Trust</strong> — coaches won't use a tool they can't sanity-check; outputs had to be visually verifiable against the source clip.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="detail-section fade-up d4">
+    <div class="ds-label">Numbers</div>
+    <div class="numbers-grid">
+      <div class="num-cell green"><div class="num-val">0</div><div class="num-label">Wearables / Markers Required</div></div>
+      <div class="num-cell"><div class="num-val">2D→</div><div class="num-label">Joint Kinematics from Video</div></div>
+      <div class="num-cell"><div class="num-val">km/h</div><div class="num-label">Smash Speed from Trajectory</div></div>
+      <div class="num-cell"><div class="num-val">Coach</div><div class="num-label">Readable Output</div></div>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <div class="foot-left">Internal company project · screenshots and source not available.</div>
+    <div class="foot-links">
+      <a class="foot-link" href="/work/shot-action-intelligence/">← Shot &amp; Action Intelligence</a>
+      <a class="foot-link" href="/work/audio-visual-detection/">Next: Audio-Visual Detection →</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>
