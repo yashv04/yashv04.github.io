@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rohit Sharma T20I Dashboard — Yash Vardhan</title>
+<meta name="description" content="An interactive Streamlit dashboard analysing Rohit Sharma's T20I career (2007-2024) — career phases, opposition splits, World Cup record, and venue-type breakdowns.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;500;600&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/personal-detail.css">
+</head>
+<body>
+
+<nav class="nav">
+  <div class="container nav-inner">
+    <a href="/personal/" class="nav-back">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 11L5 7l4-4"/></svg>
+      Back to Personal Projects
+    </a>
+    <span class="nav-meta">Project / 09 / Player Story</span>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="container">
+    <div class="hero-kicker">09 — Personal Analytics / Storytelling Dashboard</div>
+    <h1 class="hero-title">Rohit Sharma <em>T20I</em> Career</h1>
+    <p class="hero-sub">An interactive Streamlit dashboard analysing <strong>Rohit Sharma's T20I career from 2007 to 2024</strong> — four chronological phases, eight-team opposition splits, nine World Cup tournaments, and home / away / neutral venue breakdowns. Built to chart the evolution from a 21-average rookie to a 36-average World Cup-winning captain.</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item"><span class="label">Domain</span><span class="value">T20I Cricket</span></div>
+      <div class="hero-meta-item"><span class="label">Format</span><span class="value">Storytelling Dashboard</span></div>
+      <div class="hero-meta-item"><span class="label">Stack</span><span class="value mono">Streamlit · Plotly</span></div>
+      <div class="hero-meta-item"><span class="label">Span</span><span class="value mono">2007–2024 (17 yrs)</span></div>
+    </div>
+    <div class="hero-cta">
+      <a href="https://rohit-sharma-t20i-dashboard-nohflzrqecgvcaiezyxxhg.streamlit.app/" target="_blank" rel="noopener" class="hero-pill"><span class="dot"></span>Live on Streamlit</a>
+      <a href="https://github.com/yashv04/Rohit-Sharma-t20i-dashboard" target="_blank" rel="noopener" class="hero-pill">github.com/yashv04/Rohit-Sharma-t20i-dashboard</a>
+    </div>
+  </div>
+</header>
+
+<section class="section">
+  <div class="container">
+    <span class="section-num">01 / What</span>
+    <h2 class="section-title">17 years of T20Is, <em>structured into a story</em>.</h2>
+    <div class="prose">
+      <p>A four-section Streamlit dashboard covering Rohit Sharma's full T20I career. <strong>Career phases</strong> (2007–2010, 2011–2015, 2016–2020, 2021–2024) show the trajectory — average climbs from 21 to 39 between phases 1 and 3, strike rate from 116 to 152 by phase 4. <strong>Opposition splits</strong> cover 8 nations. <strong>World Cup record</strong> covers all 9 tournaments he played. <strong>Venue splits</strong> separate home, away, and neutral grounds.</p>
+      <p>The dataset is hand-curated from a PDF career summary — closed-form historical data, no live API needed.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <span class="section-num">02 / Why</span>
+    <h2 class="section-title">A T20I career is <em>multiple careers</em>.</h2>
+    <div class="prose">
+      <p>Rohit Sharma's T20I career spans 17 years across four eras of T20 cricket — from the format's infancy (2007) through its data-driven modern phase (2024). A single career average compresses all of that into one number that means nothing.</p>
+      <p>The phase-wise view reveals what the average hides: <strong>he got progressively better every era</strong> — average up, strike rate up, six-hitting up — culminating in a 2024 World Cup as captain. That's the story a dashboard like this is for.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <span class="section-num">03 / How</span>
+    <h2 class="section-title">From PDF career summary <em>to</em> dashboard.</h2>
+    <div class="flow">
+      <div class="flow-step"><div class="flow-step-num">01</div><div><h3 class="flow-step-title">Extract data from career summary PDF</h3><p class="flow-step-body">Build four DataFrames manually from career source: phase data, opposition data, World Cup data, venue data. Each row a clean record with matches / innings / runs / average / SR / high score / 50s / 100s.</p><div class="flow-step-tech"><span class="tech-pill">pandas</span><span class="tech-pill">manual extraction</span></div></div></div>
+      <div class="flow-step"><div class="flow-step-num">02</div><div><h3 class="flow-step-title">Wide layout, four-section dashboard</h3><p class="flow-step-body"><code>st.set_page_config(layout="wide")</code> for full-screen real estate. Each section gets its own header and chart group. Title + intro line at the top, then the four sections stacked vertically with clear visual breaks.</p><div class="flow-step-tech"><span class="tech-pill">Streamlit wide</span><span class="tech-pill">vertical sections</span></div></div></div>
+      <div class="flow-step"><div class="flow-step-num">03</div><div><h3 class="flow-step-title">Plotly visualizations per section</h3><p class="flow-step-body">Phase: dual-axis line (avg + SR over time). Opposition: grouped bar across 8 teams. World Cup: tournament-by-tournament bar with hundreds/fifties overlays. Venue: home/away/neutral bar with strike-rate emphasis. <code>make_subplots</code> where two views share an axis.</p><div class="flow-step-tech"><span class="tech-pill">Plotly Express</span><span class="tech-pill">graph_objects</span><span class="tech-pill">subplots</span></div></div></div>
+      <div class="flow-step"><div class="flow-step-num">04</div><div><h3 class="flow-step-title">Deploy to Streamlit Cloud</h3><p class="flow-step-body">Bundled DataFrames, single <code>app.py</code>, requirements lock for pandas / numpy / matplotlib / seaborn / plotly / streamlit. Push to GitHub → public Streamlit URL.</p><div class="flow-step-tech"><span class="tech-pill">Streamlit Cloud</span><span class="tech-pill">free tier</span></div></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <span class="section-num">04 / Numbers</span>
+    <h2 class="section-title">The <em>career arc</em>.</h2>
+    <div class="results">
+      <div class="result-cell"><div class="result-label">Career Span</div><div class="result-number">17<span style="font-size: 0.5em; color: var(--text-faint);"> yrs</span></div><div class="result-caption">2007 debut through 2024 World Cup win as captain.</div></div>
+      <div class="result-cell"><div class="result-label">Phase 1 Avg</div><div class="result-number warn">21.7</div><div class="result-caption">2007–2010 — the rookie era. SR 116.</div></div>
+      <div class="result-cell"><div class="result-label">Peak Phase Avg</div><div class="result-number accent">39.9</div><div class="result-caption">2016–2020 — established opener, 12 fifties / 2 hundreds.</div></div>
+      <div class="result-cell"><div class="result-label">Peak Phase SR</div><div class="result-number cream">152.5</div><div class="result-caption">2021–2024 — the late-career acceleration phase as captain.</div></div>
+      <div class="result-cell"><div class="result-label">World Cups Analysed</div><div class="result-number">9</div><div class="result-caption">Every T20 World Cup edition from 2007 through 2024.</div></div>
+      <div class="result-cell"><div class="result-label">Opposition Splits</div><div class="result-number">8</div><div class="result-caption">AUS · BAN · ENG · NZ · PAK · SA · SL · WI.</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="cta">
+  <div class="container">
+    <div class="cta-eyebrow">— Open the dashboard —</div>
+    <h2 class="cta-title">The <em>17-year</em> T20I arc.</h2>
+    <p class="cta-sub">Live Streamlit dashboard — career phases, opposition record, World Cup tournaments, venue splits.</p>
+    <div class="cta-buttons">
+      <a href="https://rohit-sharma-t20i-dashboard-nohflzrqecgvcaiezyxxhg.streamlit.app/" class="btn btn-primary" target="_blank" rel="noopener"><span class="live-dot"></span>Open Live App</a>
+      <a href="https://github.com/yashv04/Rohit-Sharma-t20i-dashboard" class="btn" target="_blank" rel="noopener">View on GitHub</a>
+      <a href="/personal/" class="btn">Back to Personal Projects</a>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container footer-inner">
+    <div>Yash Vardhan — Sports CV Engineer / Cricket Analyst</div>
+    <div>
+      <a href="/">Portfolio</a> &nbsp;·&nbsp;
+      <a href="https://www.linkedin.com/in/yash-vardhan-5b3956169/">LinkedIn</a> &nbsp;·&nbsp;
+      <a href="https://github.com/yashv04">GitHub</a> &nbsp;·&nbsp;
+      <a href="mailto:yashv3110@gmail.com">Email</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rohit Sharma Test Career — Yash Vardhan</title>
+<meta name="description" content="An interactive Streamlit dashboard charting Rohit Sharma's Test cricket career — phase-wise performance, batting-position analysis, and home-vs-away breakdowns.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;500;600&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/personal-detail.css">
+</head>
+<body>
+
+<nav class="nav">
+  <div class="container nav-inner">
+    <a href="/personal/" class="nav-back">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 11L5 7l4-4"/></svg>
+      Back to Personal Projects
+    </a>
+    <span class="nav-meta">Project / 08 / Player Story</span>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="container">
+    <div class="hero-kicker">08 — Personal Analytics / Storytelling Dashboard</div>
+    <h1 class="hero-title">Rohit Sharma <em>Test</em> Career</h1>
+    <p class="hero-sub">An interactive Streamlit dashboard charting <strong>Rohit Sharma's Test cricket career</strong> across four phases (2013–2016, 2017–2019, 2020–2022, 2023–2024) with position-wise analysis (Opening · #3 · #5 · #6), opposition splits, and home-vs-away contrasts. Built to reveal the career-defining 2019 opening switch.</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item"><span class="label">Domain</span><span class="value">Test Cricket</span></div>
+      <div class="hero-meta-item"><span class="label">Format</span><span class="value">Storytelling Dashboard</span></div>
+      <div class="hero-meta-item"><span class="label">Stack</span><span class="value mono">Streamlit · Plotly</span></div>
+      <div class="hero-meta-item"><span class="label">Phases</span><span class="value mono">4 career eras</span></div>
+    </div>
+    <div class="hero-cta">
+      <a href="https://rohit-sharma-test-career-ycbroxcnwmefkesca4kstx.streamlit.app/" target="_blank" rel="noopener" class="hero-pill"><span class="dot"></span>Live on Streamlit</a>
+      <a href="https://github.com/yashv04/Rohit-Sharma-Test-Career" target="_blank" rel="noopener" class="hero-pill">github.com/yashv04/Rohit-Sharma-Test-Career</a>
+    </div>
+  </div>
+</header>
+
+<section class="section">
+  <div class="container">
+    <span class="section-num">01 / What</span>
+    <h2 class="section-title">The Test career, <em>by era and by position</em>.</h2>
+    <div class="prose">
+      <p>A multi-section dashboard breaking Rohit Sharma's Test career into four chronological phases and three batting-position regimes. Each phase block reports matches, innings, runs, average, strike rate, fifties, and hundreds — and the year-by-year trend reveals the discontinuity that the aggregate average flattens.</p>
+      <p>The career-defining moment — <strong>2019, switched from middle-order to opening</strong> — pops out cleanly in the phase chart: average climbs from 39 (2013–2016) to 55+ in 2017–2019 after the position change. That's the kind of insight a career-summary stat row hides.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <span class="section-num">02 / Why</span>
+    <h2 class="section-title">Batting average is a <em>compression artefact</em>.</h2>
+    <div class="prose">
+      <p>Rohit's Test career average is one number. But that number is the weighted average of a struggling middle-order phase, a stellar opening era, and a transitional reset. <strong>Reporting it as a single value tells you nothing about the trajectory.</strong></p>
+      <p>This dashboard exists to surface the trajectory — to let a viewer see how an "average" career hides four distinct careers stacked on top of each other.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <span class="section-num">03 / How</span>
+    <h2 class="section-title">From career data <em>to</em> phase narrative.</h2>
+    <div class="flow">
+      <div class="flow-step"><div class="flow-step-num">01</div><div><h3 class="flow-step-title">Curate phase and position tables</h3><p class="flow-step-body">Hand-built DataFrames covering 2013–2016, 2017–2019, 2020–2022, 2023–2024 phases — matches, innings, runs, average, SR, 50s, 100s per phase. Plus position-wise breakdown for Opening / #3 / #5 / #6.</p><div class="flow-step-tech"><span class="tech-pill">pandas</span><span class="tech-pill">curated data</span></div></div></div>
+      <div class="flow-step"><div class="flow-step-num">02</div><div><h3 class="flow-step-title">Style cards and headers</h3><p class="flow-step-body">Custom CSS injected via <code>st.markdown</code> for metric cards, section headers, and a consistent blue accent palette. Each phase gets its own "card" treatment — visual rhythm beats a long table.</p><div class="flow-step-tech"><span class="tech-pill">st.markdown</span><span class="tech-pill">custom CSS</span></div></div></div>
+      <div class="flow-step"><div class="flow-step-num">03</div><div><h3 class="flow-step-title">Plotly trend charts</h3><p class="flow-step-body">Phase-wise bar chart showing average + strike rate over time. Stacked bars for 50s/100s. Position-wise scatter or grouped bar to show the opening switch's impact. <code>make_subplots</code> for multi-panel layouts.</p><div class="flow-step-tech"><span class="tech-pill">Plotly Express</span><span class="tech-pill">subplots</span></div></div></div>
+      <div class="flow-step"><div class="flow-step-num">04</div><div><h3 class="flow-step-title">Narrative sections between charts</h3><p class="flow-step-body">Short prose blocks explaining each phase — what changed, what the numbers signal. The goal is a guided read, not a dashboard you have to interpret yourself.</p><div class="flow-step-tech"><span class="tech-pill">storytelling layout</span></div></div></div>
+      <div class="flow-step"><div class="flow-step-num">05</div><div><h3 class="flow-step-title">Deploy to Streamlit Cloud</h3><p class="flow-step-body">Single-file <code>app.py</code> with all DataFrames bundled. No external data calls. Push to GitHub → Streamlit auto-deploys → public URL.</p><div class="flow-step-tech"><span class="tech-pill">Streamlit Cloud</span></div></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <span class="section-num">04 / Numbers</span>
+    <h2 class="section-title">The career, <em>at a glance</em>.</h2>
+    <div class="results">
+      <div class="result-cell"><div class="result-label">Career Phases</div><div class="result-number">4</div><div class="result-caption">2013–2016 · 2017–2019 · 2020–2022 · 2023–2024.</div></div>
+      <div class="result-cell"><div class="result-label">Positions Analysed</div><div class="result-number cream">4</div><div class="result-caption">Opening · #3 · #5 · #6 — the four regimes of his Test batting.</div></div>
+      <div class="result-cell"><div class="result-label">Peak Phase Avg</div><div class="result-number accent">55.5</div><div class="result-caption">2017–2019 — the opening era, after the position switch.</div></div>
+      <div class="result-cell"><div class="result-label">Deployment</div><div class="result-number" style="font-size: clamp(24px, 2.5vw, 32px); font-family: var(--font-mono); font-weight: 500;">live</div><div class="result-caption">Free on Streamlit Cloud.</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="cta">
+  <div class="container">
+    <div class="cta-eyebrow">— See the trajectory —</div>
+    <h2 class="cta-title">Open the <em>era-by-era</em> view.</h2>
+    <p class="cta-sub">Live Streamlit dashboard — phase splits, position splits, the opening-switch inflection point.</p>
+    <div class="cta-buttons">
+      <a href="https://rohit-sharma-test-career-ycbroxcnwmefkesca4kstx.streamlit.app/" class="btn btn-primary" target="_blank" rel="noopener"><span class="live-dot"></span>Open Live App</a>
+      <a href="https://github.com/yashv04/Rohit-Sharma-Test-Career" class="btn" target="_blank" rel="noopener">View on GitHub</a>
+      <a href="/personal/" class="btn">Back to Personal Projects</a>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container footer-inner">
+    <div>Yash Vardhan — Sports CV Engineer / Cricket Analyst</div>
+    <div>
+      <a href="/">Portfolio</a> &nbsp;·&nbsp;
+      <a href="https://www.linkedin.com/in/yash-vardhan-5b3956169/">LinkedIn</a> &nbsp;·&nbsp;
+      <a href="https://github.com/yashv04">GitHub</a> &nbsp;·&nbsp;
+      <a href="mailto:yashv3110@gmail.com">Email</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

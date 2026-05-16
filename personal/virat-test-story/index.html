@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Virat Test Story — Yash Vardhan</title>
+<meta name="description" content="An interactive Streamlit storytelling dashboard exploring Virat Kohli's Test cricket legacy — career phases, statistical breakdowns, opposition splits, and expert insights.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;500;600&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/personal-detail.css">
+</head>
+<body>
+
+<nav class="nav">
+  <div class="container nav-inner">
+    <a href="/personal/" class="nav-back">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 11L5 7l4-4"/></svg>
+      Back to Personal Projects
+    </a>
+    <span class="nav-meta">Project / 07 / Player Story</span>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="container">
+    <div class="hero-kicker">07 — Personal Analytics / Storytelling Dashboard</div>
+    <h1 class="hero-title">Virat <em>Test</em> Story</h1>
+    <p class="hero-sub">An interactive Streamlit dashboard that tells the story of <strong>Virat Kohli's Test cricket legacy</strong> through career phases, opposition splits, conditions-by-venue breakdowns, captaincy-vs-non-captaincy contrasts, and a statistical legacy section. Built as a long-form, scrollable analysis — not a stat dump.</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item"><span class="label">Domain</span><span class="value">Test Cricket</span></div>
+      <div class="hero-meta-item"><span class="label">Format</span><span class="value">Storytelling Dashboard</span></div>
+      <div class="hero-meta-item"><span class="label">Stack</span><span class="value mono">Streamlit · Plotly</span></div>
+      <div class="hero-meta-item"><span class="label">Status</span><span class="value mono">Live · Public</span></div>
+    </div>
+    <div class="hero-cta">
+      <a href="https://virat-test-story-7doohhp63qt4dyyfg7wx8n.streamlit.app/" target="_blank" rel="noopener" class="hero-pill"><span class="dot"></span>Live on Streamlit</a>
+      <a href="https://github.com/yashv04/Virat-Test-Story" target="_blank" rel="noopener" class="hero-pill">github.com/yashv04/Virat-Test-Story</a>
+    </div>
+  </div>
+</header>
+
+<section class="section">
+  <div class="container">
+    <span class="section-num">01 / What</span>
+    <h2 class="section-title">One career, <em>told as a story</em>.</h2>
+    <div class="prose">
+      <p>A multi-section Streamlit dashboard structured as a <strong>narrative arc</strong> through Virat Kohli's Test career — emergence, peak, captaincy era, post-captaincy adjustment. Each section combines headline stats with charts and short prose: not a table dump, a guided read.</p>
+      <p>The sections cover <strong>phase-wise performance</strong>, <strong>opposition splits</strong> (record vs each team), <strong>home vs away vs SENA</strong>, <strong>captaincy impact on his own batting</strong>, and a closing <strong>statistical legacy</strong> section that contextualises his numbers against contemporaries.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <span class="section-num">02 / Why</span>
+    <h2 class="section-title">Numbers without <em>narrative</em> miss the point.</h2>
+    <div class="prose">
+      <p>Most cricket statistics pages are summary tables — career average, hundreds, fifties — that flatten a decade into one row. A career like Kohli's has <strong>distinct phases</strong> (the 2014 England struggle, the 2016–2019 peak, the captaincy era, the post-2022 reset) that the aggregate hides entirely.</p>
+      <p>This dashboard breaks the career into those phases and lets the numbers tell the story chronologically — the way fans and analysts actually remember it.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <span class="section-num">03 / How</span>
+    <h2 class="section-title">From CSV <em>to</em> story.</h2>
+    <div class="flow">
+      <div class="flow-step"><div class="flow-step-num">01</div><div><h3 class="flow-step-title">Build career-phase, opposition, and venue tables</h3><p class="flow-step-body">Hand-curated DataFrames from Test career records — phase splits (matches, innings, runs, average, SR, 50s, 100s), opposition splits, home/away/neutral splits, captaincy splits. Source: official Test career data through 2024.</p><div class="flow-step-tech"><span class="tech-pill">pandas</span><span class="tech-pill">curated CSVs</span></div></div></div>
+      <div class="flow-step"><div class="flow-step-num">02</div><div><h3 class="flow-step-title">Section layout with custom CSS</h3><p class="flow-step-body">Streamlit's <code>st.markdown</code> with injected CSS gives each section its own header style, metric cards, and accent palette. Each phase block reads like a short essay with charts inline.</p><div class="flow-step-tech"><span class="tech-pill">st.markdown</span><span class="tech-pill">custom CSS</span></div></div></div>
+      <div class="flow-step"><div class="flow-step-num">03</div><div><h3 class="flow-step-title">Plotly visualizations per section</h3><p class="flow-step-body">Phase-wise bar charts for runs/average/SR over time, radar charts for opposition strength, scatter plots for venue performance, donut charts for shot-type / dismissal distribution. All interactive — hover for context, click to filter.</p><div class="flow-step-tech"><span class="tech-pill">Plotly Express</span><span class="tech-pill">graph_objects</span></div></div></div>
+      <div class="flow-step"><div class="flow-step-num">04</div><div><h3 class="flow-step-title">Statistical Legacy section</h3><p class="flow-step-body">Closing comparative section — Kohli vs his Indian Test peers, vs the global modern Test era. Combines stat cards with a brief written summary that frames the legacy in context, not just numbers.</p><div class="flow-step-tech"><span class="tech-pill">comparative analysis</span><span class="tech-pill">two-column layout</span></div></div></div>
+      <div class="flow-step"><div class="flow-step-num">05</div><div><h3 class="flow-step-title">Deploy to Streamlit Cloud</h3><p class="flow-step-body">Free-tier Streamlit hosting. Single <code>app.py</code> with bundled DataFrames — no external API calls, no live data sync. The career is closed-form historical data, so freezing the dataset is the right call.</p><div class="flow-step-tech"><span class="tech-pill">Streamlit Cloud</span><span class="tech-pill">free tier</span></div></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <span class="section-num">04 / Numbers</span>
+    <h2 class="section-title">The <em>headline</em> stats.</h2>
+    <div class="results">
+      <div class="result-cell"><div class="result-label">Career Phases</div><div class="result-number">4</div><div class="result-caption">Emergence · Peak · Captaincy era · Post-captaincy reset.</div></div>
+      <div class="result-cell"><div class="result-label">Sections</div><div class="result-number cream">6+</div><div class="result-caption">Phase-wise · Opposition · Venue · Captaincy · Legacy · Insights.</div></div>
+      <div class="result-cell"><div class="result-label">Charts</div><div class="result-number accent">20+</div><div class="result-caption">Plotly bar / radar / scatter / donut throughout the dashboard.</div></div>
+      <div class="result-cell"><div class="result-label">Deployment</div><div class="result-number" style="font-size: clamp(24px, 2.5vw, 32px); font-family: var(--font-mono); font-weight: 500;">live</div><div class="result-caption">Free on Streamlit Cloud — single-file app.</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="cta">
+  <div class="container">
+    <div class="cta-eyebrow">— Open the story —</div>
+    <h2 class="cta-title">Read the <em>full</em> Test legacy.</h2>
+    <p class="cta-sub">Live Streamlit dashboard — scroll through the career phase by phase, with charts and short narrative blocks at every section.</p>
+    <div class="cta-buttons">
+      <a href="https://virat-test-story-7doohhp63qt4dyyfg7wx8n.streamlit.app/" class="btn btn-primary" target="_blank" rel="noopener"><span class="live-dot"></span>Open Live App</a>
+      <a href="https://github.com/yashv04/Virat-Test-Story" class="btn" target="_blank" rel="noopener">View on GitHub</a>
+      <a href="/personal/" class="btn">Back to Personal Projects</a>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container footer-inner">
+    <div>Yash Vardhan — Sports CV Engineer / Cricket Analyst</div>
+    <div>
+      <a href="/">Portfolio</a> &nbsp;·&nbsp;
+      <a href="https://www.linkedin.com/in/yash-vardhan-5b3956169/">LinkedIn</a> &nbsp;·&nbsp;
+      <a href="https://github.com/yashv04">GitHub</a> &nbsp;·&nbsp;
+      <a href="mailto:yashv3110@gmail.com">Email</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
