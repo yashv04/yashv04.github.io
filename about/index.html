@@ -3,97 +3,718 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>About · Yash Vardhan</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/css/main.css">
+<title>About — Yash Vardhan</title>
+<meta name="description" content="Sports CV engineer at KhiladiPro. Building production computer vision for live cricket and badminton, plus public cricket analytics on the side. The path toward elite sport.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  /* Design tokens — match your existing site */
+  --bg: #000000;
+  --surface: #0a0e14;
+  --surface-2: #0e131a;
+  --border: #11161e;
+  --border-strong: #1a2230;
+  --text: #ffffff;
+  --text-body: #d1d5db;
+  --text-muted: #6b7280;
+  --text-faint: #4b5563;
+  --accent: #38bdf8;         /* cyan-400 */
+  --accent-soft: rgba(56, 189, 248, 0.08);
+  --accent-line: rgba(56, 189, 248, 0.18);
+
+  --font-display: 'Syne', -apple-system, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  --container: 1240px;
+  --gutter: clamp(20px, 5vw, 64px);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+
+body {
+  background: var(--bg);
+  color: var(--text-body);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1.7;
+  font-weight: 400;
+  overflow-x: hidden;
+}
+
+/* Subtle grid overlay — matches your homepage */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  background-image:
+    linear-gradient(var(--accent-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--accent-line) 1px, transparent 1px);
+  background-size: 120px 120px;
+  opacity: 0.12;
+}
+
+a { color: inherit; text-decoration: none; }
+
+.container {
+  max-width: var(--container);
+  margin: 0 auto;
+  padding: 0 var(--gutter);
+  position: relative;
+  z-index: 2;
+}
+
+/* ============ NAV ============ */
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+}
+.nav-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 26px 0;
+}
+.nav-logo {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 22px;
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+.nav-logo .dot { color: var(--accent); font-weight: 400; }
+.nav-links {
+  display: flex;
+  gap: 48px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.nav-links a {
+  color: var(--text-muted);
+  position: relative;
+  padding-bottom: 4px;
+  transition: color 0.2s;
+}
+.nav-links a:hover { color: var(--text); }
+.nav-links a.active {
+  color: var(--accent);
+  border-bottom: 1px solid var(--accent);
+}
+@media (max-width: 640px) {
+  .nav-links { gap: 20px; font-size: 11px; }
+}
+
+/* ============ HERO ============ */
+.hero {
+  padding: clamp(80px, 14vw, 160px) 0 clamp(60px, 10vw, 120px);
+}
+.hero-kicker {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--accent);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin-bottom: 40px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.hero-kicker::before {
+  content: '';
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  background: var(--accent);
+  border-radius: 50%;
+}
+.hero-title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(72px, 14vw, 200px);
+  line-height: 0.92;
+  letter-spacing: -0.03em;
+  color: var(--text);
+  margin-bottom: 56px;
+}
+.hero-title em {
+  font-style: italic;
+  color: var(--accent);
+  font-weight: 800;
+}
+.hero-lede {
+  font-family: var(--font-mono);
+  font-size: clamp(15px, 1.4vw, 17px);
+  line-height: 1.75;
+  color: var(--text-body);
+  max-width: 78ch;
+}
+.hero-lede em { color: var(--accent); font-style: normal; }
+.hero-lede strong { color: var(--text); font-weight: 500; }
+
+/* ============ SECTION ============ */
+.section {
+  padding: clamp(56px, 9vw, 96px) 0;
+  border-top: 1px solid var(--border);
+}
+.section-num {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-faint);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin-bottom: 28px;
+  display: block;
+}
+.section-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(36px, 5.5vw, 64px);
+  line-height: 1.0;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  margin-bottom: 48px;
+  max-width: 22ch;
+}
+.section-title em { font-style: italic; color: var(--accent); }
+
+.prose {
+  max-width: 76ch;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1.8;
+  color: var(--text-body);
+}
+.prose p { margin-bottom: 1.4em; }
+.prose p:last-child { margin-bottom: 0; }
+.prose strong { color: var(--text); font-weight: 500; }
+.prose em { color: var(--accent); font-style: normal; }
+.prose code {
+  font-family: var(--font-mono);
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  padding: 2px 8px;
+  color: var(--accent);
+  font-size: 0.92em;
+}
+
+/* ============ TWO-COLUMN INFO ============ */
+.split {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 64px;
+  margin-top: 32px;
+}
+.split-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--accent);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding-top: 4px;
+}
+.split-body {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1.75;
+  color: var(--text-body);
+}
+.split-body strong { color: var(--text); font-weight: 500; }
+.split-body code {
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  padding: 2px 8px;
+  color: var(--accent);
+  font-size: 0.92em;
+}
+@media (max-width: 760px) {
+  .split { grid-template-columns: 1fr; gap: 18px; }
+}
+
+/* ============ PRINCIPLES ============ */
+.principles {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  margin-top: 32px;
+}
+@media (max-width: 880px) { .principles { grid-template-columns: 1fr; } }
+.principle {
+  background: var(--bg);
+  padding: 44px 36px;
+  transition: background 0.3s ease;
+}
+.principle:hover { background: var(--surface); }
+.principle-num {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--accent);
+  letter-spacing: 0.14em;
+  margin-bottom: 18px;
+}
+.principle-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(22px, 2.5vw, 28px);
+  color: var(--text);
+  margin-bottom: 18px;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+}
+.principle-body {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.75;
+  color: var(--text-body);
+}
+.principle-body strong { color: var(--text); }
+.principle-body em { color: var(--accent); font-style: normal; }
+
+/* ============ STACK ============ */
+.stack-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  margin-top: 32px;
+}
+@media (max-width: 760px) { .stack-grid { grid-template-columns: 1fr; gap: 18px; } }
+.stack-col {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 36px 32px;
+}
+.stack-col-tag {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--accent);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+}
+.stack-col-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 22px;
+  color: var(--text);
+  margin-bottom: 24px;
+  letter-spacing: -0.01em;
+}
+.stack-list {
+  list-style: none;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 2;
+  color: var(--text-body);
+}
+.stack-list li {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+.stack-list li::before {
+  content: '·';
+  color: var(--accent);
+  font-weight: 700;
+}
+
+/* ============ WONT-DO ============ */
+.wont-list {
+  list-style: none;
+  margin-top: 28px;
+  border-top: 1px solid var(--border);
+}
+.wont-list li {
+  display: grid;
+  grid-template-columns: 60px 1fr;
+  gap: 24px;
+  padding: 22px 0;
+  border-bottom: 1px solid var(--border);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--text-body);
+}
+.wont-list li .x {
+  font-family: var(--font-mono);
+  font-size: 16px;
+  color: var(--accent);
+  letter-spacing: 0.08em;
+  padding-top: 0;
+}
+.wont-list li strong { color: var(--text); font-weight: 500; }
+
+/* ============ CONTACT ============ */
+.contact {
+  padding: clamp(80px, 14vw, 140px) 0;
+  border-top: 1px solid var(--border);
+  background: radial-gradient(ellipse at top, var(--surface) 0%, var(--bg) 70%);
+}
+.contact-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--accent);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin-bottom: 32px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.contact-eyebrow::before {
+  content: '';
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  background: var(--accent);
+  border-radius: 50%;
+}
+.contact-title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(40px, 7vw, 88px);
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+  color: var(--text);
+  margin-bottom: 32px;
+  max-width: 18ch;
+}
+.contact-title em { font-style: italic; color: var(--accent); }
+.contact-sub {
+  font-family: var(--font-mono);
+  font-size: 15px;
+  color: var(--text-muted);
+  margin-bottom: 56px;
+  max-width: 60ch;
+  line-height: 1.7;
+}
+.contact-links {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+}
+.contact-link {
+  background: var(--bg);
+  padding: 32px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: background 0.25s ease;
+  position: relative;
+}
+.contact-link:hover { background: var(--surface); }
+.contact-link:hover .contact-link-value { color: var(--accent); }
+.contact-link-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-faint);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.contact-link-value {
+  font-family: var(--font-display);
+  font-size: clamp(22px, 2.5vw, 28px);
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+  transition: color 0.25s ease;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.contact-link-value svg {
+  width: 18px;
+  height: 18px;
+  opacity: 0.5;
+  transition: opacity 0.25s, transform 0.25s;
+}
+.contact-link:hover .contact-link-value svg {
+  opacity: 1;
+  transform: translate(2px, -2px);
+}
+
+/* ============ FOOTER ============ */
+.footer {
+  padding: 48px 0 64px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-faint);
+  letter-spacing: 0.04em;
+  border-top: 1px solid var(--border);
+}
+.footer-inner {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 24px;
+}
+.footer a { color: var(--text-muted); transition: color 0.2s; }
+.footer a:hover { color: var(--text); }
+.footer-links { display: flex; gap: 20px; }
+.footer-links a { display: inline-flex; align-items: center; gap: 4px; }
+
+/* ============ ANIMATIONS ============ */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.hero-kicker { animation: fadeUp 0.6s ease-out 0.05s both; }
+.hero-title { animation: fadeUp 0.8s ease-out 0.15s both; }
+.hero-lede { animation: fadeUp 0.8s ease-out 0.3s both; }
+
+@media (max-width: 640px) {
+  body { font-size: 13px; }
+}
+</style>
 </head>
 <body>
-<div class="grid-bg"></div>
 
-<nav class="topnav">
-  <div class="topnav-inner">
-    <a href="/" class="brand">Yash<span>.</span>Vardhan</a>
+<!-- ============ NAV ============ -->
+<nav class="nav">
+  <div class="container nav-inner">
+    <a href="/" class="nav-logo">Yash<span class="dot">.</span>Vardhan</a>
     <div class="nav-links">
-      <a href="/" class="nav-link">Home</a>
-      <a href="/about/" class="nav-link active">About</a>
-      <a href="/work/" class="nav-link">Work</a>
-      <a href="/personal/" class="nav-link">Personal</a>
+      <a href="/">Home</a>
+      <a href="/about/" class="active">About</a>
+      <a href="/work/">Work</a>
+      <a href="/personal/">Personal</a>
     </div>
   </div>
 </nav>
 
-<div class="page">
+<!-- ============ HERO ============ -->
+<header class="hero">
+  <div class="container">
+    <div class="hero-kicker">Sports CV · Cricket Analyst · Self-documenting builder</div>
+    <h1 class="hero-title">About<em>.</em></h1>
+    <p class="hero-lede">
+      <strong>I'm a Sports CV engineer at KhiladiPro.</strong> By day I work on production computer vision for live cricket and badminton — annotation pipelines, ball and shuttle tracking, action recognition, biomechanics. By night I build public cricket analytics — a deployed ODI match predictor, IPL scouting models, fantasy XI optimization, venue intelligence. <em>Two halves of one path: getting good enough to work on elite sport at the highest level.</em>
+    </p>
+  </div>
+</header>
 
-  <header class="page-header fade-up d1">
-    <div class="ph-tag">01 / About</div>
-    <h1 class="ph-title">About <span>Me</span></h1>
-    <p class="ph-desc">Sports AI engineer focused on <strong>computer vision for cricket and badminton</strong>. I build systems that survive messy, real-world video — not lab benchmarks.</p>
-  </header>
+<!-- ============ WHERE I AM ============ -->
+<section class="section">
+  <div class="container">
+    <span class="section-num">01 / Where I Am</span>
+    <h2 class="section-title">Sports CV Engineer at <em>KhiladiPro</em>.</h2>
 
-  <section class="about-grid fade-up d2">
-    <div class="about-body">
-      <p>I work on the full sports CV stack — from raw broadcast video to decisions a coach can act on. My day-to-day spans <strong>annotation infrastructure</strong>, <strong>ball and shuttle tracking</strong>, <strong>action recognition</strong>, <strong>pose-based biomechanics</strong>, and <strong>audio-visual event detection</strong>.</p>
-      <p>Outside of work, I run a long-running personal stack of cricket analytics projects — match predictors, venue intelligence, IPL auction strategy, fantasy AI. Most of them ship as live Streamlit or Tableau dashboards.</p>
-      <p>I think of myself as <strong>sports-first, algorithm-second</strong>. Every system I build starts with the sports question, then earns its architecture. Failure modes drive my design decisions, not benchmark numbers.</p>
-      <p>I'm based in India and open to roles in sports tech, franchise analytics, and broadcast AI.</p>
-    </div>
-    <aside class="about-side">
-      <div class="sec-head" style="margin-top:0"><span class="sec-label">Specialization</span><div class="sec-line"></div></div>
-      <div class="skills-grid">
-        <div class="skill-item"><div class="skill-icon">01 / CV</div><div class="skill-text">Ball &amp; Shuttle Tracking · Trajectory Analysis</div></div>
-        <div class="skill-item"><div class="skill-icon">02 / TEMPORAL</div><div class="skill-text">Shot &amp; Action Intelligence</div></div>
-        <div class="skill-item"><div class="skill-icon">03 / BIOMECH</div><div class="skill-text">Pose-Based Technique Analysis</div></div>
-        <div class="skill-item"><div class="skill-icon">04 / MULTIMODAL</div><div class="skill-text">Audio-Visual Event Detection</div></div>
-        <div class="skill-item"><div class="skill-icon">05 / ANALYTICS</div><div class="skill-text">Tactical Modeling · Win Probability</div></div>
-      </div>
-    </aside>
-  </section>
-
-  <section class="fade-up d3">
-    <div class="sec-head"><span class="sec-label">How I Build</span><div class="sec-line"></div></div>
-    <div class="proj-grid">
-      <div class="proj-card" style="cursor:default">
-        <div class="proj-num">01</div>
-        <div class="proj-title">Sports-first framing</div>
-        <div class="proj-desc">Every system starts with the sports question, not the algorithm. The right model for cricket is the wrong one for badminton.</div>
-      </div>
-      <div class="proj-card" style="cursor:default">
-        <div class="proj-num">02</div>
-        <div class="proj-title">Robustness over accuracy</div>
-        <div class="proj-desc">Systems are built to survive occlusion, motion blur, and variable broadcast conditions — not to top a leaderboard.</div>
-      </div>
-      <div class="proj-card" style="cursor:default">
-        <div class="proj-num">03</div>
-        <div class="proj-title">Failure analysis as design</div>
-        <div class="proj-desc">Breakdowns drive data and architecture decisions. Retraining is the last resort, not the first.</div>
-      </div>
-      <div class="proj-card" style="cursor:default">
-        <div class="proj-num">04</div>
-        <div class="proj-title">Decision-ready output</div>
-        <div class="proj-desc">Every model answers one question: what does this enable a coach, analyst, or selector to do differently?</div>
+    <div class="split">
+      <div class="split-label">— Day Work</div>
+      <div class="split-body">
+        Production computer vision for live cricket and badminton broadcasts. The pipeline goes from <strong>raw broadcast video → annotation engine → object detection and tracking → action recognition → biomechanics → coach-facing intelligence</strong>. I work across the stack, not on a single sliver of it. Real footage means real constraints — occlusion, motion blur, variable camera setups, noisy audio. Solving those is most of the job.
       </div>
     </div>
-  </section>
 
-  <section class="fade-up d4">
-    <div class="sec-head"><span class="sec-label">Contact</span><div class="sec-line"></div></div>
-    <div class="detail-links" style="margin-top:0.5rem">
-      <a class="dl-btn primary" href="https://www.linkedin.com/in/yash-vardhan-5b3956169/" target="_blank">LinkedIn ↗</a>
-      <a class="dl-btn" href="mailto:yashv3110@gmail.com">yashv3110@gmail.com ↗</a>
-      <a class="dl-btn" href="tel:+918197261795">+91-81972 61795</a>
-      <a class="dl-btn" href="https://github.com/yashv04" target="_blank">GitHub ↗</a>
-      <a class="dl-btn" href="https://acrobat.adobe.com/id/urn:aaid:sc:AP:3ebf50aa-da84-42c9-bca0-812d237ed320" target="_blank">Resume ↗</a>
+    <div class="split" style="margin-top: 28px;">
+      <div class="split-label">— Night Work</div>
+      <div class="split-body">
+        Cricket analytics, built in public. A deployed ODI Full Match Predictor with calibrated probabilities and temporal train/val/test splits. An IPL Player Scouting Model with K-Means role clustering. A Fantasy XI optimizer using Integer Linear Programming. A Venue Intelligence Hub. Some of these have ML bugs I left in and documented honestly — because <em>knowing what a target-leakage signature looks like is more valuable than hiding it</em>.
+      </div>
     </div>
-  </section>
 
-  <footer class="foot">
-    <div class="foot-left">© Yash Vardhan · Sports AI Engineer</div>
-    <div class="foot-links">
-      <a class="foot-link" href="/work/">Work →</a>
-      <a class="foot-link" href="/personal/">Personal →</a>
+    <div class="split" style="margin-top: 28px;">
+      <div class="split-label">— Why Both</div>
+      <div class="split-body">
+        The CV work teaches the parts of the stack that are hard to learn from books — broadcast-grade pipelines, real-world data ingestion, deployment at production scale. The analytics work teaches the parts work doesn't yet touch — calibration, model selection rigor, optimization. <strong>Each half makes the other one better.</strong>
+      </div>
     </div>
-  </footer>
+  </div>
+</section>
 
-</div>
+<!-- ============ HOW I THINK ============ -->
+<section class="section">
+  <div class="container">
+    <span class="section-num">02 / How I Think About The Work</span>
+    <h2 class="section-title">Four <em>principles</em> I'll defend.</h2>
+
+    <div class="principles">
+      <div class="principle">
+        <div class="principle-num">— 01</div>
+        <h3 class="principle-title">Pipeline beats model.</h3>
+        <p class="principle-body">
+          80% of every project I've shipped was clean data, careful joins, version control, and parsing edge cases. The model is the last 20% — and the model gets all the credit while the pipeline does all the work. <em>I'd rather have a clean dataset and a logistic regression than a dirty one and a transformer.</em>
+        </p>
+      </div>
+
+      <div class="principle">
+        <div class="principle-num">— 02</div>
+        <h3 class="principle-title">Match the model to the data.</h3>
+        <p class="principle-body">
+          Reaching for XGBoost on 2,000 rows is a tell. On the ODI predictor I compared Logistic Regression, Random Forest, and XGBoost on a temporal validation set — LR won at 68.8% accuracy because 13 features on 2,005 rows is too small for tree boosting. Choose models for their <em>inductive bias</em>, not their reputation.
+        </p>
+      </div>
+
+      <div class="principle">
+        <div class="principle-num">— 03</div>
+        <h3 class="principle-title">Honest metrics or none.</h3>
+        <p class="principle-body">
+          A 1.0 accuracy is a signal to investigate, not celebrate. Calibration matters more than peak accuracy — a well-calibrated 60% beats a miscalibrated 90% for any downstream decision. <strong>If I can write the label as a function of the features in five lines of pseudocode, I don't have a prediction problem.</strong>
+        </p>
+      </div>
+
+      <div class="principle">
+        <div class="principle-num">— 04</div>
+        <h3 class="principle-title">Document obsessively.</h3>
+        <p class="principle-body">
+          This portfolio exists because I write about every project I ship — including what's broken. Each project page has a Limitations section that lists real bugs by line number. The writing isn't decoration; <em>it's the work that turns a notebook into something defensible</em>.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ STACK ============ -->
+<section class="section">
+  <div class="container">
+    <span class="section-num">03 / The Stack</span>
+    <h2 class="section-title">What I <em>use</em> day-to-day.</h2>
+
+    <div class="stack-grid">
+      <div class="stack-col">
+        <div class="stack-col-tag">— Computer Vision</div>
+        <h3 class="stack-col-title">Production CV at KhiladiPro</h3>
+        <ul class="stack-list">
+          <li>Python · PyTorch · OpenCV</li>
+          <li>YOLOv8 · TrackNet · MediaPipe</li>
+          <li>Pose estimation · Biomechanics</li>
+          <li>Custom annotation tooling</li>
+          <li>FFmpeg · video pipelines</li>
+          <li>Audio-visual event detection</li>
+        </ul>
+      </div>
+
+      <div class="stack-col">
+        <div class="stack-col-tag">— Analytics</div>
+        <h3 class="stack-col-title">Cricket models on the side</h3>
+        <ul class="stack-list">
+          <li>pandas · NumPy · scikit-learn</li>
+          <li>XGBoost · Gradient Boosting</li>
+          <li>K-Means · Quantile Regression</li>
+          <li>PuLP · Integer Linear Programming</li>
+          <li>Streamlit · Plotly · deployment</li>
+          <li>ICC-style Elo · isotonic calibration</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ THE PATH ============ -->
+<section class="section">
+  <div class="container">
+    <span class="section-num">04 / The Path</span>
+    <h2 class="section-title">Where this is <em>going</em>.</h2>
+
+    <div class="prose">
+      <p>
+        The honest version: I want to work on <em>elite sport at the highest level</em>. IPL teams running production analytics. ICC tournament intelligence. Broadcasters whose win-probability widgets are calibrated. National team biomechanics labs. The places where the work I do at KhiladiPro and the work I do on my own time both become professionally useful at the same time.
+      </p>
+      <p>
+        I'm not there yet. The portfolio exists to compress the gap — to make the work I've done visible enough, and rigorous enough, that the question of whether I'm qualified becomes uninteresting. <strong>Each project is documented like it's going to be defended in an interview tomorrow</strong> — because at some point, it will be.
+      </p>
+      <p>
+        The plan is simple: keep shipping at KhiladiPro, keep building public projects that get harder, keep writing about both. The work I'll be doing in two years isn't the work I'm doing today, and I'm fine with that. <em>The trajectory is the point.</em>
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ WHAT I WON'T DO ============ -->
+<section class="section">
+  <div class="container">
+    <span class="section-num">05 / Selectivity</span>
+    <h2 class="section-title">What I <em>won't</em> do.</h2>
+
+    <div class="prose" style="margin-bottom: 32px;">
+      <p>The work I'll defend has the work I won't do as its foundation. These aren't preferences — they're the lines that make the rest of what I ship credible.</p>
+    </div>
+
+    <ul class="wont-list">
+      <li>
+        <span class="x">→ 01</span>
+        <span><strong>Ship a model whose metrics I can't explain in plain English.</strong> If I can't tell you why a number is what it is, I haven't earned the right to claim it.</span>
+      </li>
+      <li>
+        <span class="x">→ 02</span>
+        <span><strong>Hide failed experiments.</strong> Every project page on this site has a Limitations section that lists real bugs. Two projects have target leakage I left in and documented honestly. The failures teach more than the successes.</span>
+      </li>
+      <li>
+        <span class="x">→ 03</span>
+        <span><strong>Claim expertise I don't have.</strong> I'm early-career, working at KhiladiPro, building toward elite sport. That's the truth. Saying I'm already at the highest level would close doors faster than admitting I'm not.</span>
+      </li>
+      <li>
+        <span class="x">→ 04</span>
+        <span><strong>Use ML where a rule-based system is more honest.</strong> The Venue Intelligence Hub uses if/then rules and K-Means because they're the right tools — not because I couldn't reach for a neural net.</span>
+      </li>
+      <li>
+        <span class="x">→ 05</span>
+        <span><strong>Use a random train/test split when temporal is honest.</strong> The ODI predictor's test set is 2024+ matches that the model never saw — even though it makes the headline number lower than a random split would. <em>The lower honest number is the useful one.</em></span>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============ CONTACT ============ -->
+<section class="contact">
+  <div class="container">
+    <div class="contact-eyebrow">Open to conversation</div>
+    <h2 class="contact-title">If you're working on <em>cricket or badminton CV at scale</em>, I want to hear from you.</h2>
+    <p class="contact-sub">Broadcaster analytics, franchise data teams, ICC initiatives, sports-tech startups, academic biomechanics labs — the work that bridges raw broadcast video and coach-ready decisions. Drop a line.</p>
+
+    <div class="contact-links">
+      <a href="mailto:yashv3110@gmail.com" class="contact-link">
+        <span class="contact-link-label">— Email</span>
+        <span class="contact-link-value">
+          yashv3110@gmail.com
+          <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 11L11 3M11 3H5M11 3V9"/></svg>
+        </span>
+      </a>
+      <a href="https://www.linkedin.com/in/yash-vardhan-5b3956169/" target="_blank" rel="noopener" class="contact-link">
+        <span class="contact-link-label">— LinkedIn</span>
+        <span class="contact-link-value">
+          yash-vardhan
+          <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 11L11 3M11 3H5M11 3V9"/></svg>
+        </span>
+      </a>
+      <a href="https://github.com/yashv04" target="_blank" rel="noopener" class="contact-link">
+        <span class="contact-link-label">— GitHub</span>
+        <span class="contact-link-value">
+          yashv04
+          <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 11L11 3M11 3H5M11 3V9"/></svg>
+        </span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer class="footer">
+  <div class="container footer-inner">
+    <div>© Yash Vardhan</div>
+    <div class="footer-links">
+      <a href="https://github.com/yashv04" target="_blank" rel="noopener">GitHub <span style="color: var(--accent);">↗</span></a>
+      <a href="https://www.linkedin.com/in/yash-vardhan-5b3956169/" target="_blank" rel="noopener">LinkedIn <span style="color: var(--accent);">↗</span></a>
+      <a href="mailto:yashv3110@gmail.com">Email <span style="color: var(--accent);">↗</span></a>
+    </div>
+  </div>
+</footer>
+
 </body>
 </html>

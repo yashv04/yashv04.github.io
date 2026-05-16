@@ -7,7 +7,7 @@
 <meta name="description" content="A two-part franchise auction system: a contextual Player Impact Score and an Integer Linear Programming squad optimizer under real IPL constraints — 95-crore budget, role minimums, overseas cap.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;500;600&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/css/personal-detail.css">
 </head>
 <body>
@@ -118,27 +118,27 @@
     <div class="lp-wrap">
       <svg viewBox="0 0 880 380" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="LP formulation diagram">
         <defs><marker id="arrow2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#737373"/></marker></defs>
-        <g><rect x="20" y="160" width="200" height="80" rx="4" fill="#161616" stroke="#2a2a2a"/><text x="120" y="185" text-anchor="middle" fill="#737373" font-family="JetBrains Mono, monospace" font-size="11" letter-spacing="0.08em">INPUT</text><text x="120" y="208" text-anchor="middle" fill="#fafafa" font-family="JetBrains Mono, monospace" font-size="14">543 players</text><text x="120" y="226" text-anchor="middle" fill="#ede4d0" font-family="JetBrains Mono, monospace" font-size="12">x ∈ {0, 1}⁵⁴³</text></g>
+        <g><rect x="20" y="160" width="200" height="80" rx="4" fill="#0e131a" stroke="#2a2a2a"/><text x="120" y="185" text-anchor="middle" fill="#737373" font-family="JetBrains Mono, monospace" font-size="11" letter-spacing="0.08em">INPUT</text><text x="120" y="208" text-anchor="middle" fill="#fafafa" font-family="JetBrains Mono, monospace" font-size="14">543 players</text><text x="120" y="226" text-anchor="middle" fill="#38bdf8" font-family="JetBrains Mono, monospace" font-size="12">x ∈ {0, 1}⁵⁴³</text></g>
         <path d="M 220 200 L 290 200" stroke="#737373" stroke-width="1.2" fill="none" marker-end="url(#arrow2)"/>
         <g>
-          <rect x="290" y="40" width="320" height="320" rx="4" fill="#0f0f0f" stroke="#dc2626" stroke-width="1.5"/>
-          <text x="450" y="68" text-anchor="middle" fill="#dc2626" font-family="JetBrains Mono, monospace" font-size="11" letter-spacing="0.12em">INTEGER LINEAR PROGRAM</text>
+          <rect x="290" y="40" width="320" height="320" rx="4" fill="#0a0e14" stroke="#38bdf8" stroke-width="1.5"/>
+          <text x="450" y="68" text-anchor="middle" fill="#38bdf8" font-family="JetBrains Mono, monospace" font-size="11" letter-spacing="0.12em">INTEGER LINEAR PROGRAM</text>
           <text x="310" y="105" fill="#737373" font-family="JetBrains Mono, monospace" font-size="11">// MAXIMIZE</text>
           <text x="310" y="128" fill="#fafafa" font-family="JetBrains Mono, monospace" font-size="13">Σ xᵢ · scoreᵢ</text>
           <line x1="310" y1="148" x2="590" y2="148" stroke="#1f1f1f"/>
           <text x="310" y="170" fill="#737373" font-family="JetBrains Mono, monospace" font-size="11">// SUBJECT TO</text>
-          <text x="310" y="194" fill="#ede4d0" font-family="JetBrains Mono, monospace" font-size="12">Σ xᵢ = 15</text><text x="500" y="194" fill="#525252" font-family="JetBrains Mono, monospace" font-size="11">squad size</text>
-          <text x="310" y="218" fill="#ede4d0" font-family="JetBrains Mono, monospace" font-size="12">Σ xᵢ · costᵢ ≤ 95cr</text><text x="500" y="218" fill="#525252" font-family="JetBrains Mono, monospace" font-size="11">budget cap</text>
-          <text x="310" y="242" fill="#ede4d0" font-family="JetBrains Mono, monospace" font-size="12">Σ xᵢ [overseas] ≥ 4</text><text x="500" y="242" fill="#525252" font-family="JetBrains Mono, monospace" font-size="11">league rule</text>
-          <text x="310" y="266" fill="#ede4d0" font-family="JetBrains Mono, monospace" font-size="12">Σ xᵢ [batsman] ≥ 5</text><text x="500" y="266" fill="#525252" font-family="JetBrains Mono, monospace" font-size="11">role min</text>
-          <text x="310" y="290" fill="#ede4d0" font-family="JetBrains Mono, monospace" font-size="12">Σ xᵢ [bowler] ≥ 5</text><text x="500" y="290" fill="#525252" font-family="JetBrains Mono, monospace" font-size="11">role min</text>
-          <text x="310" y="314" fill="#ede4d0" font-family="JetBrains Mono, monospace" font-size="12">Σ xᵢ [allrnd] ≥ 3</text><text x="500" y="314" fill="#525252" font-family="JetBrains Mono, monospace" font-size="11">role min</text>
-          <text x="310" y="338" fill="#ede4d0" font-family="JetBrains Mono, monospace" font-size="12">Σ xᵢ [wk] ≥ 2</text><text x="500" y="338" fill="#525252" font-family="JetBrains Mono, monospace" font-size="11">role min</text>
+          <text x="310" y="194" fill="#38bdf8" font-family="JetBrains Mono, monospace" font-size="12">Σ xᵢ = 15</text><text x="500" y="194" fill="#525252" font-family="JetBrains Mono, monospace" font-size="11">squad size</text>
+          <text x="310" y="218" fill="#38bdf8" font-family="JetBrains Mono, monospace" font-size="12">Σ xᵢ · costᵢ ≤ 95cr</text><text x="500" y="218" fill="#525252" font-family="JetBrains Mono, monospace" font-size="11">budget cap</text>
+          <text x="310" y="242" fill="#38bdf8" font-family="JetBrains Mono, monospace" font-size="12">Σ xᵢ [overseas] ≥ 4</text><text x="500" y="242" fill="#525252" font-family="JetBrains Mono, monospace" font-size="11">league rule</text>
+          <text x="310" y="266" fill="#38bdf8" font-family="JetBrains Mono, monospace" font-size="12">Σ xᵢ [batsman] ≥ 5</text><text x="500" y="266" fill="#525252" font-family="JetBrains Mono, monospace" font-size="11">role min</text>
+          <text x="310" y="290" fill="#38bdf8" font-family="JetBrains Mono, monospace" font-size="12">Σ xᵢ [bowler] ≥ 5</text><text x="500" y="290" fill="#525252" font-family="JetBrains Mono, monospace" font-size="11">role min</text>
+          <text x="310" y="314" fill="#38bdf8" font-family="JetBrains Mono, monospace" font-size="12">Σ xᵢ [allrnd] ≥ 3</text><text x="500" y="314" fill="#525252" font-family="JetBrains Mono, monospace" font-size="11">role min</text>
+          <text x="310" y="338" fill="#38bdf8" font-family="JetBrains Mono, monospace" font-size="12">Σ xᵢ [wk] ≥ 2</text><text x="500" y="338" fill="#525252" font-family="JetBrains Mono, monospace" font-size="11">role min</text>
         </g>
         <path d="M 610 200 L 680 200" stroke="#737373" stroke-width="1.2" fill="none" marker-end="url(#arrow2)"/>
-        <g><rect x="680" y="160" width="180" height="80" rx="4" fill="#161616" stroke="#dc2626"/><text x="770" y="185" text-anchor="middle" fill="#dc2626" font-family="JetBrains Mono, monospace" font-size="11" letter-spacing="0.08em">OUTPUT</text><text x="770" y="208" text-anchor="middle" fill="#fafafa" font-family="JetBrains Mono, monospace" font-size="14">Optimal 15</text><text x="770" y="226" text-anchor="middle" fill="#ede4d0" font-family="JetBrains Mono, monospace" font-size="12">CBC · &lt; 1s</text></g>
+        <g><rect x="680" y="160" width="180" height="80" rx="4" fill="#0e131a" stroke="#38bdf8"/><text x="770" y="185" text-anchor="middle" fill="#38bdf8" font-family="JetBrains Mono, monospace" font-size="11" letter-spacing="0.08em">OUTPUT</text><text x="770" y="208" text-anchor="middle" fill="#fafafa" font-family="JetBrains Mono, monospace" font-size="14">Optimal 15</text><text x="770" y="226" text-anchor="middle" fill="#38bdf8" font-family="JetBrains Mono, monospace" font-size="12">CBC · &lt; 1s</text></g>
       </svg>
-      <div class="lp-caption">543 binary decision variables · 1 linear objective · 7 linear constraints · solved by branch-and-bound via CBC. Search space <strong style="color: var(--cream);">C(543, 15) ≈ 10²⁸</strong>, but LP relaxation prunes most of it in under a second.</div>
+      <div class="lp-caption">543 binary decision variables · 1 linear objective · 7 linear constraints · solved by branch-and-bound via CBC. Search space <strong style="color: var(--accent);">C(543, 15) ≈ 10²⁸</strong>, but LP relaxation prunes most of it in under a second.</div>
     </div>
   </div>
 </section>
