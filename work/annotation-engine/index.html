@@ -3,95 +3,525 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Annotation &amp; Ground Truth Engine · Yash Vardhan</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/css/main.css">
+<title>Annotation Engine — Yash Vardhan</title>
+<meta name="description" content="A model-in-the-loop annotation platform spanning six sport-specific surfaces — built as a data-flywheel that systematically improves sports CV models. KhiladiPro, sole engineer.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg: #000000;
+  --surface: #0a0e14;
+  --surface-2: #0e131a;
+  --border: #11161e;
+  --border-strong: #1a2230;
+  --text: #ffffff;
+  --text-body: #d1d5db;
+  --text-muted: #6b7280;
+  --text-faint: #4b5563;
+  --accent: #38bdf8;
+  --accent-soft: rgba(56, 189, 248, 0.08);
+  --accent-line: rgba(56, 189, 248, 0.18);
+  --warn: #fbbf24;
+  --ok: #34d399;
+  --font-display: 'Syne', -apple-system, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --container: 1240px;
+  --gutter: clamp(20px, 5vw, 64px);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+body { background: var(--bg); color: var(--text-body); font-family: var(--font-mono); font-size: 14px; line-height: 1.75; font-weight: 400; overflow-x: hidden; }
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  background-image: linear-gradient(var(--accent-line) 1px, transparent 1px), linear-gradient(90deg, var(--accent-line) 1px, transparent 1px);
+  background-size: 120px 120px;
+  opacity: 0.12;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: var(--container); margin: 0 auto; padding: 0 var(--gutter); position: relative; z-index: 2; }
+
+/* NAV */
+.nav { position: sticky; top: 0; z-index: 100; background: rgba(0,0,0,0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); }
+.nav-inner { display: flex; align-items: center; justify-content: space-between; padding: 26px 0; }
+.nav-logo { font-family: var(--font-display); font-weight: 800; font-size: 22px; color: var(--text); letter-spacing: -0.01em; }
+.nav-logo .dot { color: var(--accent); font-weight: 400; }
+.nav-links { display: flex; gap: 48px; font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; }
+.nav-links a { color: var(--text-muted); padding-bottom: 4px; transition: color 0.2s; }
+.nav-links a:hover { color: var(--text); }
+.nav-links a.active { color: var(--accent); border-bottom: 1px solid var(--accent); }
+@media (max-width: 640px) { .nav-links { gap: 20px; font-size: 11px; } }
+
+/* HERO */
+.hero { padding: clamp(80px, 14vw, 140px) 0 clamp(60px, 9vw, 100px); }
+.hero-kicker { font-family: var(--font-mono); font-size: 12px; color: var(--accent); letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 36px; display: flex; align-items: center; gap: 14px; }
+.hero-kicker::before { content: ''; display: inline-block; width: 8px; height: 8px; background: var(--accent); border-radius: 50%; }
+.hero-title { font-family: var(--font-display); font-weight: 800; font-size: clamp(56px, 11vw, 140px); line-height: 0.94; letter-spacing: -0.03em; color: var(--text); margin-bottom: 40px; }
+.hero-title em { font-style: italic; color: var(--accent); font-weight: 800; }
+.hero-lede { font-family: var(--font-mono); font-size: clamp(15px, 1.4vw, 17px); line-height: 1.8; color: var(--text-body); max-width: 78ch; margin-bottom: 56px; }
+.hero-lede em { color: var(--accent); font-style: normal; }
+.hero-lede strong { color: var(--text); font-weight: 500; }
+.hero-meta-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1px; background: var(--border); border: 1px solid var(--border); }
+.hero-meta-cell { background: var(--bg); padding: 24px 24px; }
+.hero-meta-label { font-family: var(--font-mono); font-size: 10px; color: var(--text-faint); letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 10px; }
+.hero-meta-value { font-family: var(--font-display); font-size: clamp(20px, 2vw, 24px); font-weight: 700; color: var(--text); letter-spacing: -0.01em; line-height: 1.2; }
+.hero-meta-value.accent { color: var(--accent); }
+
+/* SECTION */
+.section { padding: clamp(56px, 9vw, 96px) 0; border-top: 1px solid var(--border); }
+.section-num { font-family: var(--font-mono); font-size: 11px; color: var(--text-faint); letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 24px; display: block; }
+.section-title { font-family: var(--font-display); font-weight: 700; font-size: clamp(32px, 5vw, 56px); line-height: 1.0; letter-spacing: -0.02em; color: var(--text); margin-bottom: 44px; max-width: 24ch; }
+.section-title em { font-style: italic; color: var(--accent); }
+.section-sub { font-family: var(--font-mono); font-size: 14px; color: var(--text-muted); margin-bottom: 40px; max-width: 72ch; line-height: 1.75; }
+.prose { max-width: 76ch; font-family: var(--font-mono); font-size: 14px; line-height: 1.85; color: var(--text-body); }
+.prose p { margin-bottom: 1.4em; }
+.prose p:last-child { margin-bottom: 0; }
+.prose strong { color: var(--text); font-weight: 500; }
+.prose em { color: var(--accent); font-style: normal; }
+.prose code { font-family: var(--font-mono); background: var(--surface); border: 1px solid var(--border-strong); padding: 2px 8px; color: var(--accent); font-size: 0.92em; }
+
+/* FLYWHEEL */
+.flywheel-wrap { margin-top: 36px; padding: clamp(28px, 5vw, 56px) clamp(20px, 4vw, 48px); background: var(--surface); border: 1px solid var(--border); overflow-x: auto; }
+.flywheel-wrap svg { display: block; margin: 0 auto; max-width: 100%; height: auto; }
+.flywheel-caption { margin-top: 32px; font-family: var(--font-mono); font-size: 13px; color: var(--text-muted); text-align: center; max-width: 70ch; margin-left: auto; margin-right: auto; line-height: 1.75; }
+.flywheel-caption strong { color: var(--accent); }
+
+/* OUTCOMES */
+.outcomes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); margin-top: 36px; }
+@media (max-width: 760px) { .outcomes { grid-template-columns: 1fr; } }
+.outcome { background: var(--bg); padding: 44px 36px; transition: background 0.3s ease; }
+.outcome:hover { background: var(--surface); }
+.outcome-label { font-family: var(--font-mono); font-size: 11px; color: var(--accent); letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 18px; }
+.outcome-value { font-family: var(--font-display); font-weight: 800; font-size: clamp(40px, 4.5vw, 56px); color: var(--text); line-height: 1; letter-spacing: -0.02em; margin-bottom: 16px; }
+.outcome-value .arrow { color: var(--accent); font-weight: 400; margin: 0 6px; }
+.outcome-value em { color: var(--accent); font-style: italic; }
+.outcome-caption { font-family: var(--font-mono); font-size: 13px; color: var(--text-muted); line-height: 1.6; max-width: 30ch; }
+
+/* TOOLS */
+.tools { display: grid; gap: 1px; background: var(--border); border: 1px solid var(--border); margin-top: 32px; }
+.tool { background: var(--bg); padding: 40px clamp(28px, 4vw, 48px); transition: background 0.3s ease; }
+.tool:hover { background: var(--surface); }
+.tool-header { display: grid; grid-template-columns: 80px 1fr auto; gap: 24px; align-items: baseline; margin-bottom: 24px; }
+@media (max-width: 760px) { .tool-header { grid-template-columns: 1fr; gap: 8px; } }
+.tool-num { font-family: var(--font-mono); font-size: 12px; color: var(--accent); letter-spacing: 0.14em; }
+.tool-name { font-family: var(--font-display); font-size: clamp(24px, 3vw, 32px); font-weight: 700; color: var(--text); letter-spacing: -0.01em; line-height: 1.15; }
+.tool-name em { color: var(--accent); font-style: italic; }
+.tool-stage { font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); letter-spacing: 0.12em; text-transform: uppercase; padding: 6px 12px; border: 1px solid var(--border-strong); white-space: nowrap; align-self: start; }
+.tool-stage.mature { color: var(--ok); border-color: rgba(52,211,153,0.3); }
+.tool-stage.strong { color: var(--accent); border-color: rgba(56,189,248,0.3); }
+.tool-stage.starter { color: var(--warn); border-color: rgba(251,191,36,0.3); }
+.tool-stage.early { color: var(--text-muted); }
+.tool-body { font-family: var(--font-mono); font-size: 14px; line-height: 1.75; color: var(--text-body); margin-bottom: 24px; max-width: 78ch; }
+.tool-body strong { color: var(--text); }
+.tool-body em { color: var(--accent); font-style: normal; }
+.tool-body code { color: var(--accent); font-size: 0.92em; }
+.tool-metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1px; background: var(--border-strong); border: 1px solid var(--border-strong); margin-top: 24px; }
+.metric { background: var(--surface); padding: 18px 20px; }
+.metric-label { font-family: var(--font-mono); font-size: 10px; color: var(--text-faint); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 8px; }
+.metric-value { font-family: var(--font-mono); font-size: 15px; color: var(--text); font-weight: 500; line-height: 1.3; }
+.metric-value.accent { color: var(--accent); }
+.tool-note { margin-top: 20px; padding: 16px 20px; background: var(--surface); border-left: 3px solid var(--accent); font-family: var(--font-mono); font-size: 13px; color: var(--text-muted); line-height: 1.7; }
+.tool-note strong { color: var(--text); }
+.tool-note em { color: var(--accent); font-style: normal; }
+
+/* ARCH */
+.arch-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); border: 1px solid var(--border); margin-top: 32px; }
+@media (max-width: 760px) { .arch-grid { grid-template-columns: 1fr; } }
+.arch-block { background: var(--bg); padding: 36px 32px; transition: background 0.3s ease; }
+.arch-block:hover { background: var(--surface); }
+.arch-num { font-family: var(--font-mono); font-size: 11px; color: var(--accent); letter-spacing: 0.14em; margin-bottom: 18px; }
+.arch-title { font-family: var(--font-display); font-weight: 700; font-size: clamp(20px, 2.2vw, 24px); color: var(--text); letter-spacing: -0.01em; line-height: 1.2; margin-bottom: 18px; }
+.arch-body { font-family: var(--font-mono); font-size: 13px; line-height: 1.75; color: var(--text-body); }
+.arch-body code { color: var(--accent); }
+.arch-body strong { color: var(--text); }
+
+/* STACK */
+.stack { margin-top: 32px; border: 1px solid var(--border); background: var(--surface); }
+.stack-row { display: grid; grid-template-columns: 220px 1fr; gap: 32px; padding: 22px 28px; border-top: 1px solid var(--border-strong); }
+.stack-row:first-child { border-top: none; }
+.stack-cat { font-family: var(--font-mono); font-size: 11px; color: var(--accent); letter-spacing: 0.12em; text-transform: uppercase; }
+.stack-list { font-family: var(--font-mono); font-size: 13px; line-height: 1.8; color: var(--text-body); }
+@media (max-width: 760px) { .stack-row { grid-template-columns: 1fr; gap: 8px; } }
+
+/* NEXT */
+.next-list { list-style: none; margin-top: 24px; }
+.next-list li { display: grid; grid-template-columns: 60px 1fr; gap: 24px; padding: 22px 0; border-top: 1px solid var(--border); font-family: var(--font-mono); font-size: 14px; line-height: 1.7; color: var(--text-body); }
+.next-list li:last-child { border-bottom: 1px solid var(--border); }
+.next-list li .x { font-family: var(--font-mono); font-size: 13px; color: var(--accent); }
+.next-list li strong { color: var(--text); }
+.next-list li em { color: var(--accent); font-style: normal; }
+
+/* CONFIDENTIAL */
+.confidential { margin-top: 56px; padding: 24px 28px; border: 1px solid var(--border-strong); background: var(--surface); }
+.confidential-label { font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 12px; }
+.confidential-body { font-family: var(--font-mono); font-size: 13px; color: var(--text-muted); line-height: 1.75; max-width: 72ch; }
+.confidential-body em { color: var(--text-body); font-style: normal; }
+
+/* FOOTER */
+.footer { padding: 48px 0 64px; font-family: var(--font-mono); font-size: 12px; color: var(--text-faint); letter-spacing: 0.04em; border-top: 1px solid var(--border); }
+.footer-inner { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 24px; }
+.footer a { color: var(--text-muted); transition: color 0.2s; }
+.footer a:hover { color: var(--text); }
+.footer-links { display: flex; gap: 20px; }
+
+@keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+.hero-kicker { animation: fadeUp 0.6s ease-out 0.05s both; }
+.hero-title { animation: fadeUp 0.8s ease-out 0.15s both; }
+.hero-lede { animation: fadeUp 0.8s ease-out 0.3s both; }
+.hero-meta-grid { animation: fadeUp 0.8s ease-out 0.45s both; }
+@media (max-width: 640px) { body { font-size: 13px; } }
+</style>
 </head>
 <body>
-<div class="grid-bg"></div>
 
-<nav class="topnav">
-  <div class="topnav-inner">
-    <a href="/" class="brand">Yash<span>.</span>Vardhan</a>
+<nav class="nav">
+  <div class="container nav-inner">
+    <a href="/" class="nav-logo">Yash<span class="dot">.</span>Vardhan</a>
     <div class="nav-links">
-      <a href="/" class="nav-link">Home</a>
-      <a href="/about/" class="nav-link">About</a>
-      <a href="/work/" class="nav-link active">Work</a>
-      <a href="/personal/" class="nav-link">Personal</a>
+      <a href="/">Home</a>
+      <a href="/about/">About</a>
+      <a href="/work/" class="active">Work</a>
+      <a href="/personal/">Personal</a>
     </div>
   </div>
 </nav>
 
-<div class="page">
-
-  <a class="back-link" href="/work/">← Back to Work Projects</a>
-
-  <header class="detail-header fade-up d1">
-    <div class="detail-eyebrow">
-      01 / Infrastructure · Foundation Layer
-      <span class="internal-tag">Internal · Not Public</span>
+<header class="hero">
+  <div class="container">
+    <div class="hero-kicker">Work · KhiladiPro · Sole Engineer</div>
+    <h1 class="hero-title">Annotation<em>.</em></h1>
+    <p class="hero-lede">
+      A model-in-the-loop annotation platform spanning <strong>six sport-specific surfaces</strong> across cricket and badminton. Not a labelling tool. <em>A data-flywheel</em> — every keystroke produces a structured prediction/correction delta that feeds the next training cycle. The platform isn't measured by what it labels. <strong>It's measured by how much better the models get because of what it labels.</strong>
+    </p>
+    <div class="hero-meta-grid">
+      <div class="hero-meta-cell"><div class="hero-meta-label">Role</div><div class="hero-meta-value">Sole Engineer</div></div>
+      <div class="hero-meta-cell"><div class="hero-meta-label">Surfaces</div><div class="hero-meta-value">6 Sport-Specific</div></div>
+      <div class="hero-meta-cell"><div class="hero-meta-label">Flywheel Lift</div><div class="hero-meta-value accent">+10pp Acc</div></div>
+      <div class="hero-meta-cell"><div class="hero-meta-label">Pixel Error</div><div class="hero-meta-value accent">−70%+</div></div>
     </div>
-    <h1 class="detail-title">Sports Annotation &amp; <span>Ground Truth Engine</span></h1>
-    <p class="detail-lead">A production labelling system for <strong>shuttle, cricket ball, bat, and court</strong> annotation. Handles manual and model-predicted data in one interface — the infrastructure every downstream CV system at the company depends on.</p>
-  </header>
+  </div>
+</header>
 
-  <section class="detail-section fade-up d2">
-    <div class="ds-label">What</div>
-    <div class="ds-body">
-      <p>A web-based annotation platform that lets analysts and ML engineers label sport-specific objects across video frames. Four object types — <strong>shuttle, cricket ball, bat, court markings</strong> — across two sports.</p>
-      <p>One workflow handles both <strong>manual ground-truth labelling</strong> and <strong>review-and-correct over model predictions</strong>, so the same tool drives dataset creation, benchmarking, and human-in-the-loop retraining.</p>
+<section class="section">
+  <div class="container">
+    <span class="section-num">01 / The Problem</span>
+    <h2 class="section-title">Sport-agnostic <em>annotators</em> can't see the sport.</h2>
+    <div class="prose">
+      <p>Sports CV models live or die by the quality of their training data. At KhiladiPro we ship trajectory, keypoint, and event-detection models across cricket and badminton — every one of them needs frame-level supervision: where is the shuttle in frame 247? Which four points define the bat? Did the ball pitch IN or OUT? Are these 10 court corners detected correctly?</p>
+      <p>Off-the-shelf annotators (CVAT, Labelbox, V7) are <em>sport-agnostic</em>. They treat a shuttle, a cricket ball, a bat quadrilateral, and a 10-point court grid as the same generic "draw a thing" task — which means a 90-second rally takes 40 minutes to label, and reviewers can't catch sport-specific errors. A "landing" frame that's physically impossible. A stumps box that doesn't enclose the wickets. A court corner placed off the singles line.</p>
+      <p>I built the <strong>KhiladiPro Annotator</strong> to collapse that loop. <em>Model-first.</em> <em>Sport-aware.</em> The model labels the video first — the annotator only corrects what's wrong — and every keystroke is shaped around the physics of the sport being labeled.</p>
     </div>
-  </section>
+  </div>
+</section>
 
-  <section class="detail-section fade-up d2">
-    <div class="ds-label">Why</div>
-    <div class="ds-body">
-      <p>Every downstream system — ball tracking, shot recognition, biomechanics — needs <strong>clean, consistent, sport-aware ground truth</strong>. Generic annotation tools weren't built for shuttle visibility under arena lighting, partial bat occlusion, or the frame-rate quirks of broadcast feeds.</p>
-      <p>Without a purpose-built engine, every CV project would re-invent its own labelling pipeline. With one, we get a <strong>single source of truth</strong> and the ability to retrain models against newly-corrected frames in days, not weeks.</p>
+<section class="section">
+  <div class="container">
+    <span class="section-num">02 / The Flywheel</span>
+    <h2 class="section-title">A data-flywheel, not a labelling <em>tool</em>.</h2>
+    <p class="section-sub">The architectural decision that turns annotation from a cost center into a continuously-improving training-data pipeline. Every label preserves both the model's prediction and the human's correction — and the delta becomes the next training signal.</p>
+
+    <div class="flywheel-wrap">
+      <svg viewBox="0 0 1000 480" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Data-flywheel architecture">
+        <defs>
+          <marker id="arrFW" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#38bdf8"/>
+          </marker>
+        </defs>
+        <g>
+          <rect x="380" y="200" width="240" height="80" rx="2" fill="#0a0e14" stroke="#38bdf8" stroke-width="1.5"/>
+          <text x="500" y="226" text-anchor="middle" fill="#38bdf8" font-family="JetBrains Mono, monospace" font-size="11" letter-spacing="0.12em">KHILADIPRO ANNOTATOR</text>
+          <text x="500" y="248" text-anchor="middle" fill="#ffffff" font-family="JetBrains Mono, monospace" font-size="13">pred_* / man_* / edited</text>
+          <text x="500" y="266" text-anchor="middle" fill="#6b7280" font-family="JetBrains Mono, monospace" font-size="11">6 sport-specific surfaces</text>
+        </g>
+        <g>
+          <rect x="380" y="40" width="240" height="60" rx="2" fill="#0e131a" stroke="#1a2230"/>
+          <text x="500" y="62" text-anchor="middle" fill="#6b7280" font-family="JetBrains Mono, monospace" font-size="11" letter-spacing="0.1em">RAW BROADCAST CLIP</text>
+          <text x="500" y="82" text-anchor="middle" fill="#ffffff" font-family="JetBrains Mono, monospace" font-size="12">unlabeled video</text>
+        </g>
+        <g>
+          <rect x="720" y="120" width="240" height="80" rx="2" fill="#0e131a" stroke="#1a2230"/>
+          <text x="840" y="146" text-anchor="middle" fill="#6b7280" font-family="JetBrains Mono, monospace" font-size="11" letter-spacing="0.1em">MODEL INFERENCE</text>
+          <text x="840" y="168" text-anchor="middle" fill="#ffffff" font-family="JetBrains Mono, monospace" font-size="12">TrackNet · YOLO · TFLite</text>
+          <text x="840" y="186" text-anchor="middle" fill="#ede4d0" font-family="JetBrains Mono, monospace" font-size="11">predicts → pred_*</text>
+        </g>
+        <g>
+          <rect x="380" y="380" width="240" height="60" rx="2" fill="#0e131a" stroke="#1a2230"/>
+          <text x="500" y="402" text-anchor="middle" fill="#6b7280" font-family="JetBrains Mono, monospace" font-size="11" letter-spacing="0.1em">HUMAN CORRECTION</text>
+          <text x="500" y="422" text-anchor="middle" fill="#ffffff" font-family="JetBrains Mono, monospace" font-size="12">corrects → man_*, edited=true</text>
+        </g>
+        <g>
+          <rect x="40" y="120" width="240" height="80" rx="2" fill="#0e131a" stroke="#1a2230"/>
+          <text x="160" y="146" text-anchor="middle" fill="#6b7280" font-family="JetBrains Mono, monospace" font-size="11" letter-spacing="0.1em">RETRAINING CYCLE</text>
+          <text x="160" y="168" text-anchor="middle" fill="#ffffff" font-family="JetBrains Mono, monospace" font-size="12">delta → training data</text>
+          <text x="160" y="186" text-anchor="middle" fill="#38bdf8" font-family="JetBrains Mono, monospace" font-size="11">annotation_score signal</text>
+        </g>
+        <path d="M 620 70 Q 760 70 760 120" stroke="#38bdf8" stroke-width="1.5" fill="none" marker-end="url(#arrFW)"/>
+        <path d="M 760 200 Q 700 240 620 240" stroke="#38bdf8" stroke-width="1.5" fill="none" marker-end="url(#arrFW)"/>
+        <path d="M 500 280 L 500 380" stroke="#38bdf8" stroke-width="1.5" fill="none" marker-end="url(#arrFW)"/>
+        <path d="M 380 410 Q 200 410 200 200" stroke="#38bdf8" stroke-width="1.5" fill="none" marker-end="url(#arrFW)"/>
+        <path d="M 240 130 Q 360 70 380 70" stroke="#38bdf8" stroke-width="1.5" fill="none" marker-end="url(#arrFW)"/>
+        <text x="500" y="20" text-anchor="middle" fill="#6b7280" font-family="JetBrains Mono, monospace" font-size="11" letter-spacing="0.14em">— THE FLYWHEEL —</text>
+      </svg>
+      <div class="flywheel-caption">Models predict → annotators correct → corrections become the next training cycle's signal. <strong>The platform's value isn't the labels it produces — it's the rate at which the models improve because of those labels.</strong></div>
     </div>
-  </section>
+  </div>
+</section>
 
-  <section class="detail-section fade-up d3">
-    <div class="ds-label">How</div>
-    <div class="ds-body">
-      <ul>
-        <li>Web frontend optimized for <strong>frame-accurate point and bounding-box labelling</strong> with keyboard-first navigation.</li>
-        <li>Backend hosted on <strong>Google Cloud Run</strong> for elastic scaling during labelling sprints.</li>
-        <li>Predicted-vs-manual diff view — analysts review model output and correct only where it's wrong.</li>
-        <li>Versioned dataset exports feed directly into the training pipeline.</li>
-      </ul>
+<section class="section">
+  <div class="container">
+    <span class="section-num">03 / Measured Outcome</span>
+    <h2 class="section-title">What the flywheel <em>actually moved</em>.</h2>
+    <p class="section-sub">Sample model improvement through multiple retraining iterations driven entirely by annotator-produced training data. Numbers reflect the shuttle tracker (TrackNetV5) across the platform's lifetime to date.</p>
+
+    <div class="outcomes">
+      <div class="outcome">
+        <div class="outcome-label">Accuracy</div>
+        <div class="outcome-value">80<span class="arrow">→</span><em>90+</em><span style="font-size: 0.5em; color: var(--text-muted);">%</span></div>
+        <div class="outcome-caption">+10 percentage points through model-in-the-loop retraining.</div>
+      </div>
+      <div class="outcome">
+        <div class="outcome-label">Median Pixel Error</div>
+        <div class="outcome-value"><em>−70+</em><span style="font-size: 0.5em; color: var(--text-muted);">%</span></div>
+        <div class="outcome-caption">Localization error reduced by more than 70% from baseline.</div>
+      </div>
+      <div class="outcome">
+        <div class="outcome-label">Detection Rate</div>
+        <div class="outcome-value"><em>+15</em><span style="font-size: 0.5em; color: var(--text-muted);">%</span></div>
+        <div class="outcome-caption">Frame-level detection lift driven by harder corrected training data.</div>
+      </div>
     </div>
-  </section>
 
-  <section class="detail-section fade-up d3">
-    <div class="ds-label">Difficulties</div>
-    <div class="ds-body">
-      <ul>
-        <li><strong>Shuttle visibility</strong> — a shuttlecock at smash speed crosses several frames as a blur; labellers need sub-pixel precision tools, not generic boxes.</li>
-        <li><strong>Predicted/manual UX</strong> — designing one interface that didn't bias annotators toward accepting model output.</li>
-        <li><strong>Cross-sport reuse</strong> — keeping shared infrastructure clean while supporting sport-specific quirks (cricket pitch markings vs badminton court lines).</li>
-        <li><strong>Labelling velocity</strong> — every UX decision was measured in seconds per frame, because labels at scale are the real cost.</li>
-      </ul>
+    <div style="margin-top: 36px;">
+      <div class="prose">
+        <p>These aren't model-design numbers. They're <em>infrastructure-driven numbers</em> — the same model architecture, retrained on data the annotation platform produced over multiple cycles. The flywheel's design is what made the improvement compound rather than plateau.</p>
+      </div>
     </div>
-  </section>
+  </div>
+</section>
 
-  <section class="detail-section fade-up d4">
-    <div class="ds-label">Numbers</div>
-    <div class="numbers-grid">
-      <div class="num-cell gold"><div class="num-val">4</div><div class="num-label">Object Types Supported</div></div>
-      <div class="num-cell gold"><div class="num-val">2</div><div class="num-label">Sports (Cricket · Badminton)</div></div>
-      <div class="num-cell gold"><div class="num-val">1</div><div class="num-label">Unified Manual + Predicted UI</div></div>
-      <div class="num-cell"><div class="num-val">E2E</div><div class="num-label">Labelling → Training Pipeline</div></div>
+<section class="section">
+  <div class="container">
+    <span class="section-num">04 / The Six Surfaces</span>
+    <h2 class="section-title">Six tools. <em>One</em> editor backbone.</h2>
+    <p class="section-sub">Each tool ships with its own label schema, keyboard model, and sport-specific physics constraints — but they all share the same offline-first edit cache, model-in-the-loop schema, and retraining-signal infrastructure. Different stages of the flywheel; same underlying mechanism.</p>
+
+    <div class="tools">
+
+      <div class="tool">
+        <div class="tool-header">
+          <div class="tool-num">— 01</div>
+          <div class="tool-name">Shuttle Tracker <em>·</em> TrackNet-in-the-loop</div>
+          <div class="tool-stage mature">Mature · Production</div>
+        </div>
+        <div class="tool-body">
+          <strong>The job.</strong> Annotate the 2D position of a badminton shuttlecock in every frame of a rally, classify each landing as near/far court, and tag each line call as in/out/unclear.<br><br>
+          <strong>The hard part.</strong> Shuttles are small (often &lt;8 px in broadcast video), motion-blurred during smashes (&gt;300 km/h effective velocities at the racket), and occluded by the net every few seconds.<br><br>
+          <strong>How I built it.</strong> TrackNetV5 (and a halved-channel TrackNetV5Lite for fast iteration) pre-fills the trajectory. <code>R</code> = release, <code>L</code> = landing, <code>C</code> = contact, <code>O</code> = occlude. <code>Shift+←/→</code> jumps to the next/previous frame the model actually detected something on — annotators only stop on frames that need attention. Landing classification and line-call tag are stored alongside the point, not derived after the fact.
+        </div>
+        <div class="tool-metrics">
+          <div class="metric"><div class="metric-label">Model</div><div class="metric-value">TrackNetV5 · INT8</div></div>
+          <div class="metric"><div class="metric-label">Size</div><div class="metric-value accent">0.29 MB</div></div>
+          <div class="metric"><div class="metric-label">Speed (Apple CPU)</div><div class="metric-value accent">69.5 FPS</div></div>
+          <div class="metric"><div class="metric-label">Detection Rate</div><div class="metric-value accent">90.08%</div></div>
+          <div class="metric"><div class="metric-label">Accuracy</div><div class="metric-value">90.90%</div></div>
+          <div class="metric"><div class="metric-label">Median Px Error</div><div class="metric-value">3.67 px</div></div>
+        </div>
+        <div class="tool-note"><strong>Drives both tools.</strong> The same TrackNetV5 model powers the manual shuttle annotator AND the orchestrated auto-shuttle workflow — single model, two consumption modes.</div>
+      </div>
+
+      <div class="tool">
+        <div class="tool-header">
+          <div class="tool-num">— 02</div>
+          <div class="tool-name">Cricket Ball Tracker <em>·</em> dual stumps</div>
+          <div class="tool-stage starter">In-Loop · High-Recall Starter</div>
+        </div>
+        <div class="tool-body">
+          <strong>The job.</strong> Per-frame ball position across a delivery, plus per-event tags for release, landing (pitching point), and contact, plus two stumps bounding boxes — bowler's end and batter's end.<br><br>
+          <strong>Why two stumps.</strong> Almost every downstream cricket metric (line, length, deviation, swing) is computed in a coordinate system anchored on the stumps at both ends. Annotating only one set means we can't recover the 3D bowling axis. So the schema enforces two: <code>predBowl</code>, <code>predBat</code>, <code>manBowl</code>, <code>manBat</code>.<br><br>
+          <strong>Keyboard model built for speed.</strong> <code>R</code> / <code>L</code> / <code>C</code> for release / landing / contact; <code>B</code> / <code>Shift+B</code> for bowler stumps corners; <code>N</code> / <code>Shift+N</code> for batter stumps; full <code>Cmd+Z</code> / <code>Cmd+Shift+Z</code> undo-redo bolted onto every surface.
+        </div>
+        <div class="tool-metrics">
+          <div class="metric"><div class="metric-label">Model</div><div class="metric-value">TFLite FP16</div></div>
+          <div class="metric"><div class="metric-label">Size</div><div class="metric-value accent">3.41 MB</div></div>
+          <div class="metric"><div class="metric-label">Speed (CPU)</div><div class="metric-value">16.5 FPS</div></div>
+          <div class="metric"><div class="metric-label">Per-Frame Recall</div><div class="metric-value accent">96.2%</div></div>
+          <div class="metric"><div class="metric-label">Median Px Error</div><div class="metric-value">7.57 px</div></div>
+          <div class="metric"><div class="metric-label">Stumps Accuracy</div><div class="metric-value accent">99% (sub-pixel)</div></div>
+        </div>
+        <div class="tool-note"><strong>Recall-optimized by design.</strong> Built as a <em>high-recall localization layer</em> in the flywheel. False positives are filtered downstream; landing/release/contact frames are manually marked — ensuring the next training cycle's data is event-precise. This is the model the flywheel will improve next.</div>
+      </div>
+
+      <div class="tool">
+        <div class="tool-header">
+          <div class="tool-num">— 03</div>
+          <div class="tool-name">Cricket Bat Tracker <em>·</em> 4-point quadrilateral</div>
+          <div class="tool-stage strong">Strong · In-Loop</div>
+        </div>
+        <div class="tool-body">
+          <strong>The job.</strong> Annotate four keypoints per frame defining the cricket bat as a quadrilateral — head-top, head-bottom, barrel-mid, barrel-bottom — plus a contact flag for the impact frame.<br><br>
+          <strong>The hard part.</strong> The bat is rigid but rotates fast (a cover drive sweeps ~270° in ~150 ms) and self-occludes the bottom corners during the follow-through. Single-bbox detectors give you nothing useful — you need oriented geometry to compute shot direction, swing path, and contact angle.<br><br>
+          <strong>How the UI handles 4 keypoints without becoming a mode-switching nightmare.</strong> Numeric keys <code>1</code> / <code>2</code> / <code>3</code> / <code>4</code> cycle the active keypoint — no mode pickers, no dropdowns. Active keypoint is color-coded (red, orange, cyan, purple). Dashed lines = predictions, solid = manual edits — the visual contract makes it instantly obvious where the model is confident and where the human took over.
+        </div>
+        <div class="tool-metrics">
+          <div class="metric"><div class="metric-label">Model</div><div class="metric-value">YOLOv8n-pose</div></div>
+          <div class="metric"><div class="metric-label">Size</div><div class="metric-value accent">6.58 MB</div></div>
+          <div class="metric"><div class="metric-label">Params</div><div class="metric-value">3.08M</div></div>
+          <div class="metric"><div class="metric-label">Speed (CPU)</div><div class="metric-value">18.5 FPS</div></div>
+          <div class="metric"><div class="metric-label">Frame Detection</div><div class="metric-value accent">94.3%</div></div>
+          <div class="metric"><div class="metric-label">Per-Corner Median</div><div class="metric-value accent">1 px</div></div>
+        </div>
+        <div class="tool-note"><strong>Complete-quadrilateral guarantee.</strong> Across 5,436 frames, <em>every detection produces all 4 keypoints above threshold</em> — no partial geometries. Critical for downstream shot-direction and swing-path recovery, which can't consume 3-of-4 keypoint outputs. Mean error 2 px, median per corner 1 px — at the ≤2 px design target.</div>
+      </div>
+
+      <div class="tool">
+        <div class="tool-header">
+          <div class="tool-num">— 04</div>
+          <div class="tool-name">Badminton Court Keypointer <em>·</em> 10-point hybrid</div>
+          <div class="tool-stage strong">Strong · Validation Pending</div>
+        </div>
+        <div class="tool-body">
+          <strong>The job.</strong> Annotate 10 court keypoints — 6 service-line points + 4 singles corners — for every frame where the camera moves (broadcast pans, handheld, drone footage).<br><br>
+          <strong>The architectural insight.</strong> <em>Not all keypoints are equal.</em> The 6 service-line points are visually distinctive and detectable per-frame. The 4 singles corners are derivable from court geometry once the service lines are locked. So the YOLO keypoint detector is trained on the 6 service points only — and the 4 corners are propagated via homography. Detection effort goes where the signal is; geometry handles the rest.<br><br>
+          <strong>The annotator reflects this hybrid.</strong> Numeric keys <code>0</code>–<code>9</code> cycle through the 10 keypoints. Each has independent visibility flags — courts go partially off-screen during broadcast cuts and the model has to know which points are occluded vs. off-frame. Two annotation flows supported: <em>label-first</em> (pick a keypoint, then click) and <em>click-first</em> (click, then assign) — different annotators converged on different rhythms.
+        </div>
+        <div class="tool-metrics">
+          <div class="metric"><div class="metric-label">Model</div><div class="metric-value">YOLOv8 pose · .pt</div></div>
+          <div class="metric"><div class="metric-label">Size</div><div class="metric-value">47.6 MB · 23.5M</div></div>
+          <div class="metric"><div class="metric-label">Input</div><div class="metric-value">640×640</div></div>
+          <div class="metric"><div class="metric-label">Speed (MPS)</div><div class="metric-value accent">44.0 FPS</div></div>
+          <div class="metric"><div class="metric-label">Detection Rate (clean)</div><div class="metric-value accent">100%</div></div>
+          <div class="metric"><div class="metric-label">Homography Residual</div><div class="metric-value">2.61 px / kpt</div></div>
+        </div>
+        <div class="tool-note"><strong>Honest framing.</strong> The 100% detection rate is on <em>clean, undistorted broadcast-style footage</em> — the number drops on harder material (occlusion, players standing on lines, motion blur, oblique angles). Production mAP50 is pending — needs a labeled validation set, which the annotator itself will produce. <strong>Failure mode flagged for next training pass:</strong> the long-service-centre (LSC) keypoint shows ~2× the residual of other points and is the most likely source of derived-corner geometry drift.</div>
+      </div>
+
+      <div class="tool">
+        <div class="tool-header">
+          <div class="tool-num">— 05</div>
+          <div class="tool-name">Auto Shuttle Workflow <em>·</em> end-to-end orchestration</div>
+          <div class="tool-stage mature">Mature · Orchestrated</div>
+        </div>
+        <div class="tool-body">
+          <strong>The job.</strong> Take a raw badminton clip and produce a finalized annotation — trajectory + match-type classification + IN/OUT call + near/far landing — with the human in the loop <em>only on ambiguous frames</em>.<br><br>
+          <strong>How it composes.</strong><br>
+          (1) TrackNet infers the shuttle trajectory.<br>
+          (2) YOLO court keypointer infers the 10 court points in parallel — soft-fail, so the landing call degrades gracefully if court detection misses.<br>
+          (3) Court-aware match-type classifier uses the inferred court geometry to decide singles vs. doubles.<br>
+          (4) Landing-call task projects the trajectory into court coordinates and decides IN/OUT + near/far.<br>
+          (5) Annotator only opens the clip if the orchestrator flags low confidence on any stage.<br><br>
+          <strong>Why this matters.</strong> The five other tools produce training data. <em>This one is what makes them pay off</em> — the inference pipeline turning a raw clip into structured insight automatically, with the annotator as escalation, not as bottleneck.
+        </div>
+        <div class="tool-note"><strong>Human-as-escalation, not as labour.</strong> The auto-shuttle workflow inverts the usual annotation economy: the model labels the clip first; the human only intervenes on flagged-confidence frames. This is what compounds the flywheel — the better the models get, the less human time per clip is needed, the more clips get processed per week, the more training data flows in.</div>
+      </div>
+
+      <div class="tool">
+        <div class="tool-header">
+          <div class="tool-num">— 06</div>
+          <div class="tool-name">Generic Editor <em>·</em> the test harness</div>
+          <div class="tool-stage early">Internal · Iteration Tool</div>
+        </div>
+        <div class="tool-body">
+          A sport-agnostic single-point editor used to test new model checkpoints against local video files <em>before they touch the production sport-specific surfaces</em>. Same label schema as the shuttle tool, no sport-specific constraints, supports local file mode — the CV engineer's playground for evaluating a checkpoint without going through the full production deployment cycle.
+        </div>
+      </div>
+
     </div>
-  </section>
+  </div>
+</section>
 
-  <footer class="foot">
-    <div class="foot-left">Internal company project · screenshots and source not available.</div>
-    <div class="foot-links">
-      <a class="foot-link" href="/work/ball-shuttle-intelligence/">Next: Ball &amp; Shuttle Intelligence →</a>
+<section class="section">
+  <div class="container">
+    <span class="section-num">05 / Architecture</span>
+    <h2 class="section-title">Four decisions worth <em>defending</em>.</h2>
+    <p class="section-sub">The platform-level choices that make six different sport surfaces coexist on one editor backbone without becoming an unmaintainable mess.</p>
+
+    <div class="arch-grid">
+      <div class="arch-block">
+        <div class="arch-num">— 01</div>
+        <h3 class="arch-title">Optimistic offline-first edits</h3>
+        <p class="arch-body">All edits write to <code>IndexedDB</code> with a 500ms debounce, then sync to the server via <strong>versioned patch ops</strong> with conflict detection on <code>base_version</code>. Two annotators can edit the same clip without clobbering each other. A flaky wifi connection doesn't lose 30 minutes of work.</p>
+      </div>
+      <div class="arch-block">
+        <div class="arch-num">— 02</div>
+        <h3 class="arch-title">Model-in-the-loop schema</h3>
+        <p class="arch-body">Every label carries both a <code>pred_*</code> field (model output) AND a <code>man_*</code> field (human correction), plus an <code>edited</code> flag. The annotation isn't a replacement for the prediction — <strong>it's a measured correction of it</strong>. Models keep learning from the delta.</p>
+      </div>
+      <div class="arch-block">
+        <div class="arch-num">— 03</div>
+        <h3 class="arch-title">Sport-aware physics constraints</h3>
+        <p class="arch-body">Each tool's frame schema encodes the <em>events the sport actually cares about</em> — contact, landing, release, rest for cricket; <code>landing_area</code> (near/far) and <code>line_call</code> (in/out/unclear) for badminton; <code>det_conf</code> + 4-point quadrilaterals for the bat. The schema rejects physically-impossible labels before the human sees them.</p>
+      </div>
+      <div class="arch-block">
+        <div class="arch-num">— 04</div>
+        <h3 class="arch-title">Retryable uploads</h3>
+        <p class="arch-body">Exponential-backoff XHR <code>PUT</code> (1s → 2s → 4s) with progress callbacks and a 10-minute timeout. The retry budget exists because annotators work on real-world wifi, not labs — and losing a half-hour of corrected labels because of a network blip is unacceptable when those labels are the retraining signal.</p>
+      </div>
     </div>
-  </footer>
+  </div>
+</section>
 
-</div>
+<section class="section">
+  <div class="container">
+    <span class="section-num">06 / Stack</span>
+    <h2 class="section-title">What's <em>under</em> it.</h2>
+    <div class="stack">
+      <div class="stack-row">
+        <div class="stack-cat">— Frontend</div>
+        <div class="stack-list">Next.js 15  ·  React 19  ·  TypeScript 5  ·  Tailwind CSS  ·  IndexedDB (offline cache)  ·  XHR with progress + retry</div>
+      </div>
+      <div class="stack-row">
+        <div class="stack-cat">— Orchestration</div>
+        <div class="stack-list">Flyte (workflow orchestration)  ·  Bifrost (job dispatcher, Go/Twirp)  ·  GCS (artifact store)  ·  MongoDB (job state)</div>
+      </div>
+      <div class="stack-row">
+        <div class="stack-cat">— Models</div>
+        <div class="stack-list">TrackNetV5 / TrackNetV5Lite (shuttle)  ·  YOLOv8 keypoint (court · mAP50 ≥ 0.80 quality gate)  ·  TFLite ball + landing detector  ·  Custom 4-point bat detector (YOLOv8n-pose)</div>
+      </div>
+      <div class="stack-row">
+        <div class="stack-cat">— Role</div>
+        <div class="stack-list" style="color: var(--text);">Sole engineer  ·  schema design  ·  editor UX  ·  service layer  ·  model integration  ·  Flyte workflow wiring</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <span class="section-num">07 / What's Next</span>
+    <h2 class="section-title">What the flywheel is <em>about to move</em>.</h2>
+    <p class="section-sub">The platform compounds. Every annotation session improves the next training cycle. Here's what the next cycle is targeting.</p>
+
+    <ul class="next-list">
+      <li><span class="x">→ 01</span><span><strong>Cricket ball precision lift.</strong> Current 96.2% recall, ~44% precision. Next training pass uses the manually-corrected stumps boxes as a geometric prior to filter false positives before they enter the analytics pipeline.</span></li>
+      <li><span class="x">→ 02</span><span><strong>Long-Service-Centre (LSC) keypoint fix.</strong> Court detector shows ~2× higher residual on LSC vs. other service points. Targeted training augmentation on the far-center region is the next pass.</span></li>
+      <li><span class="x">→ 03</span><span><strong>Auto-event proposal for cricket.</strong> Landing/release/contact frames are currently manually marked. Next iteration adds derivative-reversal heuristics from the bat-tracker contact frame, plus a learned event classifier as a second stage.</span></li>
+      <li><span class="x">→ 04</span><span><strong>Court mAP50 production validation.</strong> Labeled validation set is being produced by the annotator itself — <em>the flywheel labelling its own benchmark.</em></span></li>
+      <li><span class="x">→ 05</span><span><strong>IN/OUT + near/far line-call models</strong> for both shuttle and auto-shuttle workflow. Currently the qualitative call lives in the annotator's schema; the predictive model is in active development.</span></li>
+    </ul>
+
+    <div class="confidential">
+      <div class="confidential-label">— A note on detail</div>
+      <div class="confidential-body">This page describes <em>the system's design and measured outcomes</em>. Internal repository paths, code structure, file names, deployment infrastructure, and specific proprietary algorithms are not shown — this is production work for KhiladiPro, and the engineering substance is what's discoverable here without exposing IP.</div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container footer-inner">
+    <div>© Yash Vardhan</div>
+    <div class="footer-links">
+      <a href="https://github.com/yashv04" target="_blank" rel="noopener">GitHub <span style="color: var(--accent);">↗</span></a>
+      <a href="https://www.linkedin.com/in/yash-vardhan-5b3956169/" target="_blank" rel="noopener">LinkedIn <span style="color: var(--accent);">↗</span></a>
+      <a href="mailto:yashv3110@gmail.com">Email <span style="color: var(--accent);">↗</span></a>
+    </div>
+  </div>
+</footer>
+
 </body>
 </html>
