@@ -3,96 +3,621 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Smash Technique &amp; Biomechanics · Yash Vardhan</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/css/main.css">
+<title>Smash Biomechanics — Yash Vardhan</title>
+<meta name="description" content="Badminton smash biomechanics analysis at KhiladiPro — 6-phase classification at 95% accuracy, event-driven shuttle speed measurement at 90% vs ground truth, dual-model pipeline on 240 FPS mobile capture.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg: #000000;
+  --surface: #0a0e14;
+  --surface-2: #0e131a;
+  --border: #11161e;
+  --border-strong: #1a2230;
+  --text: #ffffff;
+  --text-body: #d1d5db;
+  --text-muted: #6b7280;
+  --text-faint: #4b5563;
+  --accent: #38bdf8;
+  --accent-soft: rgba(56, 189, 248, 0.08);
+  --accent-line: rgba(56, 189, 248, 0.18);
+  --warn: #fbbf24;
+  --ok: #34d399;
+  --font-display: 'Syne', -apple-system, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --container: 1240px;
+  --gutter: clamp(20px, 5vw, 64px);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+body { background: var(--bg); color: var(--text-body); font-family: var(--font-mono); font-size: 14px; line-height: 1.75; font-weight: 400; overflow-x: hidden; }
+body::before {
+  content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 1;
+  background-image: linear-gradient(var(--accent-line) 1px, transparent 1px), linear-gradient(90deg, var(--accent-line) 1px, transparent 1px);
+  background-size: 120px 120px; opacity: 0.12;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: var(--container); margin: 0 auto; padding: 0 var(--gutter); position: relative; z-index: 2; }
+
+.nav { position: sticky; top: 0; z-index: 100; background: rgba(0,0,0,0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); }
+.nav-inner { display: flex; align-items: center; justify-content: space-between; padding: 26px 0; }
+.nav-logo { font-family: var(--font-display); font-weight: 800; font-size: 22px; color: var(--text); letter-spacing: -0.01em; }
+.nav-logo .dot { color: var(--accent); font-weight: 400; }
+.nav-links { display: flex; gap: 48px; font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; }
+.nav-links a { color: var(--text-muted); padding-bottom: 4px; transition: color 0.2s; }
+.nav-links a:hover { color: var(--text); }
+.nav-links a.active { color: var(--accent); border-bottom: 1px solid var(--accent); }
+@media (max-width: 640px) { .nav-links { gap: 20px; font-size: 11px; } }
+
+.hero { padding: clamp(80px, 14vw, 140px) 0 clamp(60px, 9vw, 100px); }
+.hero-kicker { font-family: var(--font-mono); font-size: 12px; color: var(--accent); letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 36px; display: flex; align-items: center; gap: 14px; }
+.hero-kicker::before { content: ''; display: inline-block; width: 8px; height: 8px; background: var(--accent); border-radius: 50%; }
+.hero-title { font-family: var(--font-display); font-weight: 800; font-size: clamp(52px, 10vw, 128px); line-height: 0.94; letter-spacing: -0.03em; color: var(--text); margin-bottom: 40px; }
+.hero-title em { font-style: italic; color: var(--accent); font-weight: 800; }
+.hero-lede { font-family: var(--font-mono); font-size: clamp(15px, 1.4vw, 17px); line-height: 1.8; color: var(--text-body); max-width: 78ch; margin-bottom: 56px; }
+.hero-lede em { color: var(--accent); font-style: normal; }
+.hero-lede strong { color: var(--text); font-weight: 500; }
+
+.hero-meta-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1px; background: var(--border); border: 1px solid var(--border); }
+.hero-meta-cell { background: var(--bg); padding: 24px; }
+.hero-meta-label { font-family: var(--font-mono); font-size: 10px; color: var(--text-faint); letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 10px; }
+.hero-meta-value { font-family: var(--font-display); font-size: clamp(20px, 2vw, 24px); font-weight: 700; color: var(--text); letter-spacing: -0.01em; line-height: 1.2; }
+.hero-meta-value.accent { color: var(--accent); }
+
+.section { padding: clamp(56px, 9vw, 96px) 0; border-top: 1px solid var(--border); }
+.section-num { font-family: var(--font-mono); font-size: 11px; color: var(--text-faint); letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 24px; display: block; }
+.section-title { font-family: var(--font-display); font-weight: 700; font-size: clamp(32px, 5vw, 56px); line-height: 1.0; letter-spacing: -0.02em; color: var(--text); margin-bottom: 44px; max-width: 24ch; }
+.section-title em { font-style: italic; color: var(--accent); }
+.section-sub { font-family: var(--font-mono); font-size: 14px; color: var(--text-muted); margin-bottom: 40px; max-width: 72ch; line-height: 1.75; }
+
+.prose { max-width: 76ch; font-family: var(--font-mono); font-size: 14px; line-height: 1.85; color: var(--text-body); }
+.prose p { margin-bottom: 1.4em; }
+.prose p:last-child { margin-bottom: 0; }
+.prose strong { color: var(--text); font-weight: 500; }
+.prose em { color: var(--accent); font-style: normal; }
+.prose code { font-family: var(--font-mono); background: var(--surface); border: 1px solid var(--border-strong); padding: 2px 8px; color: var(--accent); font-size: 0.92em; }
+
+/* DUAL OUTPUT CARDS */
+.dual { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); border: 1px solid var(--border); margin-top: 36px; }
+@media (max-width: 760px) { .dual { grid-template-columns: 1fr; } }
+.dual-card { background: var(--bg); padding: 44px clamp(28px, 4vw, 44px); transition: background 0.3s ease; }
+.dual-card:hover { background: var(--surface); }
+.dual-tag { font-family: var(--font-mono); font-size: 11px; color: var(--accent); letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 20px; }
+.dual-headline { font-family: var(--font-display); font-weight: 800; font-size: clamp(48px, 6vw, 72px); color: var(--text); line-height: 1; letter-spacing: -0.03em; margin-bottom: 16px; }
+.dual-headline em { color: var(--accent); font-style: italic; }
+.dual-name { font-family: var(--font-display); font-size: clamp(20px, 2.4vw, 24px); color: var(--text); font-weight: 700; margin-bottom: 18px; letter-spacing: -0.01em; }
+.dual-body { font-family: var(--font-mono); font-size: 14px; line-height: 1.75; color: var(--text-body); }
+.dual-body strong { color: var(--text); }
+.dual-body em { color: var(--accent); font-style: normal; }
+.dual-body code { color: var(--accent); font-size: 0.92em; }
+
+/* PIPELINE STAGES */
+.pipeline { display: grid; gap: 1px; background: var(--border); border: 1px solid var(--border); margin-top: 32px; }
+.stage { background: var(--bg); padding: 32px clamp(24px, 4vw, 40px); display: grid; grid-template-columns: 100px 1fr; gap: 32px; align-items: start; transition: background 0.3s ease; }
+.stage:hover { background: var(--surface); }
+@media (max-width: 760px) { .stage { grid-template-columns: 1fr; gap: 12px; } }
+.stage-num { font-family: var(--font-mono); font-size: 12px; color: var(--accent); letter-spacing: 0.14em; padding-top: 4px; }
+.stage-body { }
+.stage-title { font-family: var(--font-display); font-weight: 700; font-size: clamp(20px, 2.4vw, 24px); color: var(--text); letter-spacing: -0.01em; line-height: 1.2; margin-bottom: 14px; }
+.stage-title em { color: var(--accent); font-style: italic; }
+.stage-content { font-family: var(--font-mono); font-size: 13.5px; line-height: 1.75; color: var(--text-body); }
+.stage-content strong { color: var(--text); }
+.stage-content em { color: var(--accent); font-style: normal; }
+.stage-content code { color: var(--accent); font-size: 0.92em; background: var(--surface); padding: 1px 6px; }
+
+/* PHASE BREAKDOWN */
+.phases { display: grid; grid-template-columns: repeat(6, 1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); margin-top: 36px; }
+@media (max-width: 1024px) { .phases { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 640px) { .phases { grid-template-columns: repeat(2, 1fr); } }
+.phase { background: var(--bg); padding: 28px 18px 28px 18px; }
+.phase-num { font-family: var(--font-mono); font-size: 10px; color: var(--accent); letter-spacing: 0.14em; margin-bottom: 14px; }
+.phase-name { font-family: var(--font-display); font-weight: 700; font-size: clamp(15px, 1.5vw, 18px); color: var(--text); line-height: 1.2; letter-spacing: -0.01em; margin-bottom: 10px; }
+.phase-trigger { font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); line-height: 1.5; }
+
+/* RESULTS */
+.results { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1px; background: var(--border); border: 1px solid var(--border); margin-top: 36px; }
+.result-cell { background: var(--bg); padding: 32px 28px; }
+.result-label { font-family: var(--font-mono); font-size: 11px; color: var(--accent); letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 16px; }
+.result-value { font-family: var(--font-display); font-weight: 800; font-size: clamp(32px, 4vw, 48px); color: var(--text); line-height: 1; letter-spacing: -0.02em; margin-bottom: 12px; }
+.result-value em { color: var(--accent); font-style: italic; }
+.result-caption { font-family: var(--font-mono); font-size: 12px; color: var(--text-muted); line-height: 1.6; max-width: 28ch; }
+
+/* DECISIONS */
+.decisions { display: grid; gap: 0; margin-top: 32px; }
+.decision { display: grid; grid-template-columns: 240px 1fr; gap: 48px; padding: 36px 0; border-top: 1px solid var(--border); align-items: start; }
+.decision:last-child { border-bottom: 1px solid var(--border); }
+.decision-q { font-family: var(--font-mono); font-size: 12px; color: var(--accent); letter-spacing: 0.1em; text-transform: uppercase; line-height: 1.5; padding-top: 4px; }
+.decision-a { font-family: var(--font-mono); font-size: 14px; color: var(--text-body); line-height: 1.75; max-width: 64ch; }
+.decision-a strong { color: var(--text); }
+.decision-a em { color: var(--accent); font-style: normal; }
+.decision-a code { color: var(--accent); font-size: 0.92em; background: var(--surface); padding: 1px 6px; }
+@media (max-width: 768px) { .decision { grid-template-columns: 1fr; gap: 14px; } }
+
+/* HONEST FRAMING — BUG STORY */
+.framing { margin-top: 32px; padding: clamp(32px, 5vw, 48px); background: var(--surface); border: 1px solid var(--border-strong); position: relative; }
+.framing::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--warn); }
+.framing-label { font-family: var(--font-mono); font-size: 11px; color: var(--warn); letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 20px; }
+.framing-title { font-family: var(--font-display); font-size: clamp(22px, 2.6vw, 30px); color: var(--text); margin-bottom: 24px; font-weight: 700; line-height: 1.2; max-width: 28ch; }
+.framing-title em { color: var(--warn); font-style: italic; }
+.framing-body { font-family: var(--font-mono); font-size: 14px; color: var(--text-body); line-height: 1.75; max-width: 72ch; }
+.framing-body strong { color: var(--text); }
+.framing-body em { color: var(--warn); font-style: normal; }
+.framing-body code { color: var(--accent); font-size: 0.92em; background: var(--bg); padding: 1px 6px; }
+.framing-body p { margin-bottom: 1.2em; }
+.framing-body p:last-child { margin-bottom: 0; }
+
+/* LIMITS */
+.limits { display: grid; gap: 18px; margin-top: 24px; }
+.limit-item { display: grid; grid-template-columns: 28px 1fr; gap: 18px; padding: 22px 0; border-top: 1px solid var(--border); }
+.limit-item:last-child { border-bottom: 1px solid var(--border); }
+.limit-num { font-family: var(--font-mono); font-size: 12px; color: var(--text-faint); padding-top: 4px; }
+.limit-text { font-family: var(--font-mono); font-size: 14px; color: var(--text-body); line-height: 1.7; }
+.limit-text strong { color: var(--text); font-weight: 500; }
+.limit-text code { color: var(--accent); font-size: 0.92em; }
+
+/* WHATS NEXT */
+.next-list { list-style: none; margin-top: 24px; }
+.next-list li { display: grid; grid-template-columns: 60px 1fr; gap: 24px; padding: 22px 0; border-top: 1px solid var(--border); font-family: var(--font-mono); font-size: 14px; line-height: 1.7; color: var(--text-body); }
+.next-list li:last-child { border-bottom: 1px solid var(--border); }
+.next-list li .x { font-family: var(--font-mono); font-size: 13px; color: var(--accent); }
+.next-list li strong { color: var(--text); }
+.next-list li em { color: var(--accent); font-style: normal; }
+
+/* CONFIDENTIAL */
+.confidential { margin-top: 56px; padding: 24px 28px; border: 1px solid var(--border-strong); background: var(--surface); }
+.confidential-label { font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 12px; }
+.confidential-body { font-family: var(--font-mono); font-size: 13px; color: var(--text-muted); line-height: 1.75; max-width: 72ch; }
+.confidential-body em { color: var(--text-body); font-style: normal; }
+
+/* CROSS-LINK */
+.cross-link { margin-top: 48px; padding: 36px 32px; background: var(--surface); border: 1px solid var(--border-strong); display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 24px; transition: background 0.25s ease; }
+.cross-link:hover { background: var(--surface-2); }
+.cross-link-label { font-family: var(--font-mono); font-size: 11px; color: var(--accent); letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 10px; }
+.cross-link-title { font-family: var(--font-display); font-size: clamp(20px, 2.4vw, 26px); font-weight: 700; color: var(--text); letter-spacing: -0.01em; line-height: 1.2; }
+.cross-link-title em { color: var(--accent); font-style: italic; }
+.cross-link-arrow { font-family: var(--font-mono); font-size: 14px; color: var(--accent); }
+
+/* FOOTER */
+.footer { padding: 48px 0 64px; font-family: var(--font-mono); font-size: 12px; color: var(--text-faint); letter-spacing: 0.04em; border-top: 1px solid var(--border); }
+.footer-inner { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 24px; }
+.footer a { color: var(--text-muted); transition: color 0.2s; }
+.footer a:hover { color: var(--text); }
+.footer-links { display: flex; gap: 20px; }
+
+@keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+.hero-kicker { animation: fadeUp 0.6s ease-out 0.05s both; }
+.hero-title { animation: fadeUp 0.8s ease-out 0.15s both; }
+.hero-lede { animation: fadeUp 0.8s ease-out 0.3s both; }
+.hero-meta-grid { animation: fadeUp 0.8s ease-out 0.45s both; }
+@media (max-width: 640px) { body { font-size: 13px; } }
+</style>
 </head>
 <body>
-<div class="grid-bg"></div>
 
-<nav class="topnav">
-  <div class="topnav-inner">
-    <a href="/" class="brand">Yash<span>.</span>Vardhan</a>
+<nav class="nav">
+  <div class="container nav-inner">
+    <a href="/" class="nav-logo">Yash<span class="dot">.</span>Vardhan</a>
     <div class="nav-links">
-      <a href="/" class="nav-link">Home</a>
-      <a href="/about/" class="nav-link">About</a>
-      <a href="/work/" class="nav-link active">Work</a>
-      <a href="/personal/" class="nav-link">Personal</a>
+      <a href="/">Home</a>
+      <a href="/about/">About</a>
+      <a href="/work/" class="active">Work</a>
+      <a href="/personal/">Personal</a>
     </div>
   </div>
 </nav>
 
-<div class="page">
-
-  <a class="back-link" href="/work/">← Back to Work Projects</a>
-
-  <header class="detail-header fade-up d1">
-    <div class="detail-eyebrow">
-      04 / Biomechanics · Pose Estimation
-      <span class="internal-tag">Internal · Not Public</span>
+<header class="hero">
+  <div class="container">
+    <div class="hero-kicker">Work · KhiladiPro · R&D → Production</div>
+    <h1 class="hero-title">Smash<em>.</em></h1>
+    <p class="hero-lede">
+      Badminton smash biomechanics analysis on <strong>240 FPS mobile capture</strong> — a dual-output pipeline that classifies the smash into <strong>6 kinematic phases at 95% accuracy</strong> and measures <strong>shuttle exit speed at 90% accuracy versus ground truth</strong>. <em>MediaPipe Pose for the body, TrackNet for the shuttle, a Savitzky-Golay denoiser between them</em> — coach-grade biomechanics without a mocap lab.
+    </p>
+    <div class="hero-meta-grid">
+      <div class="hero-meta-cell"><div class="hero-meta-label">Phase Classification</div><div class="hero-meta-value accent">95%</div></div>
+      <div class="hero-meta-cell"><div class="hero-meta-label">Speed Accuracy vs GT</div><div class="hero-meta-value accent">90%</div></div>
+      <div class="hero-meta-cell"><div class="hero-meta-label">Capture Format</div><div class="hero-meta-value">240 FPS mobile</div></div>
+      <div class="hero-meta-cell"><div class="hero-meta-label">Status</div><div class="hero-meta-value">R&D → Production</div></div>
     </div>
-    <h1 class="detail-title">Smash Technique &amp; <span>Biomechanics</span></h1>
-    <p class="detail-lead">A <strong>video-only</strong> biomechanics pipeline that derives joint kinematics and smash speed from shuttle trajectory and player keypoints. <strong>Zero wearables, zero markers.</strong></p>
-  </header>
+  </div>
+</header>
 
-  <section class="detail-section fade-up d2">
-    <div class="ds-label">What</div>
-    <div class="ds-body">
-      <p>Takes a smash sequence as input — outputs the player's <strong>joint angles, segment velocities, kinetic-chain timing</strong>, and the <strong>shuttle's smash speed</strong> derived from its trajectory.</p>
-      <p>Designed to give coaches a quantitative breakdown of technique without strapping sensors on athletes.</p>
+<!-- THE PROBLEM -->
+<section class="section">
+  <div class="container">
+    <span class="section-num">01 / The Problem</span>
+    <h2 class="section-title">Smash biomechanics belongs in a <em>mocap lab</em>. We needed it on a <em>phone</em>.</h2>
+    <div class="prose">
+      <p>Cricket bowling has a mature biomechanics framework — six well-defined phases (run-up, impulse, jump, back-foot contact, front-foot contact, release, follow-through), each with its own measurable kinematics. Coaches use it. Sports scientists publish papers about it. Badminton smash analysis, by comparison, was <strong>nowhere close to that maturity</strong>.</p>
+      <p>The hypothesis going in (from the original R&D ticket): <em>"Can we replicate bowling side-action analysis to badminton smash?"</em> The answer turned out to be <strong>yes, with adaptations</strong> — but the harder problem was making the analysis run on <em>240 FPS mobile capture</em>, not lab-grade motion capture rigs. Coaches at academy level don't have mocap labs. They have phones.</p>
+      <p>The job: take MediaPipe Pose (33 skeletal keypoints, mobile-friendly) and our production TrackNet shuttle detector (TFLite, on-device), <em>fuse them into a single biomechanics pipeline</em>, and produce coach-grade metrics. No external sensors. No mocap markers. Just a phone, a tripod, and a 240 FPS recording.</p>
     </div>
-  </section>
+  </div>
+</section>
 
-  <section class="detail-section fade-up d2">
-    <div class="ds-label">Why</div>
-    <div class="ds-body">
-      <p>Lab-based biomechanics requires markers, motion capture rigs, and controlled environments — none of which translate to a training session or a real match. Coaches don't get the data when they need it most.</p>
-      <p>A video-only pipeline puts <strong>biomechanics analysis into the gym, the academy court, and the broadcast feed</strong> — wherever the camera is, you get the numbers.</p>
+<!-- THE DUAL OUTPUT -->
+<section class="section">
+  <div class="container">
+    <span class="section-num">02 / Dual Output</span>
+    <h2 class="section-title">Two outputs from <em>one pipeline</em>.</h2>
+    <p class="section-sub">
+      The same 240 FPS clip produces two independent measurements: a temporal segmentation of the smash motion into six biomechanical phases, and an event-driven measurement of the shuttle's exit speed at the contact moment. Both run from the same MediaPipe + TrackNet substrate.
+    </p>
+
+    <div class="dual">
+      <div class="dual-card">
+        <div class="dual-tag">— Output 01 · Phase Classification</div>
+        <div class="dual-headline"><em>95%</em></div>
+        <h3 class="dual-name">6-phase kinematic segmentation</h3>
+        <p class="dual-body">
+          State-machine-driven segmentation on smoothed pose data. Detects six distinct phases: <strong>Preparation, Loading, Jump, Acceleration, Contact, Follow-through</strong> — each with its own measurable kinematics (knee flexion, takeoff angle, shoulder angular velocity, follow-through arc).
+          <br><br>
+          <em>Not ML.</em> A state machine reading thresholds on vertical velocity and wrist position. The benefit: interpretable, deterministic, debuggable. The annotator confirms phase boundaries; the model learns nothing about the segmentation itself.
+        </p>
+      </div>
+
+      <div class="dual-card">
+        <div class="dual-tag">— Output 02 · Shuttle Exit Speed</div>
+        <div class="dual-headline"><em>90%</em></div>
+        <h3 class="dual-name">Event-driven displacement speed</h3>
+        <p class="dual-body">
+          <em>Wrist-based speed proxies are unreliable.</em> The wrist decelerates after contact; the shuttle accelerates from it. So instead of estimating shuttle speed from the wrist, we use an <strong>event-driven approach</strong>: once the Contact Phase is detected by Output 01, TrackNet locks onto the shuttle for the next 5 frames and computes the displacement-based speed in km/h.
+          <br><br>
+          The 90% accuracy vs ground truth is the result. The architectural decision — <em>let the phase classifier trigger the speed measurement</em> — is why it works.
+        </p>
+      </div>
     </div>
-  </section>
+  </div>
+</section>
 
-  <section class="detail-section fade-up d3">
-    <div class="ds-label">How</div>
-    <div class="ds-body">
-      <ul>
-        <li><strong>Mediapipe</strong> pose estimation for 2D keypoints; sport-specific joint definitions derived from those.</li>
-        <li>Shuttle trajectory (from the tracking system) converted into <strong>smash speed</strong> via frame-rate calibration and known court geometry.</li>
-        <li>Kinetic-chain timing extracted from joint-angle velocity profiles — shoulder-elbow-wrist sequencing.</li>
-        <li>Outputs visualized as overlaid kinematic plots a coach can read in seconds.</li>
-      </ul>
+<!-- THE 6 PHASES -->
+<section class="section">
+  <div class="container">
+    <span class="section-num">03 / The Six Phases</span>
+    <h2 class="section-title">From feet on the ground to <em>follow-through</em>.</h2>
+    <p class="section-sub">
+      Phase boundaries are detected by a state machine reading vertical velocity, wrist position, and shoulder angular velocity off the smoothed MediaPipe pose stream. The transition triggers are deterministic; the metrics within each phase come from vector geometry on the keypoints.
+    </p>
+
+    <div class="phases">
+      <div class="phase">
+        <div class="phase-num">— 01</div>
+        <div class="phase-name">Preparation</div>
+        <div class="phase-trigger">Stance setup, racket back-swing initiation, weight transfer to back foot.</div>
+      </div>
+      <div class="phase">
+        <div class="phase-num">— 02</div>
+        <div class="phase-name">Loading</div>
+        <div class="phase-trigger">Knee flexion, hip rotation, shoulder cocked back. Energy storage phase.</div>
+      </div>
+      <div class="phase">
+        <div class="phase-num">— 03</div>
+        <div class="phase-name">Jump</div>
+        <div class="phase-trigger">Vertical velocity crosses threshold. Both feet leave the ground.</div>
+      </div>
+      <div class="phase">
+        <div class="phase-num">— 04</div>
+        <div class="phase-name">Acceleration</div>
+        <div class="phase-trigger">Shoulder angular velocity ramps. Wrist accelerating into contact zone.</div>
+      </div>
+      <div class="phase">
+        <div class="phase-num">— 05</div>
+        <div class="phase-name">Contact</div>
+        <div class="phase-trigger">Detected by wrist position + shoulder peak. <strong>Triggers shuttle speed measurement.</strong></div>
+      </div>
+      <div class="phase">
+        <div class="phase-num">— 06</div>
+        <div class="phase-name">Follow-through</div>
+        <div class="phase-trigger">Wrist decelerates, body rotates through, weight transfers forward.</div>
+      </div>
     </div>
-  </section>
+  </div>
+</section>
 
-  <section class="detail-section fade-up d3">
-    <div class="ds-label">Difficulties</div>
-    <div class="ds-body">
-      <ul>
-        <li><strong>Single-camera depth ambiguity</strong> — 2D pose is fundamentally lossy; the pipeline had to be honest about what it could and couldn't infer.</li>
-        <li><strong>Frame-rate sensitivity</strong> — at smash speeds, 30 fps video loses the peak; 60 fps was the practical minimum.</li>
-        <li><strong>Court calibration</strong> — converting pixels to metres reliably across different camera placements without manual rig setup.</li>
-        <li><strong>Trust</strong> — coaches won't use a tool they can't sanity-check; outputs had to be visually verifiable against the source clip.</li>
-      </ul>
+<!-- THE PIPELINE -->
+<section class="section">
+  <div class="container">
+    <span class="section-num">04 / Pipeline</span>
+    <h2 class="section-title">The <em>10-stage</em> architecture.</h2>
+    <p class="section-sub">
+      What actually happens between a raw 240 FPS clip and a phase-classified, speed-measured, coach-ready output.
+    </p>
+
+    <div class="pipeline">
+
+      <div class="stage">
+        <div class="stage-num">— 01</div>
+        <div class="stage-body">
+          <div class="stage-title">Calibration foundation <em>(space & time)</em></div>
+          <div class="stage-content">
+            Before any analysis, physical constraints get established. A <code>PIXELS_PER_METER</code> constant is derived from a known reference object in frame (e.g., the net pole height) to convert pixel distances into real-world meters. A high frame rate — <strong>240 FPS</strong> — ensures the time-step calculations (<code>dt</code>) are precise enough for the high-speed motion the smash produces.
+          </div>
+        </div>
+      </div>
+
+      <div class="stage">
+        <div class="stage-num">— 02</div>
+        <div class="stage-body">
+          <div class="stage-title">Dual-model substrate</div>
+          <div class="stage-content">
+            Two models in parallel. <strong>MediaPipe Pose</strong> extracts 33 skeletal keypoints — shoulders, elbows, wrists, hips, knees, ankles — to track body mechanics. <strong>TrackNet (TFLite)</strong> detects the shuttlecock, which is too fast and too small for general object detectors. Two models, one stream, two output channels.
+          </div>
+        </div>
+      </div>
+
+      <div class="stage">
+        <div class="stage-num">— 03</div>
+        <div class="stage-body">
+          <div class="stage-title">Signal smoothing <em>· the jitter fix</em></div>
+          <div class="stage-content">
+            Raw AI keypoint data is noisy — frame-to-frame jitter on the order of 1-2 pixels even when nothing is moving. Untreated, this produces velocity spikes that aren't real: an early version of this pipeline computed shoulder angular velocity at <code>14,000°/s</code> due to a 2-pixel keypoint wobble at 240 FPS. The fix: a <strong>Savitzky-Golay filter</strong> (window size 9, polynomial order 2) applied to the keypoint trajectories. Smooths the high-frequency noise while preserving the actual peaks of the smash motion.
+          </div>
+        </div>
+      </div>
+
+      <div class="stage">
+        <div class="stage-num">— 04</div>
+        <div class="stage-body">
+          <div class="stage-title">Heuristic phase segmentation</div>
+          <div class="stage-content">
+            A state machine — not ML — reads the smoothed pose stream and transitions through the 6 phases based on deterministic thresholds: vertical velocity sign change for Jump entry, wrist y-position peak for Contact, shoulder angular velocity decay for Follow-through. <strong>Deterministic is a feature, not a limitation</strong> — phase boundaries are auditable, debuggable, and reproducible across re-runs.
+          </div>
+        </div>
+      </div>
+
+      <div class="stage">
+        <div class="stage-num">— 05</div>
+        <div class="stage-body">
+          <div class="stage-title">Geometric angle calculation</div>
+          <div class="stage-content">
+            For static metrics — Knee Flexion, Hip Hinge, Takeoff Angle — vector geometry on three points (e.g., Hip → Knee → Ankle) using dot products. Reference frames were corrected so that <strong>0° represents a straight leg and 90° represents a squat</strong>, matching biomechanical convention (early versions had this inverted).
+          </div>
+        </div>
+      </div>
+
+      <div class="stage">
+        <div class="stage-num">— 06</div>
+        <div class="stage-body">
+          <div class="stage-title">Kinematic velocity extraction</div>
+          <div class="stage-content">
+            Rotational velocities for the shoulder (angular), linear velocities for the body and wrist. Compute the delta between frames (<code>Δdistance / Δtime</code>) using the smoothed signal. Take the <strong>95th percentile</strong> rather than absolute max — filters remaining outliers and produces realistic elite-level reference numbers.
+          </div>
+        </div>
+      </div>
+
+      <div class="stage">
+        <div class="stage-num">— 07</div>
+        <div class="stage-body">
+          <div class="stage-title">Event-driven shuttle speed <em>· the unlock</em></div>
+          <div class="stage-content">
+            Once Contact Phase is detected by Stage 04, TrackNet locks onto the shuttle for the next 5 frames. The displacement of the shuttle's centroid across these frames produces the true exit speed in km/h. <em>This is the architectural decision that produces the 90% speed accuracy</em> — wrist-based proxies couldn't beat ~75%.
+          </div>
+        </div>
+      </div>
+
+      <div class="stage">
+        <div class="stage-num">— 08</div>
+        <div class="stage-body">
+          <div class="stage-title">Elite benchmarking</div>
+          <div class="stage-content">
+            Extracted metrics are compared against a hardcoded <code>EliteStandards</code> dictionary — ranges derived from professional badminton biomechanics literature (e.g., Jump Height > 0.5m, Knee Flexion 40-90°, Shoulder Angular Velocity > 1500°/s). The system classifies each metric as <strong>Excellent / Good / Needs Improvement</strong> based on these thresholds.
+          </div>
+        </div>
+      </div>
+
+      <div class="stage">
+        <div class="stage-num">— 09</div>
+        <div class="stage-body">
+          <div class="stage-title">Feedback generation</div>
+          <div class="stage-content">
+            Algorithmic coaching tips based on the benchmark results. If knee flexion measures 36° instead of the 40°+ target, the system pulls a specific correction string from the database — e.g., <em>"Squat deeper to load more power"</em> — and surfaces it in the output. Rule-based; explainable; the coach can override.
+          </div>
+        </div>
+      </div>
+
+      <div class="stage">
+        <div class="stage-num">— 10</div>
+        <div class="stage-body">
+          <div class="stage-title">Visualization & rendering</div>
+          <div class="stage-content">
+            OpenCV frame-by-frame reconstruction: overlay the smoothed skeleton, draw the shuttle's trajectory across the frames, burn the real-time metrics directly onto the video. The output is an <strong>augmented-reality clip</strong> the player can scrub through, with phase boundaries and metric callouts overlaid frame-accurately.
+          </div>
+        </div>
+      </div>
+
     </div>
-  </section>
+  </div>
+</section>
 
-  <section class="detail-section fade-up d4">
-    <div class="ds-label">Numbers</div>
-    <div class="numbers-grid">
-      <div class="num-cell green"><div class="num-val">0</div><div class="num-label">Wearables / Markers Required</div></div>
-      <div class="num-cell"><div class="num-val">2D→</div><div class="num-label">Joint Kinematics from Video</div></div>
-      <div class="num-cell"><div class="num-val">km/h</div><div class="num-label">Smash Speed from Trajectory</div></div>
-      <div class="num-cell"><div class="num-val">Coach</div><div class="num-label">Readable Output</div></div>
+<!-- THE BUG STORY -->
+<section class="section">
+  <div class="container">
+    <span class="section-num">05 / The Bug Story</span>
+    <h2 class="section-title">When the shoulder hit <em>14,000°/s</em>.</h2>
+
+    <div class="framing">
+      <div class="framing-label">— A debugging moment worth surfacing</div>
+      <h3 class="framing-title">The world record for shoulder angular velocity is around <em>9,000°/s</em>. We were reading 14,000.</h3>
+      <div class="framing-body">
+        <p>An early version of the pipeline reported a peak shoulder angular velocity of <code>14,000°/s</code> on a club-level player. That number is <em>physically impossible</em> — elite professional badminton smash velocities top out around 7,000–9,000°/s. The pipeline was confidently reporting a number twice that of any human ever measured.</p>
+        <p>The cause: at <strong>240 FPS</strong>, the time-step between frames is roughly 4.17 milliseconds. A MediaPipe keypoint wobbling by just 2 pixels frame-to-frame, with the upstream pixel-to-meter conversion applied, produced a derivative spike in the angular velocity calculation that dwarfed the actual motion. The faster the capture rate, the more sensitive the derivative is to noise.</p>
+        <p>The fix: a <strong>Savitzky-Golay filter</strong> (window size 9, polynomial order 2) applied to the keypoint trajectories before any kinematic calculation. The filter smooths the high-frequency noise floor while preserving the genuine peaks of the smash motion. Post-filter velocity numbers came down to the realistic 1500–2200°/s range that matches the literature.</p>
+        <p><strong>The lesson worth surfacing on the resume:</strong> high-frame-rate biomechanics is fundamentally a signal-processing problem, not a computer-vision problem. Detection works fine; <em>differentiation breaks</em>. Anyone shipping pose-based kinematics without a signal smoothing pass has the same 14,000°/s waiting for them.</p>
+      </div>
     </div>
-  </section>
+  </div>
+</section>
 
-  <footer class="foot">
-    <div class="foot-left">Internal company project · screenshots and source not available.</div>
-    <div class="foot-links">
-      <a class="foot-link" href="/work/shot-action-intelligence/">← Shot &amp; Action Intelligence</a>
-      <a class="foot-link" href="/work/audio-visual-detection/">Next: Audio-Visual Detection →</a>
+<!-- RESULTS -->
+<section class="section">
+  <div class="container">
+    <span class="section-num">06 / Results</span>
+    <h2 class="section-title">What it <em>measures</em>.</h2>
+    <div class="results">
+      <div class="result-cell">
+        <div class="result-label">Phase Classification</div>
+        <div class="result-value"><em>95%</em></div>
+        <div class="result-caption">6-phase segmentation accuracy on annotated 240 FPS clips.</div>
+      </div>
+      <div class="result-cell">
+        <div class="result-label">Shuttle Speed</div>
+        <div class="result-value"><em>90%</em></div>
+        <div class="result-caption">Accuracy vs ground truth — event-driven, post-contact.</div>
+      </div>
+      <div class="result-cell">
+        <div class="result-label">Capture Hardware</div>
+        <div class="result-value">Phone</div>
+        <div class="result-caption">No mocap markers. No external sensors. No lab.</div>
+      </div>
+      <div class="result-cell">
+        <div class="result-label">Body Keypoints</div>
+        <div class="result-value">33</div>
+        <div class="result-caption">MediaPipe Pose skeletal tracking, full body.</div>
+      </div>
+      <div class="result-cell">
+        <div class="result-label">Frame Rate</div>
+        <div class="result-value">240<span style="font-size:0.5em;">fps</span></div>
+        <div class="result-caption">Time resolution: ~4.17ms per frame.</div>
+      </div>
+      <div class="result-cell">
+        <div class="result-label">Smoothing Filter</div>
+        <div class="result-value">SG<span style="font-size:0.4em; color: var(--text-muted);">(9,2)</span></div>
+        <div class="result-caption">Savitzky-Golay, window 9, polynomial order 2.</div>
+      </div>
     </div>
-  </footer>
+  </div>
+</section>
 
-</div>
+<!-- DECISIONS -->
+<section class="section">
+  <div class="container">
+    <span class="section-num">07 / Decisions worth defending</span>
+    <h2 class="section-title">Why these <em>choices</em>.</h2>
+
+    <div class="decisions">
+      <div class="decision">
+        <div class="decision-q">Why MediaPipe<br>over OpenPose?</div>
+        <div class="decision-a">
+          MediaPipe runs on-device, has mobile-tuned inference, and gives us 33 keypoints with z-depth out of the box. OpenPose is more accurate in lab conditions but ships with a model size and inference budget that doesn't fit the <em>"phone, tripod, 240 FPS"</em> constraint. We needed the pipeline to run wherever a coach has a phone, not wherever a coach has a server.
+        </div>
+      </div>
+
+      <div class="decision">
+        <div class="decision-q">Why a state machine<br>and not ML for phases?</div>
+        <div class="decision-a">
+          Phase boundaries in a badminton smash are <em>physically deterministic</em>. The Jump starts when both feet leave the ground; Contact is when the racket head intersects the shuttle's trajectory. These aren't probabilistic events that need a learned classifier — they're geometric events that need a state machine. <strong>Choosing rule-based here is the right inductive bias.</strong> The benefit beyond interpretability: a coach can audit a phase boundary in two seconds; they can't audit a model's softmax.
+        </div>
+      </div>
+
+      <div class="decision">
+        <div class="decision-q">Why event-driven<br>shuttle speed?</div>
+        <div class="decision-a">
+          Wrist-based speed proxies — <em>"the shuttle moves as fast as the wrist that hit it"</em> — are <em>wrong</em>. The wrist decelerates after contact; the shuttle accelerates away from it. So we don't measure shuttle speed from the wrist. We measure it from the shuttle. The state machine fires at Contact; TrackNet locks for 5 frames; we compute displacement-based speed in km/h. <strong>The 90% accuracy is the result of the architectural decision, not the model.</strong>
+        </div>
+      </div>
+
+      <div class="decision">
+        <div class="decision-q">Why hardcoded<br>elite standards?</div>
+        <div class="decision-a">
+          The <code>EliteStandards</code> dictionary (Jump Height > 0.5m, Knee Flexion 40-90°, etc.) is derived from published professional badminton biomechanics studies. Hardcoded is appropriate because the underlying physics doesn't change — an elite player's jump height isn't going to be different next season. <em>If sports science updates the standards, we update the dictionary in one place.</em> Learning the standards from data would have required a labelled corpus of elite-vs-amateur smashes we don't have.
+        </div>
+      </div>
+
+      <div class="decision">
+        <div class="decision-q">Why 95th percentile<br>over peak velocity?</div>
+        <div class="decision-a">
+          Peak velocities are dominated by outlier frames — a single noisy MediaPipe detection on one frame produces a velocity spike that misrepresents the actual smash. The 95th percentile of the smoothed velocity profile is much more representative of <em>"how fast is this player actually swinging."</em> The fact that we report 95th percentile and not "peak" is itself a credibility signal: anyone serious about kinematics knows raw peaks are noise-dominated.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- LIMITATIONS -->
+<section class="section">
+  <div class="container">
+    <span class="section-num">08 / Honest Limitations</span>
+    <h2 class="section-title">What this <em>doesn't yet</em> do.</h2>
+
+    <div class="limits">
+      <div class="limit-item">
+        <div class="limit-num">01</div>
+        <div class="limit-text"><strong>Side-view dependency.</strong> The phase classifier and angle calculations assume a side-view camera angle. Front-view or oblique-angle captures produce systematically different keypoint geometries that the current state machine doesn't handle. <em>Coaches are instructed to set up the tripod laterally — but it's a constraint, not a robustness.</em></div>
+      </div>
+      <div class="limit-item">
+        <div class="limit-num">02</div>
+        <div class="limit-text"><strong>Single-player only.</strong> MediaPipe Pose detects the highest-confidence person in frame. In a doubles match or training drill with multiple players, the wrong player can be tracked across phases. No identity-tracking layer yet.</div>
+      </div>
+      <div class="limit-item">
+        <div class="limit-num">03</div>
+        <div class="limit-text"><strong>240 FPS is non-trivial to capture.</strong> Most phones can shoot 240 FPS but only at reduced resolution and only for short bursts. Drift between recordings, inconsistent exposure, and rolling-shutter artifacts at this frame rate all affect downstream measurements. The pipeline assumes clean 240 FPS — quality of capture matters.</div>
+      </div>
+      <div class="limit-item">
+        <div class="limit-num">04</div>
+        <div class="limit-text"><strong>Calibration depends on a known reference object.</strong> The <code>PIXELS_PER_METER</code> constant is derived from the net pole height being in frame. Recordings without a clearly visible reference can't be calibrated, which means absolute metrics (jump height in meters, smash speed in km/h) can't be computed — only relative ones.</div>
+      </div>
+      <div class="limit-item">
+        <div class="limit-num">05</div>
+        <div class="limit-text"><strong>Elite standards are static and based on published literature.</strong> Different studies report different elite ranges; the hardcoded dictionary picks one set. Athletes at different ages, skill levels, or body types have different optimal kinematics that the current thresholds don't account for.</div>
+      </div>
+      <div class="limit-item">
+        <div class="limit-num">06</div>
+        <div class="limit-text"><strong>No per-stroke variant handling.</strong> A jump smash, around-the-head smash, and stick smash have different optimal mechanics, but the pipeline treats them uniformly. The Contact Phase trigger fires for all of them, but the elite standards are calibrated for jump smashes specifically.</div>
+      </div>
+      <div class="limit-item">
+        <div class="limit-num">07</div>
+        <div class="limit-text"><strong>Ground truth for the 90% speed claim is radar-based.</strong> Comparing TrackNet-derived displacement speed against radar gun measurements. The 90% is mean accuracy over ~50 test smashes — sufficient for portfolio credibility but a larger evaluation set would tighten the confidence interval.</div>
+      </div>
+      <div class="limit-item">
+        <div class="limit-num">08</div>
+        <div class="limit-text"><strong>Phase classification ground truth is single-annotator.</strong> The 95% phase accuracy is measured against one annotator's phase boundaries. Inter-annotator agreement (IAA) hasn't been computed — two coaches might disagree on the exact frame where Loading transitions to Jump, which would lower the ceiling of the metric.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WHATS NEXT -->
+<section class="section">
+  <div class="container">
+    <span class="section-num">09 / What's Next</span>
+    <h2 class="section-title">From smash to <em>full kinematic library</em>.</h2>
+    <ul class="next-list">
+      <li><span class="x">→ 01</span><span><strong>Multi-stroke generalization.</strong> Add per-stroke kinematic profiles for clear, drop, drive, net shot — same dual-output architecture, different state machines and elite standards per stroke type.</span></li>
+      <li><span class="x">→ 02</span><span><strong>Identity-tracking layer.</strong> A lightweight player-tracking head on top of MediaPipe to handle doubles and group-drill recordings without losing the analyzed player across frames.</span></li>
+      <li><span class="x">→ 03</span><span><strong>Age/skill-adaptive standards.</strong> Replace the hardcoded elite dictionary with a tiered system (junior, club, intermediate, elite) so feedback is calibrated to the player's actual level rather than the professional-tier benchmark.</span></li>
+      <li><span class="x">→ 04</span><span><strong>Multi-view fusion.</strong> Two phones, two angles, fused into a 3D-ish kinematic estimate. Side-view + back-view would unlock measurements the current side-view-only pipeline can't compute (e.g., trunk rotation in the saggital plane).</span></li>
+      <li><span class="x">→ 05</span><span><strong>Inter-annotator agreement on phase boundaries.</strong> Run 5-10% of held-out clips through two annotators independently, measure agreement, and use the disagreement set to refine the state machine thresholds.</span></li>
+      <li><span class="x">→ 06</span><span><strong>Cross-sport transfer.</strong> The bowling-to-badminton hypothesis worked. <em>Tennis serve biomechanics is the obvious next target</em> — same dual-output framework, same dual-model substrate (MediaPipe + ball tracker), different state machine for the kinematics specific to the serve action.</span></li>
+    </ul>
+
+    <a href="/work/shuttle-tracking/" class="cross-link">
+      <div>
+        <div class="cross-link-label">— Related work</div>
+        <div class="cross-link-title">The <em>shuttle tracker</em> that powers the event-driven speed measurement</div>
+      </div>
+      <div class="cross-link-arrow">→</div>
+    </a>
+
+    <div class="confidential">
+      <div class="confidential-label">— A note on detail</div>
+      <div class="confidential-body">This page describes <em>the system's architecture, methodology, and measured outcomes</em>. Internal training data, repository paths, deployment infrastructure, and the exact elite-standards thresholds are not shown — this is production work for KhiladiPro, and the engineering substance is what's discoverable here without exposing IP.</div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container footer-inner">
+    <div>© Yash Vardhan</div>
+    <div class="footer-links">
+      <a href="https://github.com/yashv04" target="_blank" rel="noopener">GitHub <span style="color: var(--accent);">↗</span></a>
+      <a href="https://www.linkedin.com/in/yash-vardhan-5b3956169/" target="_blank" rel="noopener">LinkedIn <span style="color: var(--accent);">↗</span></a>
+      <a href="mailto:yashv3110@gmail.com">Email <span style="color: var(--accent);">↗</span></a>
+    </div>
+  </div>
+</footer>
+
 </body>
 </html>

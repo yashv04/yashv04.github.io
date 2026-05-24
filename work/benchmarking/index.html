@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Model Benchmarking — Yash Vardhan</title>
+<meta name="description" content="Cross-sport model benchmarking and evaluation methodology at KhiladiPro — six-variant comparison for badminton player classification, recall-vs-precision analysis for cricket ball tracking, flywheel lift measurement for shuttle tracking. Plus the data collection and annotation foundation that makes the rigor possible.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg: #000000;
+  --surface: #0a0e14;
+  --surface-2: #0e131a;
+  --border: #11161e;
+  --border-strong: #1a2230;
+  --text: #ffffff;
+  --text-body: #d1d5db;
+  --text-muted: #6b7280;
+  --text-faint: #4b5563;
+  --accent: #38bdf8;
+  --accent-soft: rgba(56, 189, 248, 0.08);
+  --accent-line: rgba(56, 189, 248, 0.18);
+  --warn: #fbbf24;
+  --ok: #34d399;
+  --font-display: 'Syne', -apple-system, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --container: 1240px;
+  --gutter: clamp(20px, 5vw, 64px);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+body { background: var(--bg); color: var(--text-body); font-family: var(--font-mono); font-size: 14px; line-height: 1.75; font-weight: 400; overflow-x: hidden; }
+body::before {
+  content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 1;
+  background-image: linear-gradient(var(--accent-line) 1px, transparent 1px), linear-gradient(90deg, var(--accent-line) 1px, transparent 1px);
+  background-size: 120px 120px; opacity: 0.12;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: var(--container); margin: 0 auto; padding: 0 var(--gutter); position: relative; z-index: 2; }
+
+.nav { position: sticky; top: 0; z-index: 100; background: rgba(0,0,0,0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); }
+.nav-inner { display: flex; align-items: center; justify-content: space-between; padding: 26px 0; }
+.nav-logo { font-family: var(--font-display); font-weight: 800; font-size: 22px; color: var(--text); letter-spacing: -0.01em; }
+.nav-logo .dot { color: var(--accent); font-weight: 400; }
+.nav-links { display: flex; gap: 48px; font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; }
+.nav-links a { color: var(--text-muted); padding-bottom: 4px; transition: color 0.2s; }
+.nav-links a:hover { color: var(--text); }
+.nav-links a.active { color: var(--accent); border-bottom: 1px solid var(--accent); }
+@media (max-width: 640px) { .nav-links { gap: 20px; font-size: 11px; } }
+
+.hero { padding: clamp(80px, 14vw, 140px) 0 clamp(60px, 9vw, 100px); }
+.hero-kicker { font-family: var(--font-mono); font-size: 12px; color: var(--accent); letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 36px; display: flex; align-items: center; gap: 14px; }
+.hero-kicker::before { content: ''; display: inline-block; width: 8px; height: 8px; background: var(--accent); border-radius: 50%; }
+.hero-title { font-family: var(--font-display); font-weight: 800; font-size: clamp(48px, 9vw, 116px); line-height: 0.94; letter-spacing: -0.03em; color: var(--text); margin-bottom: 40px; }
+.hero-title em { font-style: italic; color: var(--accent); font-weight: 800; }
+.hero-lede { font-family: var(--font-mono); font-size: clamp(15px, 1.4vw, 17px); line-height: 1.8; color: var(--text-body); max-width: 78ch; margin-bottom: 56px; }
+.hero-lede em { color: var(--accent); font-style: normal; }
+.hero-lede strong { color: var(--text); font-weight: 500; }
+
+.hero-meta-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1px; background: var(--border); border: 1px solid var(--border); }
+.hero-meta-cell { background: var(--bg); padding: 24px; }
+.hero-meta-label { font-family: var(--font-mono); font-size: 10px; color: var(--text-faint); letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 10px; }
+.hero-meta-value { font-family: var(--font-display); font-size: clamp(18px, 1.9vw, 22px); font-weight: 700; color: var(--text); letter-spacing: -0.01em; line-height: 1.2; }
+.hero-meta-value.accent { color: var(--accent); }
+
+.section { padding: clamp(56px, 9vw, 96px) 0; border-top: 1px solid var(--border); }
+.section-num { font-family: var(--font-mono); font-size: 11px; color: var(--text-faint); letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 24px; display: block; }
+.section-title { font-family: var(--font-display); font-weight: 700; font-size: clamp(32px, 5vw, 56px); line-height: 1.0; letter-spacing: -0.02em; color: var(--text); margin-bottom: 44px; max-width: 24ch; }
+.section-title em { font-style: italic; color: var(--accent); }
+.section-sub { font-family: var(--font-mono); font-size: 14px; color: var(--text-muted); margin-bottom: 40px; max-width: 72ch; line-height: 1.75; }
+
+.prose { max-width: 76ch; font-family: var(--font-mono); font-size: 14px; line-height: 1.85; color: var(--text-body); }
+.prose p { margin-bottom: 1.4em; }
+.prose p:last-child { margin-bottom: 0; }
+.prose strong { color: var(--text); font-weight: 500; }
+.prose em { color: var(--accent); font-style: normal; }
+.prose code { font-family: var(--font-mono); background: var(--surface); border: 1px solid var(--border-strong); padding: 2px 8px; color: var(--accent); font-size: 0.92em; }
+
+/* BENCHMARK BLOCK — each model family */
+.bench { margin-top: 32px; padding: clamp(32px, 5vw, 56px) clamp(24px, 4vw, 48px); background: var(--surface); border: 1px solid var(--border); }
+.bench + .bench { margin-top: 24px; }
+.bench-header { display: grid; grid-template-columns: 1fr auto; gap: 24px; align-items: baseline; margin-bottom: 32px; padding-bottom: 24px; border-bottom: 1px solid var(--border-strong); }
+@media (max-width: 760px) { .bench-header { grid-template-columns: 1fr; gap: 12px; } }
+.bench-num { font-family: var(--font-mono); font-size: 11px; color: var(--accent); letter-spacing: 0.14em; margin-bottom: 10px; }
+.bench-name { font-family: var(--font-display); font-size: clamp(26px, 3.2vw, 36px); color: var(--text); font-weight: 700; letter-spacing: -0.01em; line-height: 1.15; }
+.bench-name em { color: var(--accent); font-style: italic; }
+.bench-headline { font-family: var(--font-mono); font-size: 12px; color: var(--text-muted); letter-spacing: 0.08em; text-transform: uppercase; }
+.bench-headline strong { color: var(--accent); font-weight: 600; }
+
+.bench-body { font-family: var(--font-mono); font-size: 14px; line-height: 1.75; color: var(--text-body); max-width: 76ch; margin-bottom: 28px; }
+.bench-body strong { color: var(--text); }
+.bench-body em { color: var(--accent); font-style: normal; }
+.bench-body code { color: var(--accent); font-size: 0.92em; background: var(--bg); padding: 1px 6px; }
+.bench-body p { margin-bottom: 1.2em; }
+.bench-body p:last-child { margin-bottom: 0; }
+
+/* MODEL COMPARISON TABLE */
+.compare-wrap { margin-top: 24px; overflow-x: auto; border: 1px solid var(--border-strong); background: var(--bg); }
+.compare { width: 100%; border-collapse: collapse; font-family: var(--font-mono); font-size: 13px; min-width: 720px; }
+.compare th, .compare td { padding: 14px 18px; text-align: left; border-bottom: 1px solid var(--border-strong); }
+.compare th { font-size: 10px; color: var(--text-faint); letter-spacing: 0.14em; text-transform: uppercase; font-weight: 500; background: var(--surface); }
+.compare td { color: var(--text-body); }
+.compare td.num { font-variant-numeric: tabular-nums; }
+.compare tr.best { background: rgba(56, 189, 248, 0.06); }
+.compare tr.best td { color: var(--text); font-weight: 500; }
+.compare tr.best td:first-child { color: var(--accent); position: relative; }
+.compare tr.best td:first-child::before { content: '◀ '; color: var(--accent); font-weight: 600; }
+.compare tr:last-child td { border-bottom: none; }
+.compare td:last-child { color: var(--accent); font-weight: 500; }
+
+/* METRIC SUMMARY GRID */
+.metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1px; background: var(--border-strong); border: 1px solid var(--border-strong); margin-top: 24px; }
+.mc { background: var(--bg); padding: 22px 24px; }
+.mc-label { font-family: var(--font-mono); font-size: 10px; color: var(--text-faint); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 10px; }
+.mc-value { font-family: var(--font-mono); font-size: 15px; color: var(--text); font-weight: 500; line-height: 1.3; }
+.mc-value.accent { color: var(--accent); }
+
+/* HONEST FRAMING (cricket ball precision) */
+.framing { margin-top: 28px; padding: 24px 28px; background: var(--bg); border: 1px solid var(--border-strong); border-left: 3px solid var(--warn); }
+.framing-label { font-family: var(--font-mono); font-size: 11px; color: var(--warn); letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 14px; }
+.framing-body { font-family: var(--font-mono); font-size: 13.5px; color: var(--text-body); line-height: 1.75; max-width: 72ch; }
+.framing-body strong { color: var(--text); }
+.framing-body em { color: var(--warn); font-style: normal; }
+.framing-body code { color: var(--accent); font-size: 0.92em; background: var(--surface); padding: 1px 6px; }
+
+/* METHODOLOGY PRINCIPLES */
+.principles { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); border: 1px solid var(--border); margin-top: 36px; }
+@media (max-width: 760px) { .principles { grid-template-columns: 1fr; } }
+.principle { background: var(--bg); padding: 36px 32px; transition: background 0.3s ease; }
+.principle:hover { background: var(--surface); }
+.principle-num { font-family: var(--font-mono); font-size: 11px; color: var(--accent); letter-spacing: 0.14em; margin-bottom: 18px; }
+.principle-title { font-family: var(--font-display); font-weight: 700; font-size: clamp(20px, 2.2vw, 24px); color: var(--text); letter-spacing: -0.01em; line-height: 1.2; margin-bottom: 16px; }
+.principle-title em { color: var(--accent); font-style: italic; }
+.principle-body { font-family: var(--font-mono); font-size: 13.5px; line-height: 1.75; color: var(--text-body); }
+.principle-body strong { color: var(--text); }
+.principle-body em { color: var(--accent); font-style: normal; }
+.principle-body code { color: var(--accent); font-size: 0.92em; background: var(--surface); padding: 1px 6px; }
+
+/* DATA COLLECTION SECTION */
+.data-list { display: grid; gap: 1px; background: var(--border); border: 1px solid var(--border); margin-top: 32px; }
+.data-item { background: var(--bg); padding: 28px clamp(24px, 4vw, 40px); display: grid; grid-template-columns: 80px 1fr 120px; gap: 32px; align-items: baseline; transition: background 0.3s ease; }
+.data-item:hover { background: var(--surface); }
+@media (max-width: 760px) { .data-item { grid-template-columns: 1fr; gap: 8px; } }
+.data-num { font-family: var(--font-mono); font-size: 11px; color: var(--accent); letter-spacing: 0.14em; padding-top: 4px; }
+.data-content { }
+.data-title { font-family: var(--font-display); font-size: clamp(17px, 1.9vw, 20px); color: var(--text); font-weight: 700; letter-spacing: -0.005em; line-height: 1.25; margin-bottom: 8px; }
+.data-title em { color: var(--accent); font-style: italic; }
+.data-desc { font-family: var(--font-mono); font-size: 13px; line-height: 1.7; color: var(--text-body); }
+.data-desc strong { color: var(--text); }
+.data-desc em { color: var(--accent); font-style: normal; }
+.data-stat { font-family: var(--font-mono); font-size: 13px; color: var(--accent); text-align: right; line-height: 1.5; font-weight: 500; }
+@media (max-width: 760px) { .data-stat { text-align: left; } }
+
+/* WHATS NEXT */
+.next-list { list-style: none; margin-top: 24px; }
+.next-list li { display: grid; grid-template-columns: 60px 1fr; gap: 24px; padding: 22px 0; border-top: 1px solid var(--border); font-family: var(--font-mono); font-size: 14px; line-height: 1.7; color: var(--text-body); }
+.next-list li:last-child { border-bottom: 1px solid var(--border); }
+.next-list li .x { font-family: var(--font-mono); font-size: 13px; color: var(--accent); }
+.next-list li strong { color: var(--text); }
+.next-list li em { color: var(--accent); font-style: normal; }
+
+/* CONFIDENTIAL */
+.confidential { margin-top: 56px; padding: 24px 28px; border: 1px solid var(--border-strong); background: var(--surface); }
+.confidential-label { font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 12px; }
+.confidential-body { font-family: var(--font-mono); font-size: 13px; color: var(--text-muted); line-height: 1.75; max-width: 72ch; }
+.confidential-body em { color: var(--text-body); font-style: normal; }
+
+/* CROSS-LINK */
+.cross-link { margin-top: 48px; padding: 36px 32px; background: var(--surface); border: 1px solid var(--border-strong); display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 24px; transition: background 0.25s ease; }
+.cross-link:hover { background: var(--surface-2); }
+.cross-link-label { font-family: var(--font-mono); font-size: 11px; color: var(--accent); letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 10px; }
+.cross-link-title { font-family: var(--font-display); font-size: clamp(20px, 2.4vw, 26px); font-weight: 700; color: var(--text); letter-spacing: -0.01em; line-height: 1.2; }
+.cross-link-title em { color: var(--accent); font-style: italic; }
+.cross-link-arrow { font-family: var(--font-mono); font-size: 14px; color: var(--accent); }
+
+.footer { padding: 48px 0 64px; font-family: var(--font-mono); font-size: 12px; color: var(--text-faint); letter-spacing: 0.04em; border-top: 1px solid var(--border); }
+.footer-inner { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 24px; }
+.footer a { color: var(--text-muted); transition: color 0.2s; }
+.footer a:hover { color: var(--text); }
+.footer-links { display: flex; gap: 20px; }
+
+@keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+.hero-kicker { animation: fadeUp 0.6s ease-out 0.05s both; }
+.hero-title { animation: fadeUp 0.8s ease-out 0.15s both; }
+.hero-lede { animation: fadeUp 0.8s ease-out 0.3s both; }
+.hero-meta-grid { animation: fadeUp 0.8s ease-out 0.45s both; }
+@media (max-width: 640px) { body { font-size: 13px; } }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="container nav-inner">
+    <a href="/" class="nav-logo">Yash<span class="dot">.</span>Vardhan</a>
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="/about/">About</a>
+      <a href="/work/" class="active">Work</a>
+      <a href="/personal/">Personal</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="container">
+    <div class="hero-kicker">Work · KhiladiPro · Evaluation Methodology</div>
+    <h1 class="hero-title">Benchmarking<em>.</em></h1>
+    <p class="hero-lede">
+      A model isn't shipped because it works — it's shipped because <em>we know how well it works</em>. Cross-sport benchmarking across three production model families: <strong>cricket ball tracking, shuttle tracking, badminton player classification</strong>. Held-out clips. Held-out venues. Composite scoring across accuracy, latency, and pixel error. <em>The evaluation rigor is the deliverable</em> — the model selection follows from it.
+    </p>
+    <div class="hero-meta-grid">
+      <div class="hero-meta-cell"><div class="hero-meta-label">Model Families</div><div class="hero-meta-value">3 Sports</div></div>
+      <div class="hero-meta-cell"><div class="hero-meta-label">Player Class Variants</div><div class="hero-meta-value accent">6 Compared</div></div>
+      <div class="hero-meta-cell"><div class="hero-meta-label">Best Selected Model</div><div class="hero-meta-value accent">98.29%</div></div>
+      <div class="hero-meta-cell"><div class="hero-meta-label">Methodology</div><div class="hero-meta-value">Composite scoring</div></div>
+    </div>
+  </div>
+</header>
+
+<!-- THE PROBLEM -->
+<section class="section">
+  <div class="container">
+    <span class="section-num">01 / The Problem</span>
+    <h2 class="section-title">Picking the <em>best</em> model is harder than training a good one.</h2>
+    <div class="prose">
+      <p>Sports CV teams ship models. They train them, they push them into production, they watch the metrics. The decision <em>which</em> model to ship — between five variants that all look about the same on a single accuracy number — is where most ML teams quietly hand-wave and pick whichever was trained most recently.</p>
+      <p>That doesn't work at production scale. A model that's <strong>0.5% more accurate but 30% slower</strong> isn't better — it's worse for on-device deployment. A model that's <strong>recall-optimized at the cost of 4,700 false positives</strong> isn't a regression — it might be exactly what the downstream pipeline needs. <em>Single-number comparisons are how teams ship the wrong model.</em></p>
+      <p>The benchmarking work documented here treats <strong>model selection as its own engineering problem</strong>. Composite scores that weight accuracy, latency, and pixel error together. Held-out evaluation sets across both broadcast and KourtEye in-house captures. Honest framing when a number looks too good to trust. The work below is what makes the model selection defensible — not the model training.</p>
+    </div>
+  </div>
+</section>
+
+<!-- BENCHMARK 1 — BADMINTON PLAYER CLASSIFICATION (the deepest comparison) -->
+<section class="section">
+  <div class="container">
+    <span class="section-num">02 / Benchmarks</span>
+    <h2 class="section-title">Three model families. <em>One</em> methodology.</h2>
+    <p class="section-sub">
+      Each benchmark below was conducted with held-out evaluation, multi-metric reporting, and (where relevant) variant comparison. The goal isn't to declare a model "good" — it's to know precisely how the model behaves under conditions the model hasn't seen, against alternatives that might have been chosen instead.
+    </p>
+
+    <!-- BENCH 1: BADMINTON PLAYER CLASSIFICATION -->
+    <div class="bench">
+      <div class="bench-header">
+        <div>
+          <div class="bench-num">— Benchmark 01 / KourtEye</div>
+          <h3 class="bench-name">Badminton Player Classification <em>·</em> 6-variant comparison</h3>
+        </div>
+        <div class="bench-headline">Selected: <strong>YOLOv8n V2 · 98.29%</strong></div>
+      </div>
+
+      <div class="bench-body">
+        <p>The job: pick the best player-classification model for the KourtEye stack from six candidate variants spanning three YOLO families (v8n, v11n, v26n) and multiple training revisions. Constraint: deploys on the same broadcast and KourtEye footage, evaluated on the same held-out clips, scored on the same composite metric.</p>
+        <p><strong>Methodology:</strong> each variant evaluated on overall accuracy, frame-level detection rate, mean pixel error, and ms-per-frame inference speed. A <em>composite score</em> combines all four — so a model with 0.1% higher accuracy but 30% slower inference doesn't win automatically. The composite is the decision; the per-metric numbers are the diagnostic.</p>
+      </div>
+
+      <div class="compare-wrap">
+        <table class="compare">
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th>Overall Acc</th>
+              <th>Detection</th>
+              <th>Pixel Error</th>
+              <th>Speed</th>
+              <th>Composite</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="best">
+              <td>YOLOv8n V2</td>
+              <td class="num">98.29%</td>
+              <td class="num">98.52%</td>
+              <td class="num">8.95 px</td>
+              <td class="num">31.70 ms</td>
+              <td class="num">0.923</td>
+            </tr>
+            <tr>
+              <td>YOLOv8n V1</td>
+              <td class="num">98.20%</td>
+              <td class="num">98.72%</td>
+              <td class="num">8.93 px</td>
+              <td class="num">32.10 ms</td>
+              <td class="num">0.911</td>
+            </tr>
+            <tr>
+              <td>YOLOv11n V3</td>
+              <td class="num">97.58%</td>
+              <td class="num">97.66%</td>
+              <td class="num">9.77 px</td>
+              <td class="num">33.80 ms</td>
+              <td class="num">0.702</td>
+            </tr>
+            <tr>
+              <td>YOLOv11n V2</td>
+              <td class="num">96.70%</td>
+              <td class="num">96.79%</td>
+              <td class="num">9.38 px</td>
+              <td class="num">31.29 ms</td>
+              <td class="num">0.804</td>
+            </tr>
+            <tr>
+              <td>YOLOv26n V1</td>
+              <td class="num">95.88%</td>
+              <td class="num">95.96%</td>
+              <td class="num">9.96 px</td>
+              <td class="num">33.10 ms</td>
+              <td class="num">0.621</td>
+            </tr>
+            <tr>
+              <td>YOLOv26n V2</td>
+              <td class="num">85.17%</td>
+              <td class="num">85.22%</td>
+              <td class="num">10.51 px</td>
+              <td class="num">29.83 ms</td>
+              <td class="num">0.150</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="metric-grid" style="margin-top: 28px;">
+        <div class="mc"><div class="mc-label">Selected Accuracy</div><div class="mc-value accent">98.29%</div></div>
+        <div class="mc"><div class="mc-label">Detection Rate</div><div class="mc-value accent">98.52%</div></div>
+        <div class="mc"><div class="mc-label">Mean Pixel Error</div><div class="mc-value">8.95 px</div></div>
+        <div class="mc"><div class="mc-label">Inference Speed</div><div class="mc-value">31.70 ms/frame</div></div>
+      </div>
+
+      <div class="framing" style="margin-top: 28px;">
+        <div class="framing-label">— What the composite score reveals</div>
+        <div class="framing-body">
+          Note that <strong>YOLOv8n V1 has higher detection rate (98.72%)</strong> than the selected V2 (98.52%) — and slightly better pixel error (8.93 vs 8.95). On a single-metric comparison, V1 might have been picked. But the composite score (0.911 vs 0.923) accounts for V2's <em>marginal speed advantage</em> (31.70 vs 32.10 ms) and the overall accuracy bump, and selects V2 as the operating point. <strong>This is the decision the composite was designed to make.</strong>
+        </div>
+      </div>
+    </div>
+
+    <!-- BENCH 2: SHUTTLE TRACKING -->
+    <div class="bench">
+      <div class="bench-header">
+        <div>
+          <div class="bench-num">— Benchmark 02 / KourtEye</div>
+          <h3 class="bench-name">Shuttle Tracking <em>·</em> flywheel-driven iteration</h3>
+        </div>
+        <div class="bench-headline">Production: <strong>93% accuracy</strong> · lifted from 80%</div>
+      </div>
+
+      <div class="bench-body">
+        <p>The shuttle tracker benchmark is the canonical proof-point for the <em>data-flywheel</em> architecture built into the KhiladiPro Annotator. <strong>Same model architecture (TrackNetV5) across multiple retraining cycles, 80% → 93% accuracy</strong> — the lift is attributable to training data quality, loss-function tuning, and targeted augmentation, not architecture changes.</p>
+        <p><strong>Held-out methodology:</strong> evaluation set spans both broadcast badminton footage AND KourtEye in-house captures, with venue-level separation between training and evaluation. <em>Random clip splits on the same venue inflate accuracy</em> — the held-out venue layer is what makes the 93% defensible.</p>
+        <p>Two variants compared at the end of the benchmark cycle: heavy TrackNetV5 (server-side, 93% accuracy) and TrackNetV5Lite (INT8 dynamic, 0.29 MB on-device, 69.5 FPS on Apple CPU). The Lite variant carries a measurable accuracy delta from the heavy version — acceptable for on-device deployment, not for analytics paths.</p>
+      </div>
+
+      <div class="metric-grid">
+        <div class="mc"><div class="mc-label">Heavy Accuracy</div><div class="mc-value accent">93%</div></div>
+        <div class="mc"><div class="mc-label">Lite Detection</div><div class="mc-value">90.08%</div></div>
+        <div class="mc"><div class="mc-label">Median Px Error</div><div class="mc-value">3.67 px</div></div>
+        <div class="mc"><div class="mc-label">Lite Size</div><div class="mc-value accent">0.29 MB</div></div>
+        <div class="mc"><div class="mc-label">Lite Speed</div><div class="mc-value accent">69.5 FPS</div></div>
+        <div class="mc"><div class="mc-label">Lift</div><div class="mc-value accent">+13 pp</div></div>
+      </div>
+
+      <a href="/work/shuttle-tracking/" class="cross-link" style="margin-top: 28px;">
+        <div>
+          <div class="cross-link-label">— Deep dive</div>
+          <div class="cross-link-title">Shuttle tracking <em>case study</em> with the full lift chart</div>
+        </div>
+        <div class="cross-link-arrow">→</div>
+      </a>
+    </div>
+
+    <!-- BENCH 3: CRICKET BALL TRACKING -->
+    <div class="bench">
+      <div class="bench-header">
+        <div>
+          <div class="bench-num">— Benchmark 03 / Cricket</div>
+          <h3 class="bench-name">Cricket Ball Tracking <em>·</em> recall-vs-precision analysis</h3>
+        </div>
+        <div class="bench-headline"><strong>96.2% recall</strong> · 44% precision · honest framing</div>
+      </div>
+
+      <div class="bench-body">
+        <p>Cricket ball tracking benchmark across <strong>17 clips, 1,757 frames</strong>. The model: TFLite FP16 ball detector, 3.41 MB on-disk, 16.5 FPS CPU inference. The benchmark output produced a number that <em>looked great in isolation</em> — 96.2% per-frame recall — and a number that <em>looked bad in isolation</em> — ~44% precision, 738 false positives across the same frames.</p>
+        <p><strong>The honest read:</strong> this is a <em>recall-optimized localization layer</em>, not a fully-deployable ball detector. The model finds the ball on essentially every frame where the ball is visible (recall) — but it also fires on frames where the ball isn't (precision). For the production cricket pipeline this is acceptable because <em>landing, release, and contact frames are manually marked</em>, so the downstream analytics only consume ball positions on human-confirmed event frames, not raw detections.</p>
+        <p>Separately, the cricket stumps annotation accuracy was benchmarked at <strong>99% sub-pixel</strong> — the prediction is essentially landing on the corrected box on both bowler-end and batter-end stumps. This is the strongest single number in the cricket pipeline and is what makes downstream line-and-length analytics geometrically reliable.</p>
+      </div>
+
+      <div class="metric-grid">
+        <div class="mc"><div class="mc-label">Per-Frame Recall</div><div class="mc-value accent">96.23%</div></div>
+        <div class="mc"><div class="mc-label">Per-Frame Precision</div><div class="mc-value">~44%</div></div>
+        <div class="mc"><div class="mc-label">Median Px Error</div><div class="mc-value">7.57 px</div></div>
+        <div class="mc"><div class="mc-label">Mean Px Error</div><div class="mc-value">10.82 px</div></div>
+        <div class="mc"><div class="mc-label">Stumps Accuracy</div><div class="mc-value accent">99% sub-pixel</div></div>
+        <div class="mc"><div class="mc-label">Eval Set</div><div class="mc-value">17 clips · 1,757 frames</div></div>
+      </div>
+
+      <div class="framing" style="margin-top: 28px;">
+        <div class="framing-label">— The number behind the number</div>
+        <div class="framing-body">
+          The mean pixel error (10.82 px) is meaningfully higher than the median (7.57 px), which signals <em>outlier clips dragging the mean up</em>. Specifically: <code>cric_clip_9</code> had a mean error of 17.9 px — about 2× the typical clip. <strong>Reporting median alongside mean is what makes the benchmark honest</strong> — a single number would have hidden the outlier behavior. This is exactly the kind of failure-mode signal the next flywheel cycle needs to target.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- METHODOLOGY PRINCIPLES -->
+<section class="section">
+  <div class="container">
+    <span class="section-num">03 / Methodology</span>
+    <h2 class="section-title">Four principles. <em>One</em> standard.</h2>
+    <p class="section-sub">
+      What "good benchmarking" actually means at production scale. These aren't theoretical — every benchmark above followed them.
+    </p>
+
+    <div class="principles">
+      <div class="principle">
+        <div class="principle-num">— 01</div>
+        <h3 class="principle-title">Held-out across <em>two layers</em>.</h3>
+        <p class="principle-body">
+          Single held-out splits aren't enough. Production benchmarks use <em>held-out clips AND held-out venues</em> — venues the model has never seen any training data from. <strong>If you train on Wankhede footage and test on Wankhede footage, you're testing the venue, not the model.</strong> Cross-venue separation is the only way to surface the systematic biases (lighting, court color, camera setup) that random splits inherit.
+        </p>
+      </div>
+
+      <div class="principle">
+        <div class="principle-num">— 02</div>
+        <h3 class="principle-title">Multi-metric, <em>composite</em>-scored.</h3>
+        <p class="principle-body">
+          Production models don't optimize for one metric — they balance accuracy, latency, pixel precision, and memory. The badminton player classification benchmark used a <em>composite score</em> across all four, and the selected model (YOLOv8n V2) wasn't the leader on any single metric — it was the best <strong>tradeoff</strong>. Single-metric leaderboards ship the wrong model.
+        </p>
+      </div>
+
+      <div class="principle">
+        <div class="principle-num">— 03</div>
+        <h3 class="principle-title">Mean <em>and</em> median, always.</h3>
+        <p class="principle-body">
+          Reporting just mean pixel error hides outlier clips. Reporting just median hides systematic skew. <strong>Always both</strong> — the gap between them is the signal that tells you whether the model has consistent error or occasional catastrophic failures. The cricket ball benchmark's mean-vs-median gap is what flagged <code>cric_clip_9</code> as a failure-mode candidate worth investigating.
+        </p>
+      </div>
+
+      <div class="principle">
+        <div class="principle-num">— 04</div>
+        <h3 class="principle-title">Recall <em>and</em> precision, separately.</h3>
+        <p class="principle-body">
+          Detection rate alone is incomplete. The cricket ball tracker's 96% recall and ~44% precision tell <em>different stories</em> — and both matter, depending on how the downstream pipeline consumes the output. <strong>Bundling them into "accuracy" hides the architectural decision</strong> (recall-optimized for manual event filtering vs precision-optimized for autonomous detection).
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DATA COLLECTION FOUNDATION -->
+<section class="section">
+  <div class="container">
+    <span class="section-num">04 / Foundation</span>
+    <h2 class="section-title">The <em>data</em> that makes the benchmarks possible.</h2>
+    <p class="section-sub">
+      Benchmarking quality is bounded by data quality. The work below is the foundation that every model above sits on — datasets curated, annotations validated, ground truth generated, research projects scoped. The unglamorous work that makes the headline numbers trustworthy.
+    </p>
+
+    <div class="data-list">
+
+      <div class="data-item">
+        <div class="data-num">— 01</div>
+        <div class="data-content">
+          <div class="data-title">Cricket Shot Type Dataset <em>·</em> 10 shot classes</div>
+          <div class="data-desc">
+            <strong>Cover drive, on drive, off drive, straight drive, pull, square cut, sweep, front-foot defence, back-foot defence, lofted shot, left-alone</strong>. Minimum 50 videos per shot type, 2-second clips (bat-lift through follow-through), curated across multiple cricket formats (T20I, ODI, Test, IPL, BBL). Mixed ball types (red/white leather), mixed jersey colors, umpire-view camera. Foundation for the cricket action recognition model.
+          </div>
+        </div>
+        <div class="data-stat">10 classes<br>500+ clips</div>
+      </div>
+
+      <div class="data-item">
+        <div class="data-num">— 02</div>
+        <div class="data-content">
+          <div class="data-title">Bat Detection Dataset <em>·</em> per-frame annotations</div>
+          <div class="data-desc">
+            Frame-level bat detection annotations on Roboflow — <strong>1,953 images</strong> labelled with top-hand keypoints for each frame. Used to train the bat detection model that the bat 4-point quadrilateral tracker (in the Annotator platform) builds on top of. The bat is the hardest-to-annotate object in the cricket pipeline because of its fast rotation and self-occlusion during the follow-through.
+          </div>
+        </div>
+        <div class="data-stat">1,953<br>images</div>
+      </div>
+
+      <div class="data-item">
+        <div class="data-num">— 03</div>
+        <div class="data-content">
+          <div class="data-title">Badminton Doubles Clips <em>·</em> shuttle annotations</div>
+          <div class="data-desc">
+            <strong>25+ YouTube clips, 15-second duration each</strong>, trimmed and annotated for shuttle tracking on doubles matches. Doubles is structurally harder than singles for shuttle tracking — 4 players occlude the trajectory more frequently, mixed-doubles court coverage variance, more frequent racket-on-shuttle visual confusion. Foundation for the next-cycle doubles model.
+          </div>
+        </div>
+        <div class="data-stat">25+ clips<br>doubles</div>
+      </div>
+
+      <div class="data-item">
+        <div class="data-num">— 04</div>
+        <div class="data-content">
+          <div class="data-title">TrackNet Ground Truth Labels <em>·</em> model comparison set</div>
+          <div class="data-desc">
+            Ground truth labels for shuttle position used in <strong>TrackNet vs custom models comparison</strong> — latency, speed, model size, params, precision, recall. Distance metrics between manually labelled (x,y) pixel coordinates and model inference, with PCK@0.2 tolerance thresholds. <em>This is the dataset that makes the shuttle benchmark defensible</em> — without these labels, every accuracy number is a model marking its own homework.
+          </div>
+        </div>
+        <div class="data-stat">Multi-clip<br>+ landing-spots</div>
+      </div>
+
+      <div class="data-item">
+        <div class="data-num">— 05</div>
+        <div class="data-content">
+          <div class="data-title">KourtEye Ground Truth CSV Generation <em>·</em> evaluation pipeline</div>
+          <div class="data-desc">
+            Production-grade ground truth CSV generation pipeline for the KourtEye stack. Per-clip CSV outputs containing shuttle position, court keypoints, player classifications — formatted so downstream evaluation scripts can compute accuracy/detection/pixel-error metrics automatically. <em>The benchmark numbers above are produced by this pipeline.</em>
+          </div>
+        </div>
+        <div class="data-stat">Production<br>pipeline</div>
+      </div>
+
+      <div class="data-item">
+        <div class="data-num">— 06</div>
+        <div class="data-content">
+          <div class="data-title">Audio Annotations <em>·</em> hit/miss training data</div>
+          <div class="data-desc">
+            LabelStudio-based audio annotation pipeline for the bat-ball <em>hit/miss event detection model</em>. Reviewed dataset composition, annotation guidelines, audio modality choice, evaluation metrics. This is the dataset that powers the only event-detection method in the production stack that remains reliable in noisy training-environment footage where visual-only methods fail.
+          </div>
+        </div>
+        <div class="data-stat">LabelStudio<br>audio events</div>
+      </div>
+
+      <div class="data-item">
+        <div class="data-num">— 07</div>
+        <div class="data-content">
+          <div class="data-title">Pickleball Research Exploration</div>
+          <div class="data-desc">
+            Research scoping for a new sport — pickleball trajectory tracking and rally segmentation. Reviewed reference footage, surveyed existing CV approaches, evaluated feasibility against current TrackNet variants. <em>The kind of exploration that decides whether a sport gets a dedicated production pipeline or stays in research.</em> Currently scoping, not production.
+          </div>
+        </div>
+        <div class="data-stat">Sport scoping<br>R&D</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- WHATS NEXT -->
+<section class="section">
+  <div class="container">
+    <span class="section-num">05 / What's Next</span>
+    <h2 class="section-title">The benchmark's <em>own</em> evolution.</h2>
+    <ul class="next-list">
+      <li><span class="x">→ 01</span><span><strong>Inter-annotator agreement (IAA) on held-out sets.</strong> 5-10% of evaluation clips labelled by two annotators independently — the disagreement set bounds the labelling noise floor that any model's accuracy is ceiling-bound by.</span></li>
+      <li><span class="x">→ 02</span><span><strong>Cross-hardware benchmarking.</strong> The Lite shuttle variant's 69.5 FPS is measured on Apple CPU. <em>Same evaluation pass on Android Snapdragon, x86 server CPUs, ARM.</em> The on-device claim needs to generalize.</span></li>
+      <li><span class="x">→ 03</span><span><strong>Ablation studies on the cricket ball precision gap.</strong> The 44% precision is the largest known weakness in the cricket pipeline. Targeted experiments — temporal smoothing on detections, geometric gating from stumps boxes, loss-function reweighting — to identify which intervention closes the precision gap without sacrificing recall.</span></li>
+      <li><span class="x">→ 04</span><span><strong>Confidence-interval reporting on small-N benchmarks.</strong> The cricket ball benchmark on 17 clips and the smash speed benchmark on ~50 smashes both have real confidence intervals that haven't been formally computed. Reporting them tightens the credibility of every claim downstream.</span></li>
+      <li><span class="x">→ 05</span><span><strong>Continuous benchmark CI.</strong> Run the benchmark pipeline automatically on every new model checkpoint, surface deltas in a dashboard, alert on regressions. The benchmarking work should be <em>continuous, not episodic</em>.</span></li>
+    </ul>
+
+    <div class="confidential">
+      <div class="confidential-label">— A note on detail</div>
+      <div class="confidential-body">This page describes <em>benchmarking methodology, measured results, and the data foundation behind them</em>. Specific deployment infrastructure, internal repository paths, and proprietary algorithms are not shown — this is production work for KhiladiPro, and the engineering substance is what's discoverable here without exposing IP.</div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container footer-inner">
+    <div>© Yash Vardhan</div>
+    <div class="footer-links">
+      <a href="https://github.com/yashv04" target="_blank" rel="noopener">GitHub <span style="color: var(--accent);">↗</span></a>
+      <a href="https://www.linkedin.com/in/yash-vardhan-5b3956169/" target="_blank" rel="noopener">LinkedIn <span style="color: var(--accent);">↗</span></a>
+      <a href="mailto:yashv3110@gmail.com">Email <span style="color: var(--accent);">↗</span></a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

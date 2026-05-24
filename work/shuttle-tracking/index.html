@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shuttle Tracking Model — Yash Vardhan</title>
+<meta name="description" content="Production shuttle tracking model for live badminton broadcasts. 93% accuracy on held-out broadcast + KourtEye footage, lifted from 80% via flywheel-driven retraining. TrackNetV5 + TrackNetV5Lite, KhiladiPro.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg: #000000;
+  --surface: #0a0e14;
+  --surface-2: #0e131a;
+  --border: #11161e;
+  --border-strong: #1a2230;
+  --text: #ffffff;
+  --text-body: #d1d5db;
+  --text-muted: #6b7280;
+  --text-faint: #4b5563;
+  --accent: #38bdf8;
+  --accent-soft: rgba(56, 189, 248, 0.08);
+  --accent-line: rgba(56, 189, 248, 0.18);
+  --warn: #fbbf24;
+  --ok: #34d399;
+  --font-display: 'Syne', -apple-system, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --container: 1240px;
+  --gutter: clamp(20px, 5vw, 64px);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+body { background: var(--bg); color: var(--text-body); font-family: var(--font-mono); font-size: 14px; line-height: 1.75; font-weight: 400; overflow-x: hidden; }
+body::before {
+  content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 1;
+  background-image: linear-gradient(var(--accent-line) 1px, transparent 1px), linear-gradient(90deg, var(--accent-line) 1px, transparent 1px);
+  background-size: 120px 120px; opacity: 0.12;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: var(--container); margin: 0 auto; padding: 0 var(--gutter); position: relative; z-index: 2; }
+
+.nav { position: sticky; top: 0; z-index: 100; background: rgba(0,0,0,0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); }
+.nav-inner { display: flex; align-items: center; justify-content: space-between; padding: 26px 0; }
+.nav-logo { font-family: var(--font-display); font-weight: 800; font-size: 22px; color: var(--text); letter-spacing: -0.01em; }
+.nav-logo .dot { color: var(--accent); font-weight: 400; }
+.nav-links { display: flex; gap: 48px; font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; }
+.nav-links a { color: var(--text-muted); padding-bottom: 4px; transition: color 0.2s; }
+.nav-links a:hover { color: var(--text); }
+.nav-links a.active { color: var(--accent); border-bottom: 1px solid var(--accent); }
+@media (max-width: 640px) { .nav-links { gap: 20px; font-size: 11px; } }
+
+.hero { padding: clamp(80px, 14vw, 140px) 0 clamp(60px, 9vw, 100px); }
+.hero-kicker { font-family: var(--font-mono); font-size: 12px; color: var(--accent); letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 36px; display: flex; align-items: center; gap: 14px; }
+.hero-kicker::before { content: ''; display: inline-block; width: 8px; height: 8px; background: var(--accent); border-radius: 50%; }
+.hero-title { font-family: var(--font-display); font-weight: 800; font-size: clamp(52px, 10vw, 128px); line-height: 0.94; letter-spacing: -0.03em; color: var(--text); margin-bottom: 40px; }
+.hero-title em { font-style: italic; color: var(--accent); font-weight: 800; }
+.hero-lede { font-family: var(--font-mono); font-size: clamp(15px, 1.4vw, 17px); line-height: 1.8; color: var(--text-body); max-width: 78ch; margin-bottom: 56px; }
+.hero-lede em { color: var(--accent); font-style: normal; }
+.hero-lede strong { color: var(--text); font-weight: 500; }
+
+.hero-meta-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1px; background: var(--border); border: 1px solid var(--border); }
+.hero-meta-cell { background: var(--bg); padding: 24px; }
+.hero-meta-label { font-family: var(--font-mono); font-size: 10px; color: var(--text-faint); letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 10px; }
+.hero-meta-value { font-family: var(--font-display); font-size: clamp(20px, 2vw, 24px); font-weight: 700; color: var(--text); letter-spacing: -0.01em; line-height: 1.2; }
+.hero-meta-value.accent { color: var(--accent); }
+
+.section { padding: clamp(56px, 9vw, 96px) 0; border-top: 1px solid var(--border); }
+.section-num { font-family: var(--font-mono); font-size: 11px; color: var(--text-faint); letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 24px; display: block; }
+.section-title { font-family: var(--font-display); font-weight: 700; font-size: clamp(32px, 5vw, 56px); line-height: 1.0; letter-spacing: -0.02em; color: var(--text); margin-bottom: 44px; max-width: 24ch; }
+.section-title em { font-style: italic; color: var(--accent); }
+.section-sub { font-family: var(--font-mono); font-size: 14px; color: var(--text-muted); margin-bottom: 40px; max-width: 72ch; line-height: 1.75; }
+.prose { max-width: 76ch; font-family: var(--font-mono); font-size: 14px; line-height: 1.85; color: var(--text-body); }
+.prose p { margin-bottom: 1.4em; }
+.prose p:last-child { margin-bottom: 0; }
+.prose strong { color: var(--text); font-weight: 500; }
+.prose em { color: var(--accent); font-style: normal; }
+.prose code { font-family: var(--font-mono); background: var(--surface); border: 1px solid var(--border-strong); padding: 2px 8px; color: var(--accent); font-size: 0.92em; }
+
+/* FLYWHEEL LIFT VIZ */
+.lift { margin-top: 36px; padding: clamp(28px, 5vw, 56px) clamp(20px, 4vw, 48px); background: var(--surface); border: 1px solid var(--border); }
+.lift svg { display: block; margin: 0 auto; max-width: 100%; height: auto; }
+.lift-caption { margin-top: 32px; font-family: var(--font-mono); font-size: 13px; color: var(--text-muted); text-align: center; max-width: 70ch; margin-left: auto; margin-right: auto; line-height: 1.75; }
+.lift-caption strong { color: var(--accent); }
+
+/* RESULTS CARDS */
+.results { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1px; background: var(--border); border: 1px solid var(--border); margin-top: 36px; }
+.result-cell { background: var(--bg); padding: 32px 28px; }
+.result-label { font-family: var(--font-mono); font-size: 11px; color: var(--accent); letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 16px; }
+.result-value { font-family: var(--font-display); font-weight: 800; font-size: clamp(32px, 4vw, 48px); color: var(--text); line-height: 1; letter-spacing: -0.02em; margin-bottom: 12px; }
+.result-value em { color: var(--accent); font-style: italic; }
+.result-caption { font-family: var(--font-mono); font-size: 12px; color: var(--text-muted); line-height: 1.6; max-width: 28ch; }
+
+/* TWO MODEL VARIANTS */
+.variants { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); border: 1px solid var(--border); margin-top: 32px; }
+@media (max-width: 760px) { .variants { grid-template-columns: 1fr; } }
+.variant { background: var(--bg); padding: 40px clamp(28px, 4vw, 44px); transition: background 0.3s ease; }
+.variant:hover { background: var(--surface); }
+.variant-tag { font-family: var(--font-mono); font-size: 11px; color: var(--accent); letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 18px; }
+.variant-title { font-family: var(--font-display); font-size: clamp(24px, 2.8vw, 30px); font-weight: 700; color: var(--text); letter-spacing: -0.01em; line-height: 1.15; margin-bottom: 20px; }
+.variant-title em { color: var(--accent); font-style: italic; }
+.variant-body { font-family: var(--font-mono); font-size: 14px; line-height: 1.75; color: var(--text-body); margin-bottom: 24px; }
+.variant-body strong { color: var(--text); }
+.variant-body em { color: var(--accent); font-style: normal; }
+.variant-body code { color: var(--accent); font-size: 0.92em; }
+.variant-metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border-strong); border: 1px solid var(--border-strong); }
+.metric { background: var(--surface); padding: 16px 18px; }
+.metric-label { font-family: var(--font-mono); font-size: 10px; color: var(--text-faint); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 6px; }
+.metric-value { font-family: var(--font-mono); font-size: 14px; color: var(--text); font-weight: 500; line-height: 1.3; }
+.metric-value.accent { color: var(--accent); }
+.variant-purpose { margin-top: 20px; padding: 14px 18px; background: var(--surface); border-left: 3px solid var(--accent); font-family: var(--font-mono); font-size: 12px; color: var(--text-muted); line-height: 1.7; }
+.variant-purpose strong { color: var(--text); }
+
+/* DECISIONS */
+.decisions { display: grid; gap: 0; margin-top: 32px; }
+.decision { display: grid; grid-template-columns: 220px 1fr; gap: 48px; padding: 36px 0; border-top: 1px solid var(--border); align-items: start; }
+.decision:last-child { border-bottom: 1px solid var(--border); }
+.decision-q { font-family: var(--font-mono); font-size: 12px; color: var(--accent); letter-spacing: 0.1em; text-transform: uppercase; line-height: 1.5; padding-top: 4px; }
+.decision-a { font-family: var(--font-mono); font-size: 14px; color: var(--text-body); line-height: 1.75; max-width: 64ch; }
+.decision-a strong { color: var(--text); }
+.decision-a em { color: var(--accent); font-style: normal; }
+.decision-a code { color: var(--accent); font-size: 0.92em; }
+@media (max-width: 768px) { .decision { grid-template-columns: 1fr; gap: 14px; } }
+
+/* HONEST FRAMING */
+.framing { margin-top: 32px; padding: clamp(32px, 5vw, 48px); background: var(--surface); border: 1px solid var(--border-strong); position: relative; }
+.framing::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--warn); }
+.framing-label { font-family: var(--font-mono); font-size: 11px; color: var(--warn); letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 20px; }
+.framing-title { font-family: var(--font-display); font-size: clamp(22px, 2.6vw, 30px); color: var(--text); margin-bottom: 24px; font-weight: 700; line-height: 1.2; max-width: 28ch; }
+.framing-title em { color: var(--warn); font-style: italic; }
+.framing-body { font-family: var(--font-mono); font-size: 14px; color: var(--text-body); line-height: 1.75; max-width: 70ch; }
+.framing-body strong { color: var(--text); }
+.framing-body em { color: var(--warn); font-style: normal; }
+.framing-body code { color: var(--accent); font-size: 0.92em; }
+.framing-body p { margin-bottom: 1.2em; }
+.framing-body p:last-child { margin-bottom: 0; }
+
+/* LIMITS */
+.limits { display: grid; gap: 18px; margin-top: 24px; }
+.limit-item { display: grid; grid-template-columns: 28px 1fr; gap: 18px; padding: 22px 0; border-top: 1px solid var(--border); }
+.limit-item:last-child { border-bottom: 1px solid var(--border); }
+.limit-num { font-family: var(--font-mono); font-size: 12px; color: var(--text-faint); padding-top: 4px; }
+.limit-text { font-family: var(--font-mono); font-size: 14px; color: var(--text-body); line-height: 1.7; }
+.limit-text strong { color: var(--text); font-weight: 500; }
+.limit-text code { color: var(--accent); font-size: 0.92em; }
+
+/* WHATS NEXT */
+.next-list { list-style: none; margin-top: 24px; }
+.next-list li { display: grid; grid-template-columns: 60px 1fr; gap: 24px; padding: 22px 0; border-top: 1px solid var(--border); font-family: var(--font-mono); font-size: 14px; line-height: 1.7; color: var(--text-body); }
+.next-list li:last-child { border-bottom: 1px solid var(--border); }
+.next-list li .x { font-family: var(--font-mono); font-size: 13px; color: var(--accent); }
+.next-list li strong { color: var(--text); }
+.next-list li em { color: var(--accent); font-style: normal; }
+
+/* CONFIDENTIAL */
+.confidential { margin-top: 56px; padding: 24px 28px; border: 1px solid var(--border-strong); background: var(--surface); }
+.confidential-label { font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 12px; }
+.confidential-body { font-family: var(--font-mono); font-size: 13px; color: var(--text-muted); line-height: 1.75; max-width: 72ch; }
+.confidential-body em { color: var(--text-body); font-style: normal; }
+
+/* CROSS-LINK CARD */
+.cross-link { margin-top: 48px; padding: 36px 32px; background: var(--surface); border: 1px solid var(--border-strong); display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 24px; transition: background 0.25s ease; }
+.cross-link:hover { background: var(--surface-2); }
+.cross-link-label { font-family: var(--font-mono); font-size: 11px; color: var(--accent); letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 10px; }
+.cross-link-title { font-family: var(--font-display); font-size: clamp(20px, 2.4vw, 26px); font-weight: 700; color: var(--text); letter-spacing: -0.01em; line-height: 1.2; }
+.cross-link-title em { color: var(--accent); font-style: italic; }
+.cross-link-arrow { font-family: var(--font-mono); font-size: 14px; color: var(--accent); }
+
+/* FOOTER */
+.footer { padding: 48px 0 64px; font-family: var(--font-mono); font-size: 12px; color: var(--text-faint); letter-spacing: 0.04em; border-top: 1px solid var(--border); }
+.footer-inner { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 24px; }
+.footer a { color: var(--text-muted); transition: color 0.2s; }
+.footer a:hover { color: var(--text); }
+.footer-links { display: flex; gap: 20px; }
+
+@keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+.hero-kicker { animation: fadeUp 0.6s ease-out 0.05s both; }
+.hero-title { animation: fadeUp 0.8s ease-out 0.15s both; }
+.hero-lede { animation: fadeUp 0.8s ease-out 0.3s both; }
+.hero-meta-grid { animation: fadeUp 0.8s ease-out 0.45s both; }
+@media (max-width: 640px) { body { font-size: 13px; } }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="container nav-inner">
+    <a href="/" class="nav-logo">Yash<span class="dot">.</span>Vardhan</a>
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="/about/">About</a>
+      <a href="/work/" class="active">Work</a>
+      <a href="/personal/">Personal</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="container">
+    <div class="hero-kicker">Work · KhiladiPro · Production Model</div>
+    <h1 class="hero-title">Shuttle<em>.</em></h1>
+    <p class="hero-lede">
+      Production shuttle tracking model for live badminton broadcasts. <strong>93% accuracy</strong> on held-out clips from both broadcast footage and KourtEye captures, on held-out venues — <em>lifted from 80% via flywheel-driven retraining on annotator-corrected data</em>. Two model variants: <strong>TrackNetV5</strong> (heavy, production accuracy) and <strong>TrackNetV5Lite</strong> (lightweight, INT8 dynamic, on-device deployable at 69.5 FPS).
+    </p>
+    <div class="hero-meta-grid">
+      <div class="hero-meta-cell"><div class="hero-meta-label">Production Accuracy</div><div class="hero-meta-value accent">93%</div></div>
+      <div class="hero-meta-cell"><div class="hero-meta-label">Flywheel Lift</div><div class="hero-meta-value">80% → 93%</div></div>
+      <div class="hero-meta-cell"><div class="hero-meta-label">Lite Variant Speed</div><div class="hero-meta-value accent">69.5 FPS</div></div>
+      <div class="hero-meta-cell"><div class="hero-meta-label">Status</div><div class="hero-meta-value">Live · Serving</div></div>
+    </div>
+  </div>
+</header>
+
+<section class="section">
+  <div class="container">
+    <span class="section-num">01 / The Problem</span>
+    <h2 class="section-title">Shuttles are <em>small, fast,</em> and almost <em>invisible</em>.</h2>
+    <div class="prose">
+      <p>A shuttlecock in broadcast badminton footage is often <strong>under 8 pixels across</strong>. During a smash, it travels at effective velocities exceeding <strong>300 km/h at the racket</strong> — the camera captures it as a blurred streak across multiple frames. The net occludes it every few seconds. And on broadcast lighting, the white shuttle on a light court background becomes <em>nearly indistinguishable from the surface it's flying over</em>.</p>
+      <p>Tracking that is the foundation of every downstream badminton analytics product — line-call detection, smash speed estimation, rally segmentation, highlight generation, biomechanics. <strong>The shuttle tracker is the substrate.</strong> If it's wrong, everything downstream inherits the error.</p>
+      <p>Off-the-shelf TrackNet variants underperformed on the footage KhiladiPro actually ships against — broadcast cameras with varied lighting, KourtEye in-house captures with different angles, venues with court-color variance, shuttles flying through net-occluded paths. The job: take a known-good architecture and make it <em>materially better on the data we actually see</em>.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <span class="section-num">02 / The Lift</span>
+    <h2 class="section-title">80% to 93% — <em>same architecture</em>, better data.</h2>
+    <p class="section-sub">
+      The accuracy gain didn't come from a new model. It came from a <em>better training pipeline</em> — the KhiladiPro Annotator's model-in-the-loop schema (pred_/man_/edited) produced data quality that compounded across multiple retraining cycles. The architecture stayed; the data improved.
+    </p>
+
+    <div class="lift">
+      <svg viewBox="0 0 1000 380" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Accuracy lift over flywheel iterations">
+        <defs>
+          <marker id="arrUp" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#38bdf8"/>
+          </marker>
+          <linearGradient id="growArea" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.35"/>
+            <stop offset="100%" stop-color="#38bdf8" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+
+        <!-- Axes -->
+        <line x1="100" y1="320" x2="940" y2="320" stroke="#1a2230" stroke-width="1"/>
+        <line x1="100" y1="60" x2="100" y2="320" stroke="#1a2230" stroke-width="1"/>
+
+        <!-- Y-axis labels -->
+        <text x="80" y="320" text-anchor="end" fill="#6b7280" font-family="JetBrains Mono, monospace" font-size="11">75%</text>
+        <text x="80" y="245" text-anchor="end" fill="#6b7280" font-family="JetBrains Mono, monospace" font-size="11">80%</text>
+        <text x="80" y="170" text-anchor="end" fill="#6b7280" font-family="JetBrains Mono, monospace" font-size="11">85%</text>
+        <text x="80" y="95" text-anchor="end" fill="#6b7280" font-family="JetBrains Mono, monospace" font-size="11">93%</text>
+
+        <!-- Reference lines -->
+        <line x1="100" y1="245" x2="940" y2="245" stroke="#1a2230" stroke-width="0.5" stroke-dasharray="2,4"/>
+        <line x1="100" y1="170" x2="940" y2="170" stroke="#1a2230" stroke-width="0.5" stroke-dasharray="2,4"/>
+        <line x1="100" y1="95" x2="940" y2="95" stroke="#38bdf8" stroke-width="0.8" stroke-dasharray="2,4" stroke-opacity="0.6"/>
+
+        <!-- Lift area + line -->
+        <path d="M 160 245 L 360 200 L 560 145 L 760 110 L 880 95 L 880 320 L 160 320 Z" fill="url(#growArea)"/>
+        <path d="M 160 245 L 360 200 L 560 145 L 760 110 L 880 95" stroke="#38bdf8" stroke-width="2" fill="none"/>
+
+        <!-- Data points -->
+        <circle cx="160" cy="245" r="5" fill="#0a0e14" stroke="#38bdf8" stroke-width="2"/>
+        <circle cx="360" cy="200" r="5" fill="#0a0e14" stroke="#38bdf8" stroke-width="2"/>
+        <circle cx="560" cy="145" r="5" fill="#0a0e14" stroke="#38bdf8" stroke-width="2"/>
+        <circle cx="760" cy="110" r="5" fill="#0a0e14" stroke="#38bdf8" stroke-width="2"/>
+        <circle cx="880" cy="95" r="6" fill="#38bdf8" stroke="#38bdf8" stroke-width="2"/>
+
+        <!-- Point labels -->
+        <text x="160" y="270" text-anchor="middle" fill="#fafafa" font-family="JetBrains Mono, monospace" font-size="13" font-weight="500">~80%</text>
+        <text x="160" y="288" text-anchor="middle" fill="#6b7280" font-family="JetBrains Mono, monospace" font-size="10">Baseline</text>
+
+        <text x="360" y="222" text-anchor="middle" fill="#fafafa" font-family="JetBrains Mono, monospace" font-size="12">~85%</text>
+        <text x="360" y="240" text-anchor="middle" fill="#6b7280" font-family="JetBrains Mono, monospace" font-size="10">Cycle 1</text>
+
+        <text x="560" y="165" text-anchor="middle" fill="#fafafa" font-family="JetBrains Mono, monospace" font-size="12">~89%</text>
+        <text x="560" y="183" text-anchor="middle" fill="#6b7280" font-family="JetBrains Mono, monospace" font-size="10">Cycle 2</text>
+
+        <text x="760" y="130" text-anchor="middle" fill="#fafafa" font-family="JetBrains Mono, monospace" font-size="12">~91%</text>
+        <text x="760" y="148" text-anchor="middle" fill="#6b7280" font-family="JetBrains Mono, monospace" font-size="10">Cycle 3</text>
+
+        <text x="880" y="78" text-anchor="middle" fill="#38bdf8" font-family="JetBrains Mono, monospace" font-size="14" font-weight="600">93%</text>
+        <text x="880" y="62" text-anchor="middle" fill="#38bdf8" font-family="JetBrains Mono, monospace" font-size="10" letter-spacing="0.1em">PRODUCTION</text>
+
+        <!-- X-axis label -->
+        <text x="520" y="355" text-anchor="middle" fill="#6b7280" font-family="JetBrains Mono, monospace" font-size="11" letter-spacing="0.1em">— FLYWHEEL CYCLES (annotator-corrected retraining) —</text>
+      </svg>
+      <div class="lift-caption">Accuracy across retraining cycles. <strong>Each cycle = annotator corrections fed back through the model-in-the-loop schema</strong>, biased toward failure-mode frames flagged by the annotation_score metric. Same TrackNet architecture across all five evaluations.</div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <span class="section-num">03 / Two-Model Strategy</span>
+    <h2 class="section-title">Heavy for <em>accuracy</em>. Lite for <em>deployment</em>.</h2>
+    <p class="section-sub">
+      Production sports CV doesn't pick between accuracy and latency — it ships both, and chooses which one to consume at inference time depending on the consumer. The same training data produces both variants. Same architecture family, different parameter counts and quantization strategies.
+    </p>
+
+    <div class="variants">
+      <div class="variant">
+        <div class="variant-tag">— TrackNetV5 (Heavy)</div>
+        <h3 class="variant-title">Production <em>accuracy reference</em></h3>
+        <p class="variant-body">
+          Full-capacity TrackNetV5 architecture. Higher parameter count, server-side inference. This is the model that delivers the <strong>93% headline accuracy</strong> against the held-out broadcast + KourtEye evaluation set. Used for high-stakes analytics paths where latency budget is generous — match analysis, batch processing, ground-truth generation for downstream evaluation.
+        </p>
+        <div class="variant-metrics">
+          <div class="metric"><div class="metric-label">Accuracy</div><div class="metric-value accent">93%</div></div>
+          <div class="metric"><div class="metric-label">Deployment</div><div class="metric-value">Server-side</div></div>
+        </div>
+        <div class="variant-purpose"><strong>Where it ships:</strong> the model running on production analytics pipelines where the accuracy budget matters more than the latency budget. Reference benchmark for all downstream evaluations.</div>
+      </div>
+
+      <div class="variant">
+        <div class="variant-tag">— TrackNetV5Lite</div>
+        <h3 class="variant-title">On-device <em>deployment target</em></h3>
+        <p class="variant-body">
+          Halved-channel TrackNetV5 architecture, INT8 dynamic quantization. <strong>0.29 MB on disk</strong> — small enough to ship as part of an iOS/Android app bundle. Runs at <strong>69.5 FPS on Apple CPU</strong> (14.38 ms/frame), no GPU required. Accuracy trade-off vs heavy is bounded — the Lite variant is the deployment target for live mobile capture, edge inference, and bandwidth-constrained contexts.
+        </p>
+        <div class="variant-metrics">
+          <div class="metric"><div class="metric-label">Size</div><div class="metric-value accent">0.29 MB</div></div>
+          <div class="metric"><div class="metric-label">Speed</div><div class="metric-value accent">69.5 FPS</div></div>
+          <div class="metric"><div class="metric-label">Format</div><div class="metric-value">INT8 dynamic</div></div>
+          <div class="metric"><div class="metric-label">Hardware</div><div class="metric-value">Apple CPU</div></div>
+        </div>
+        <div class="variant-purpose"><strong>Where it ships:</strong> mobile captures via the KourtEye app, on-device inference for real-time feedback, and any deployment context where the model has to live inside a binary, not behind an API.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <span class="section-num">04 / Approach</span>
+    <h2 class="section-title">What <em>actually changed</em> across the cycles.</h2>
+    <p class="section-sub">
+      The 80% → 93% lift wasn't a single architectural breakthrough. Four levers stacked, each one producing a few percentage points of improvement. The flywheel mechanism was what made the levers reproducible.
+    </p>
+
+    <div class="decisions">
+      <div class="decision">
+        <div class="decision-q">More & better<br>training data</div>
+        <div class="decision-a">
+          The annotator platform produced labelled data at higher velocity than off-the-shelf tools, and crucially — produced <em>corrected</em> data, not just labelled data. The <code>pred_</code>/<code>man_</code>/<code>edited</code> schema preserved the model's predictions alongside human corrections, so the next training cycle could target exactly the frames where the previous model was wrong. <strong>The training set didn't just grow; it grew toward failure modes.</strong>
+        </div>
+      </div>
+
+      <div class="decision">
+        <div class="decision-q">FeatherTrack —<br>lightweight architecture</div>
+        <div class="decision-a">
+          The halved-channel TrackNetV5Lite variant. Designed for on-device deployment with INT8 dynamic quantization — but the architecture's lower parameter count also reduced overfitting risk on the early training cycles, when the dataset was smaller. The Lite model converged faster and gave us a deployable production target while the heavy model continued improving.
+        </div>
+      </div>
+
+      <div class="decision">
+        <div class="decision-q">Loss function<br>tuning</div>
+        <div class="decision-a">
+          TrackNet's gaussian-heatmap regression loss was tuned to weight high-confidence detections heavier, reducing the false-positive count that dominated earlier evaluations (recall the Nov 2025 benchmark showed <code>4,726 FP</code> across just 57 visible-ball frames). The loss adjustment biased the model toward <em>precision in addition to recall</em>.
+        </div>
+      </div>
+
+      <div class="decision">
+        <div class="decision-q">Targeted<br>augmentation</div>
+        <div class="decision-a">
+          Augmentation focused on the failure modes the previous cycle's errors surfaced — motion blur, lighting variance, low-contrast backgrounds, partial occlusion. <em>Random augmentation alone doesn't fix specific failure modes; targeted augmentation does.</em> The annotation_score metric flagged which clips the model struggled on, and those failure modes drove the next cycle's augmentation strategy.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <span class="section-num">05 / Evaluation</span>
+    <h2 class="section-title">Held-out clips. <em>Held-out</em> venues.</h2>
+    <div class="prose">
+      <p>The 93% accuracy number is produced on an evaluation set with two layers of held-out separation: <strong>(1) held-out clips</strong> from both broadcast badminton footage AND KourtEye in-house captures, and <strong>(2) held-out venues</strong> — venues the model has not seen any training data from. This is the methodology a production sports CV team should use, not the random-split methodology that inflates numbers across portfolio projects.</p>
+      <p>The reason for both layers of held-out: shuttle appearance varies meaningfully across broadcast configurations (camera angle, exposure, lighting), and venue-specific factors (court color, lighting rigs, background noise) introduce systematic bias that random clip splits can't isolate. <em>If you train on Wankhede footage and test on Wankhede footage, you're testing the venue, not the model.</em></p>
+    </div>
+
+    <div class="results">
+      <div class="result-cell">
+        <div class="result-label">Accuracy</div>
+        <div class="result-value"><em>93%</em></div>
+        <div class="result-caption">On held-out broadcast + KourtEye clips, held-out venues.</div>
+      </div>
+      <div class="result-cell">
+        <div class="result-label">Lift</div>
+        <div class="result-value">+13<span style="font-size:0.55em;">pp</span></div>
+        <div class="result-caption">From 80% baseline via flywheel-driven retraining.</div>
+      </div>
+      <div class="result-cell">
+        <div class="result-label">Lite Speed</div>
+        <div class="result-value">14.4<span style="font-size:0.5em;">ms</span></div>
+        <div class="result-caption">Per-frame inference on Apple CPU (69.5 FPS).</div>
+      </div>
+      <div class="result-cell">
+        <div class="result-label">Lite Size</div>
+        <div class="result-value">0.29<span style="font-size:0.5em;">MB</span></div>
+        <div class="result-caption">INT8 dynamic — ships in mobile app bundle.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <span class="section-num">06 / Honest Limitations</span>
+    <h2 class="section-title">Where the 7% <em>still lives</em>.</h2>
+
+    <div class="framing">
+      <div class="framing-label">— DOMINANT FAILURE MODE</div>
+      <h3 class="framing-title">Low-contrast frames <em>are still hard</em>.</h3>
+      <div class="framing-body">
+        <p>When the shuttle's appearance approaches the court or background luminance — white shuttle on light court surface, light shuttle against pale broadcast lighting — the model's confidence drops sharply. This is the single largest contributor to the remaining 7% error.</p>
+        <p>Low-contrast isn't a problem the model can solve in isolation. It needs <strong>more low-contrast training examples</strong> (which the annotator is producing), and likely <strong>auxiliary inputs</strong> in V2 — temporal smoothing across frames, motion-based detection priors, or contrast normalization at preprocessing time.</p>
+        <p>This is being prioritized for the next flywheel cycle. The annotation_score metric already flags low-contrast clips for upweighting in the next training set.</p>
+      </div>
+    </div>
+
+    <div class="limits">
+      <div class="limit-item">
+        <div class="limit-num">02</div>
+        <div class="limit-text"><strong>Fast-motion frames during smashes (>50 px/frame movement)</strong> remain harder than steady-state rally frames. Earlier evaluations showed motion-blurred frames at 5–10× the typical pixel error. The current model has improved but not eliminated this.</div>
+      </div>
+      <div class="limit-item">
+        <div class="limit-num">03</div>
+        <div class="limit-text"><strong>Net occlusion</strong> — when the shuttle passes through the net plane, the model has to track across frames where the shuttle is partially or fully invisible. Handled today by temporal context but not perfectly.</div>
+      </div>
+      <div class="limit-item">
+        <div class="limit-num">04</div>
+        <div class="limit-text"><strong>Lite variant accuracy delta vs heavy</strong> — the lightweight model carries an accuracy trade-off (currently around <code>~90%</code> detection rate vs 93% for the heavy variant). For latency-sensitive on-device paths this is acceptable; for analytics paths it's not the right model.</div>
+      </div>
+      <div class="limit-item">
+        <div class="limit-num">05</div>
+        <div class="limit-text"><strong>Singles only.</strong> Most of the training data and evaluation methodology was built around singles matches. Doubles introduces additional complexity (4 players occluding the shuttle, mixed-doubles court coverage variance) and is being addressed by the annotator's doubles clip pipeline.</div>
+      </div>
+      <div class="limit-item">
+        <div class="limit-num">06</div>
+        <div class="limit-text"><strong>Apple CPU benchmark specificity</strong> — the 69.5 FPS number is measured on Apple CPU. Performance on other deployment hardware (Android Snapdragon, x86 server CPUs, ARM) hasn't been formally benchmarked in the same evaluation pass.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <span class="section-num">07 / What's Next</span>
+    <h2 class="section-title">The next <em>2–3 percentage points</em>.</h2>
+    <p class="section-sub">
+      Each flywheel cycle has historically delivered 2–4 percentage points of accuracy lift. The next cycle's targeted improvements:
+    </p>
+
+    <ul class="next-list">
+      <li><span class="x">→ 01</span><span><strong>Low-contrast augmentation pass.</strong> Targeted training on frames where shuttle luminance is within 15% of court background. annotation_score is already flagging these clips for upweighting in the next training set.</span></li>
+      <li><span class="x">→ 02</span><span><strong>Doubles trajectory robustness.</strong> Integrate the 25+ doubles clips annotated through the doubles pipeline. Validate that shuttle tracking holds up when 4 players occlude the trajectory more frequently than in singles.</span></li>
+      <li><span class="x">→ 03</span><span><strong>Temporal context window.</strong> Currently the model is largely per-frame plus a small temporal window. Expanding the temporal context should help with both net-occlusion gaps and low-contrast detections (the shuttle's recent trajectory is a strong prior on where it should be next).</span></li>
+      <li><span class="x">→ 04</span><span><strong>Cross-hardware benchmarking.</strong> Run the same evaluation pass on non-Apple hardware (Android, x86 server). The Lite variant's 69.5 FPS claim needs to generalize.</span></li>
+      <li><span class="x">→ 05</span><span><strong>Lite variant accuracy lift.</strong> Apply the same flywheel methodology that lifted the heavy model from 80% → 93% to the Lite variant. The current accuracy gap between heavy and lite is the next compression-vs-quality tradeoff to close.</span></li>
+    </ul>
+
+    <a href="/work/annotation-engine/" class="cross-link">
+      <div>
+        <div class="cross-link-label">— Related work</div>
+        <div class="cross-link-title">The <em>infrastructure</em> behind the lift — the KhiladiPro Annotator</div>
+      </div>
+      <div class="cross-link-arrow">→</div>
+    </a>
+
+    <div class="confidential">
+      <div class="confidential-label">— A note on detail</div>
+      <div class="confidential-body">This page describes <em>the model's design, training methodology, and measured outcomes</em>. Internal training pipelines, dataset compositions, repository paths, and specific deployment infrastructure are not shown — this is production work for KhiladiPro, and the engineering substance is what's discoverable here without exposing IP.</div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container footer-inner">
+    <div>© Yash Vardhan</div>
+    <div class="footer-links">
+      <a href="https://github.com/yashv04" target="_blank" rel="noopener">GitHub <span style="color: var(--accent);">↗</span></a>
+      <a href="https://www.linkedin.com/in/yash-vardhan-5b3956169/" target="_blank" rel="noopener">LinkedIn <span style="color: var(--accent);">↗</span></a>
+      <a href="mailto:yashv3110@gmail.com">Email <span style="color: var(--accent);">↗</span></a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

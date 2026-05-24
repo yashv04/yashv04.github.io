@@ -3,90 +3,292 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Work Projects · Yash Vardhan</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/css/main.css">
+<title>Work — Yash Vardhan</title>
+<meta name="description" content="Production sports computer vision work at KhiladiPro — annotation infrastructure, shuttle tracking, smash biomechanics, audio event detection, benchmarking methodology. Sole engineer.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg: #000000;
+  --surface: #0a0e14;
+  --surface-2: #0e131a;
+  --border: #11161e;
+  --border-strong: #1a2230;
+  --text: #ffffff;
+  --text-body: #d1d5db;
+  --text-muted: #6b7280;
+  --text-faint: #4b5563;
+  --accent: #38bdf8;
+  --accent-soft: rgba(56, 189, 248, 0.08);
+  --accent-line: rgba(56, 189, 248, 0.18);
+  --warn: #fbbf24;
+  --ok: #34d399;
+  --font-display: 'Syne', -apple-system, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --container: 1240px;
+  --gutter: clamp(20px, 5vw, 64px);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+body { background: var(--bg); color: var(--text-body); font-family: var(--font-mono); font-size: 14px; line-height: 1.75; font-weight: 400; overflow-x: hidden; }
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  background-image: linear-gradient(var(--accent-line) 1px, transparent 1px), linear-gradient(90deg, var(--accent-line) 1px, transparent 1px);
+  background-size: 120px 120px;
+  opacity: 0.12;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: var(--container); margin: 0 auto; padding: 0 var(--gutter); position: relative; z-index: 2; }
+
+/* NAV */
+.nav { position: sticky; top: 0; z-index: 100; background: rgba(0,0,0,0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); }
+.nav-inner { display: flex; align-items: center; justify-content: space-between; padding: 26px 0; }
+.nav-logo { font-family: var(--font-display); font-weight: 800; font-size: 22px; color: var(--text); letter-spacing: -0.01em; }
+.nav-logo .dot { color: var(--accent); font-weight: 400; }
+.nav-links { display: flex; gap: 48px; font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; }
+.nav-links a { color: var(--text-muted); padding-bottom: 4px; transition: color 0.2s; }
+.nav-links a:hover { color: var(--text); }
+.nav-links a.active { color: var(--accent); border-bottom: 1px solid var(--accent); }
+@media (max-width: 640px) { .nav-links { gap: 20px; font-size: 11px; } }
+
+/* HERO */
+.hero { padding: clamp(80px, 14vw, 140px) 0 clamp(56px, 9vw, 96px); }
+.hero-kicker { font-family: var(--font-mono); font-size: 12px; color: var(--accent); letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 36px; display: flex; align-items: center; gap: 14px; }
+.hero-kicker::before { content: ''; display: inline-block; width: 8px; height: 8px; background: var(--accent); border-radius: 50%; }
+.hero-title { font-family: var(--font-display); font-weight: 800; font-size: clamp(64px, 12vw, 160px); line-height: 0.94; letter-spacing: -0.03em; color: var(--text); margin-bottom: 40px; }
+.hero-title em { font-style: italic; color: var(--accent); font-weight: 800; }
+.hero-lede { font-family: var(--font-mono); font-size: clamp(15px, 1.4vw, 17px); line-height: 1.8; color: var(--text-body); max-width: 78ch; }
+.hero-lede em { color: var(--accent); font-style: normal; }
+.hero-lede strong { color: var(--text); font-weight: 500; }
+
+/* SECTION */
+.section { padding: clamp(40px, 7vw, 80px) 0 clamp(80px, 12vw, 140px); border-top: 1px solid var(--border); }
+.section-num { font-family: var(--font-mono); font-size: 11px; color: var(--text-faint); letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 24px; display: block; }
+
+/* WORK GRID */
+.work-grid { display: grid; gap: 1px; background: var(--border); border: 1px solid var(--border); margin-top: 32px; }
+.work-card { background: var(--bg); padding: 44px clamp(28px, 4vw, 56px); transition: background 0.3s ease; display: block; position: relative; overflow: hidden; }
+.work-card::after { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: var(--accent); transform: scaleY(0); transform-origin: top; transition: transform 0.35s ease; }
+.work-card:hover { background: var(--surface); }
+.work-card:hover::after { transform: scaleY(1); }
+.work-card:hover .work-card-arrow { color: var(--accent); transform: translate(2px, -2px); }
+.work-card-head { display: grid; grid-template-columns: 90px 1fr auto; gap: 28px; align-items: baseline; margin-bottom: 22px; }
+@media (max-width: 760px) { .work-card-head { grid-template-columns: 1fr; gap: 10px; } }
+.work-card-num { font-family: var(--font-mono); font-size: 12px; color: var(--accent); letter-spacing: 0.14em; }
+.work-card-title { font-family: var(--font-display); font-weight: 700; font-size: clamp(26px, 3.4vw, 38px); color: var(--text); letter-spacing: -0.015em; line-height: 1.1; }
+.work-card-title em { color: var(--accent); font-style: italic; }
+.work-card-stage { font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); letter-spacing: 0.12em; text-transform: uppercase; padding: 6px 12px; border: 1px solid var(--border-strong); white-space: nowrap; align-self: start; }
+.work-card-stage.production { color: var(--ok); border-color: rgba(52,211,153,0.3); }
+.work-card-stage.flagship { color: var(--accent); border-color: rgba(56,189,248,0.4); }
+.work-card-stage.rd { color: var(--warn); border-color: rgba(251,191,36,0.3); }
+.work-card-stage.methodology { color: var(--text-muted); }
+.work-card-body { font-family: var(--font-mono); font-size: 14px; line-height: 1.75; color: var(--text-body); max-width: 76ch; margin-bottom: 24px; }
+.work-card-body strong { color: var(--text); font-weight: 500; }
+.work-card-body em { color: var(--accent); font-style: normal; }
+.work-card-footer { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px; }
+.work-card-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+.work-card-tag { font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); letter-spacing: 0.04em; padding: 5px 10px; border: 1px solid var(--border-strong); border-radius: 2px; }
+.work-card-tag.accent { color: var(--accent); border-color: rgba(56,189,248,0.3); }
+.work-card-arrow { font-family: var(--font-display); font-size: 22px; color: var(--text-faint); transition: all 0.25s ease; align-self: center; }
+
+/* NOTE */
+.work-note { margin-top: 48px; padding: 24px 28px; border: 1px solid var(--border-strong); background: var(--surface); }
+.work-note-label { font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 10px; }
+.work-note-body { font-family: var(--font-mono); font-size: 13px; color: var(--text-muted); line-height: 1.75; max-width: 72ch; }
+.work-note-body em { color: var(--text-body); font-style: normal; }
+
+/* FOOTER */
+.footer { padding: 48px 0 64px; font-family: var(--font-mono); font-size: 12px; color: var(--text-faint); letter-spacing: 0.04em; border-top: 1px solid var(--border); }
+.footer-inner { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 24px; }
+.footer a { color: var(--text-muted); transition: color 0.2s; }
+.footer a:hover { color: var(--text); }
+.footer-links { display: flex; gap: 20px; }
+
+@keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+.hero-kicker { animation: fadeUp 0.6s ease-out 0.05s both; }
+.hero-title { animation: fadeUp 0.8s ease-out 0.15s both; }
+.hero-lede { animation: fadeUp 0.8s ease-out 0.3s both; }
+.work-grid { animation: fadeUp 0.8s ease-out 0.45s both; }
+
+@media (max-width: 640px) { body { font-size: 13px; } }
+</style>
 </head>
 <body>
-<div class="grid-bg"></div>
 
-<nav class="topnav">
-  <div class="topnav-inner">
-    <a href="/" class="brand">Yash<span>.</span>Vardhan</a>
+<nav class="nav">
+  <div class="container nav-inner">
+    <a href="/" class="nav-logo">Yash<span class="dot">.</span>Vardhan</a>
     <div class="nav-links">
-      <a href="/" class="nav-link">Home</a>
-      <a href="/about/" class="nav-link">About</a>
-      <a href="/work/" class="nav-link active">Work</a>
-      <a href="/personal/" class="nav-link">Personal</a>
+      <a href="/">Home</a>
+      <a href="/about/">About</a>
+      <a href="/work/" class="active">Work</a>
+      <a href="/personal/">Personal</a>
     </div>
   </div>
 </nav>
 
-<div class="page">
-
-  <header class="page-header fade-up d1">
-    <div class="ph-tag">02 / Work Projects</div>
-    <h1 class="ph-title">Work <span>Projects</span></h1>
-    <p class="ph-desc">Production computer-vision and analytics systems built at work. All are <strong>internal / not public</strong> — click any card for the what, why, how, difficulties, and numbers.</p>
-  </header>
-
-  <div class="proj-grid fade-up d2">
-
-    <a class="proj-card internal" href="/work/annotation-engine/">
-      <div class="badge-internal">Internal</div>
-      <div class="proj-num">01 / Foundation · Data Flywheel</div>
-      <div class="proj-eyebrow gold">Model-in-the-Loop Platform · Sole Engineer</div>
-      <div class="proj-title">Annotation Engine</div>
-      <div class="proj-desc">A model-in-the-loop annotation platform spanning <strong>six sport-specific surfaces</strong> across cricket and badminton. Not a labelling tool — <strong>a data-flywheel</strong> where every keystroke produces a prediction/correction delta that feeds the next training cycle. Measured by how much the models improve because of what it labels.</div>
-      <div class="proj-tags"><span class="tag gold">6 Surfaces</span><span class="tag gold">Model-in-loop</span><span class="tag gold">+10pp Acc</span><span class="tag gold">−70% Px Error</span></div>
-    </a>
-
-    <a class="proj-card internal" href="/work/ball-shuttle-intelligence/">
-      <div class="badge-internal">Internal</div>
-      <div class="proj-num">02 / Video Intelligence</div>
-      <div class="proj-eyebrow">Tracking &amp; Trajectory</div>
-      <div class="proj-title">Ball &amp; Shuttle Intelligence System</div>
-      <div class="proj-desc">TrackNet-based tracking producing frame-wise trajectories under real broadcast conditions — occlusion, motion blur, and multi-angle cameras.</div>
-      <div class="proj-tags"><span class="tag">TrackNet</span><span class="tag">PyTorch</span><span class="tag">OpenCV</span></div>
-    </a>
-
-    <a class="proj-card internal" href="/work/shot-action-intelligence/">
-      <div class="badge-internal">Internal</div>
-      <div class="proj-num">03 / Action Recognition</div>
-      <div class="proj-eyebrow">Temporal Modeling</div>
-      <div class="proj-title">Shot &amp; Action Intelligence</div>
-      <div class="proj-desc">Temporal clip classification for cricket and badminton. Eliminates manual tagging and enables automated tactical breakdowns at scale.</div>
-      <div class="proj-tags"><span class="tag">Temporal Modeling</span><span class="tag">Multi-class CV</span></div>
-    </a>
-
-    <a class="proj-card internal" href="/work/smash-biomechanics/">
-      <div class="badge-internal">Internal</div>
-      <div class="proj-num">04 / Biomechanics</div>
-      <div class="proj-eyebrow">Pose &amp; Kinematics</div>
-      <div class="proj-title">Smash Technique &amp; Biomechanics</div>
-      <div class="proj-desc">Video-only pipeline that derives joint kinematics and smash speed from shuttle trajectory and player keypoints. Zero wearables.</div>
-      <div class="proj-tags"><span class="tag">Mediapipe</span><span class="tag">Pose Estimation</span></div>
-    </a>
-
-    <a class="proj-card internal" href="/work/audio-visual-detection/">
-      <div class="badge-internal">Internal</div>
-      <div class="proj-num">05 / Multimodal AI</div>
-      <div class="proj-eyebrow">Audio + Vision</div>
-      <div class="proj-title">Audio-Visual Bat-Ball Detection</div>
-      <div class="proj-desc">Audio-based hit/miss classifier that works without clean visual frames — reliable in noisy training-net environments where vision alone fails.</div>
-      <div class="proj-tags"><span class="tag">Audio Signal Processing</span><span class="tag">Multimodal</span></div>
-    </a>
-
+<header class="hero">
+  <div class="container">
+    <div class="hero-kicker">Work · KhiladiPro · Sole Sports CV Engineer</div>
+    <h1 class="hero-title">Work<em>.</em></h1>
+    <p class="hero-lede">
+      Production sports computer vision at <strong>KhiladiPro</strong>. The stack spans <em>annotation infrastructure, ball &amp; shuttle tracking, smash biomechanics, audio event detection,</em> and the <em>benchmarking methodology</em> that gates every model that ships. Click any card for the architecture, the measured numbers, and the honest limitations.
+    </p>
   </div>
+</header>
 
-  <footer class="foot">
-    <div class="foot-left">All systems above are employer-internal. No source available.</div>
-    <div class="foot-links">
-      <a class="foot-link" href="/personal/">Personal Projects →</a>
-      <a class="foot-link" href="/about/">About →</a>
+<section class="section">
+  <div class="container">
+    <span class="section-num">— Production projects · 6</span>
+
+    <div class="work-grid">
+
+      <a class="work-card" href="/work/annotation-engine/">
+        <div class="work-card-head">
+          <div class="work-card-num">— 01</div>
+          <div class="work-card-title">Annotation <em>Engine</em></div>
+          <div class="work-card-stage flagship">Foundation · Data Flywheel</div>
+        </div>
+        <p class="work-card-body">
+          A model-in-the-loop annotation platform spanning <strong>six sport-specific surfaces</strong> across cricket and badminton. Not a labelling tool — <em>a data-flywheel</em> where every keystroke produces a prediction/correction delta that feeds the next training cycle. Measured by how much the models improve because of what it labels.
+        </p>
+        <div class="work-card-footer">
+          <div class="work-card-tags">
+            <span class="work-card-tag">6 Surfaces</span>
+            <span class="work-card-tag">Model-in-loop</span>
+            <span class="work-card-tag accent">+10pp Acc</span>
+            <span class="work-card-tag accent">−70% Px Error</span>
+          </div>
+          <span class="work-card-arrow">↗</span>
+        </div>
+      </a>
+
+      <a class="work-card" href="/work/shuttle-tracking/">
+        <div class="work-card-head">
+          <div class="work-card-num">— 02</div>
+          <div class="work-card-title">Shuttle <em>Tracking</em></div>
+          <div class="work-card-stage production">Live · Serving</div>
+        </div>
+        <p class="work-card-body">
+          Production shuttle tracking for live badminton broadcasts. <strong>93% accuracy</strong> on held-out clips from broadcast + KourtEye footage — <em>lifted from 80% via flywheel-driven retraining</em> on annotator-corrected data. Two variants: <strong>TrackNetV5</strong> (heavy, production accuracy) and <strong>TrackNetV5Lite</strong> (INT8, on-device, 69.5 FPS).
+        </p>
+        <div class="work-card-footer">
+          <div class="work-card-tags">
+            <span class="work-card-tag">TrackNetV5</span>
+            <span class="work-card-tag accent">93% Acc</span>
+            <span class="work-card-tag accent">80→93% lift</span>
+            <span class="work-card-tag">69.5 FPS lite</span>
+          </div>
+          <span class="work-card-arrow">↗</span>
+        </div>
+      </a>
+
+      <a class="work-card" href="/work/smash-biomechanics/">
+        <div class="work-card-head">
+          <div class="work-card-num">— 03</div>
+          <div class="work-card-title">Smash <em>Biomechanics</em></div>
+          <div class="work-card-stage rd">R&amp;D → Production</div>
+        </div>
+        <p class="work-card-body">
+          Badminton smash biomechanics on <strong>240 FPS mobile capture</strong>. Dual-output pipeline that classifies the smash into <strong>6 kinematic phases at 95%</strong> and measures <strong>shuttle exit speed at 90% vs ground truth</strong>. MediaPipe Pose for the body, TrackNet for the shuttle, a Savitzky-Golay denoiser between them — <em>coach-grade biomechanics without a mocap lab</em>.
+        </p>
+        <div class="work-card-footer">
+          <div class="work-card-tags">
+            <span class="work-card-tag">MediaPipe</span>
+            <span class="work-card-tag">TrackNet</span>
+            <span class="work-card-tag accent">95% Phase</span>
+            <span class="work-card-tag accent">90% Speed</span>
+          </div>
+          <span class="work-card-arrow">↗</span>
+        </div>
+      </a>
+
+      <a class="work-card" href="/work/audio-hit-miss/">
+        <div class="work-card-head">
+          <div class="work-card-num">— 04</div>
+          <div class="work-card-title">Audio <em>Hit/Miss</em></div>
+          <div class="work-card-stage production">Production · Event Detection</div>
+        </div>
+        <p class="work-card-body">
+          Bat-ball contact detection from <strong>audio</strong>, not video. The only event-detection method in the production stack that <em>survives noisy training environments</em> where visual methods fail — nets, occlusion, motion blur. <strong>~85% production accuracy</strong>, fine-tune peaked at 86.36%, built in a 9-day arc with a memorable annotation-export bug in the middle.
+        </p>
+        <div class="work-card-footer">
+          <div class="work-card-tags">
+            <span class="work-card-tag">Audio-only</span>
+            <span class="work-card-tag accent">~85% Prod</span>
+            <span class="work-card-tag">9-day build</span>
+            <span class="work-card-tag accent">+6.36pp target</span>
+          </div>
+          <span class="work-card-arrow">↗</span>
+        </div>
+      </a>
+
+      <a class="work-card" href="/work/benchmarking/">
+        <div class="work-card-head">
+          <div class="work-card-num">— 05</div>
+          <div class="work-card-title">Model <em>Benchmarking</em></div>
+          <div class="work-card-stage methodology">Methodology · Evaluation</div>
+        </div>
+        <p class="work-card-body">
+          A model isn't shipped because it works — it's shipped because <em>we know how well it works</em>. Cross-sport benchmarking across three production families: <strong>cricket ball tracking, shuttle tracking, badminton player classification</strong>. Held-out clips, held-out venues, composite scoring across accuracy, latency, and pixel error. <em>The evaluation rigor is the deliverable.</em>
+        </p>
+        <div class="work-card-footer">
+          <div class="work-card-tags">
+            <span class="work-card-tag">3 Sports</span>
+            <span class="work-card-tag accent">6 Variants Compared</span>
+            <span class="work-card-tag accent">98.29% Selected</span>
+            <span class="work-card-tag">Composite scoring</span>
+          </div>
+          <span class="work-card-arrow">↗</span>
+        </div>
+      </a>
+
+      <a class="work-card" href="/work/shot-action-intelligence/">
+        <div class="work-card-head">
+          <div class="work-card-num">— 06</div>
+          <div class="work-card-title">Shot &amp; Action <em>Intelligence</em></div>
+          <div class="work-card-stage methodology">In Progress</div>
+        </div>
+        <p class="work-card-body">
+          Temporal clip classification for cricket and badminton — automated shot tagging that eliminates manual breakdown work and enables tactical analysis at scale. Sport-specific class hierarchies built with domain experts. <em>Detailed writeup coming.</em>
+        </p>
+        <div class="work-card-footer">
+          <div class="work-card-tags">
+            <span class="work-card-tag">Temporal Modeling</span>
+            <span class="work-card-tag">Multi-class CV</span>
+          </div>
+          <span class="work-card-arrow">↗</span>
+        </div>
+      </a>
+
     </div>
-  </footer>
 
-</div>
+    <div class="work-note">
+      <div class="work-note-label">— A note on detail</div>
+      <div class="work-note-body">
+        Every page describes <em>the system's design and measured outcomes</em>. Internal repository paths, code structure, file names, deployment infrastructure, and specific proprietary algorithms are not shown — this is production work for KhiladiPro, and the engineering substance is what's discoverable here without exposing IP.
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container footer-inner">
+    <div>© Yash Vardhan</div>
+    <div class="footer-links">
+      <a href="https://github.com/yashv04" target="_blank" rel="noopener">GitHub <span style="color: var(--accent);">↗</span></a>
+      <a href="https://www.linkedin.com/in/yash-vardhan-5b3956169/" target="_blank" rel="noopener">LinkedIn <span style="color: var(--accent);">↗</span></a>
+      <a href="mailto:yashv3110@gmail.com">Email <span style="color: var(--accent);">↗</span></a>
+    </div>
+  </div>
+</footer>
+
 </body>
 </html>

@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Audio Hit/Miss Detection — Yash Vardhan</title>
+<meta name="description" content="Audio-based bat-ball contact event detection at KhiladiPro — the only event-detection method in the production stack that survives noisy training environments where visual methods fail. ~85% production accuracy, 86.36% fine-tune peak, 9-day build cycle.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg: #000000;
+  --surface: #0a0e14;
+  --surface-2: #0e131a;
+  --border: #11161e;
+  --border-strong: #1a2230;
+  --text: #ffffff;
+  --text-body: #d1d5db;
+  --text-muted: #6b7280;
+  --text-faint: #4b5563;
+  --accent: #38bdf8;
+  --accent-soft: rgba(56, 189, 248, 0.08);
+  --accent-line: rgba(56, 189, 248, 0.18);
+  --warn: #fbbf24;
+  --warn-soft: rgba(251, 191, 36, 0.08);
+  --ok: #34d399;
+  --font-display: 'Syne', -apple-system, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --container: 1240px;
+  --gutter: clamp(20px, 5vw, 64px);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+body { background: var(--bg); color: var(--text-body); font-family: var(--font-mono); font-size: 14px; line-height: 1.75; font-weight: 400; overflow-x: hidden; }
+body::before {
+  content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 1;
+  background-image: linear-gradient(var(--accent-line) 1px, transparent 1px), linear-gradient(90deg, var(--accent-line) 1px, transparent 1px);
+  background-size: 120px 120px; opacity: 0.12;
+}
+a { color: inherit; text-decoration: none; }
+.container { max-width: var(--container); margin: 0 auto; padding: 0 var(--gutter); position: relative; z-index: 2; }
+
+.nav { position: sticky; top: 0; z-index: 100; background: rgba(0,0,0,0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); }
+.nav-inner { display: flex; align-items: center; justify-content: space-between; padding: 26px 0; }
+.nav-logo { font-family: var(--font-display); font-weight: 800; font-size: 22px; color: var(--text); letter-spacing: -0.01em; }
+.nav-logo .dot { color: var(--accent); font-weight: 400; }
+.nav-links { display: flex; gap: 48px; font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; }
+.nav-links a { color: var(--text-muted); padding-bottom: 4px; transition: color 0.2s; }
+.nav-links a:hover { color: var(--text); }
+.nav-links a.active { color: var(--accent); border-bottom: 1px solid var(--accent); }
+@media (max-width: 640px) { .nav-links { gap: 20px; font-size: 11px; } }
+
+.hero { padding: clamp(80px, 14vw, 140px) 0 clamp(60px, 9vw, 100px); }
+.hero-kicker { font-family: var(--font-mono); font-size: 12px; color: var(--accent); letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 36px; display: flex; align-items: center; gap: 14px; }
+.hero-kicker::before { content: ''; display: inline-block; width: 8px; height: 8px; background: var(--accent); border-radius: 50%; }
+.hero-title { font-family: var(--font-display); font-weight: 800; font-size: clamp(48px, 9vw, 116px); line-height: 0.94; letter-spacing: -0.03em; color: var(--text); margin-bottom: 40px; }
+.hero-title em { font-style: italic; color: var(--accent); font-weight: 800; }
+.hero-lede { font-family: var(--font-mono); font-size: clamp(15px, 1.4vw, 17px); line-height: 1.8; color: var(--text-body); max-width: 78ch; margin-bottom: 56px; }
+.hero-lede em { color: var(--accent); font-style: normal; }
+.hero-lede strong { color: var(--text); font-weight: 500; }
+
+.hero-meta-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1px; background: var(--border); border: 1px solid var(--border); }
+.hero-meta-cell { background: var(--bg); padding: 24px; }
+.hero-meta-label { font-family: var(--font-mono); font-size: 10px; color: var(--text-faint); letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 10px; }
+.hero-meta-value { font-family: var(--font-display); font-size: clamp(18px, 1.9vw, 22px); font-weight: 700; color: var(--text); letter-spacing: -0.01em; line-height: 1.2; }
+.hero-meta-value.accent { color: var(--accent); }
+
+.section { padding: clamp(56px, 9vw, 96px) 0; border-top: 1px solid var(--border); }
+.section-num { font-family: var(--font-mono); font-size: 11px; color: var(--text-faint); letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 24px; display: block; }
+.section-title { font-family: var(--font-display); font-weight: 700; font-size: clamp(32px, 5vw, 56px); line-height: 1.0; letter-spacing: -0.02em; color: var(--text); margin-bottom: 44px; max-width: 24ch; }
+.section-title em { font-style: italic; color: var(--accent); }
+.section-sub { font-family: var(--font-mono); font-size: 14px; color: var(--text-muted); margin-bottom: 40px; max-width: 72ch; line-height: 1.75; }
+
+.prose { max-width: 76ch; font-family: var(--font-mono); font-size: 14px; line-height: 1.85; color: var(--text-body); }
+.prose p { margin-bottom: 1.4em; }
+.prose p:last-child { margin-bottom: 0; }
+.prose strong { color: var(--text); font-weight: 500; }
+.prose em { color: var(--accent); font-style: normal; }
+.prose code { font-family: var(--font-mono); background: var(--surface); border: 1px solid var(--border-strong); padding: 2px 8px; color: var(--accent); font-size: 0.92em; }
+
+/* MODALITY COMPARISON */
+.modality-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); border: 1px solid var(--border); margin-top: 40px; }
+@media (max-width: 760px) { .modality-grid { grid-template-columns: 1fr; } }
+.modality { background: var(--bg); padding: clamp(28px, 4vw, 44px); }
+.modality.visual { opacity: 0.85; }
+.modality-tag { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 18px; display: inline-block; padding: 4px 10px; border: 1px solid var(--border-strong); }
+.modality.visual .modality-tag { color: var(--warn); border-color: rgba(251, 191, 36, 0.4); }
+.modality.audio .modality-tag { color: var(--accent); border-color: rgba(56, 189, 248, 0.4); }
+.modality-title { font-family: var(--font-display); font-weight: 700; font-size: clamp(22px, 2.4vw, 28px); color: var(--text); letter-spacing: -0.01em; line-height: 1.2; margin-bottom: 16px; }
+.modality-title em { color: var(--accent); font-style: italic; }
+.modality.visual .modality-title em { color: var(--warn); }
+.modality-body { font-family: var(--font-mono); font-size: 13.5px; line-height: 1.75; color: var(--text-body); margin-bottom: 20px; }
+.modality-body strong { color: var(--text); }
+.modality-list { list-style: none; font-family: var(--font-mono); font-size: 13px; line-height: 1.85; color: var(--text-body); }
+.modality-list li { padding-left: 22px; position: relative; }
+.modality.visual .modality-list li::before { content: '✕'; position: absolute; left: 0; color: var(--warn); font-size: 12px; }
+.modality.audio .modality-list li::before { content: '✓'; position: absolute; left: 0; color: var(--accent); font-size: 12px; }
+
+/* ITERATION CHART */
+.chart-wrap { margin-top: 40px; padding: clamp(28px, 4vw, 48px); background: var(--surface); border: 1px solid var(--border); }
+.chart-svg { width: 100%; height: auto; display: block; }
+.chart-caption { font-family: var(--font-mono); font-size: 12px; color: var(--text-muted); letter-spacing: 0.04em; margin-top: 24px; line-height: 1.7; }
+.chart-caption strong { color: var(--text); }
+.chart-caption em { color: var(--accent); font-style: normal; }
+
+/* BUG STORY */
+.bug-story { margin-top: 40px; background: var(--bg); border: 1px solid var(--border-strong); border-left: 4px solid var(--warn); padding: clamp(32px, 5vw, 56px) clamp(28px, 4vw, 48px); }
+.bug-label { font-family: var(--font-mono); font-size: 11px; color: var(--warn); letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 20px; }
+.bug-quote { font-family: var(--font-display); font-weight: 500; font-size: clamp(20px, 2.6vw, 28px); line-height: 1.4; color: var(--text); letter-spacing: -0.01em; margin-bottom: 28px; font-style: italic; max-width: 28ch; }
+.bug-quote::before { content: '"'; color: var(--warn); font-size: 1.2em; font-weight: 800; margin-right: 4px; }
+.bug-quote::after { content: '"'; color: var(--warn); font-size: 1.2em; font-weight: 800; margin-left: 4px; }
+.bug-attr { font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); letter-spacing: 0.08em; margin-bottom: 32px; }
+.bug-attr strong { color: var(--accent); font-weight: 400; }
+.bug-body { font-family: var(--font-mono); font-size: 14px; line-height: 1.8; color: var(--text-body); max-width: 72ch; }
+.bug-body p { margin-bottom: 1.2em; }
+.bug-body p:last-child { margin-bottom: 0; }
+.bug-body strong { color: var(--text); }
+.bug-body em { color: var(--warn); font-style: normal; }
+.bug-body code { color: var(--accent); font-size: 0.92em; background: var(--surface); padding: 1px 6px; }
+
+/* TIMELINE */
+.timeline { margin-top: 32px; border: 1px solid var(--border); }
+.tl-event { display: grid; grid-template-columns: 140px 1fr; gap: 32px; padding: 28px clamp(20px, 3vw, 36px); border-bottom: 1px solid var(--border); transition: background 0.3s ease; }
+.tl-event:hover { background: var(--surface); }
+.tl-event:last-child { border-bottom: none; }
+@media (max-width: 760px) { .tl-event { grid-template-columns: 1fr; gap: 6px; } }
+.tl-date { font-family: var(--font-mono); font-size: 11px; color: var(--accent); letter-spacing: 0.1em; line-height: 1.6; padding-top: 4px; }
+.tl-date small { display: block; color: var(--text-faint); font-size: 10px; letter-spacing: 0.14em; margin-top: 2px; }
+.tl-content { }
+.tl-title { font-family: var(--font-display); font-size: clamp(17px, 1.9vw, 20px); color: var(--text); font-weight: 700; letter-spacing: -0.005em; line-height: 1.25; margin-bottom: 8px; }
+.tl-title em { color: var(--accent); font-style: italic; }
+.tl-title.warn em { color: var(--warn); font-style: italic; }
+.tl-desc { font-family: var(--font-mono); font-size: 13px; line-height: 1.7; color: var(--text-body); }
+.tl-desc strong { color: var(--text); }
+.tl-desc em { color: var(--accent); font-style: normal; }
+.tl-desc code { color: var(--accent); font-size: 0.92em; background: var(--surface); padding: 1px 6px; }
+.tl-tag { display: inline-block; font-family: var(--font-mono); font-size: 9.5px; letter-spacing: 0.12em; text-transform: uppercase; padding: 3px 8px; border: 1px solid var(--border-strong); color: var(--text-muted); margin-right: 6px; }
+.tl-tag.bug { color: var(--warn); border-color: rgba(251, 191, 36, 0.4); }
+.tl-tag.win { color: var(--accent); border-color: rgba(56, 189, 248, 0.4); }
+
+/* RESULTS METRIC GRID */
+.metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 1px; background: var(--border-strong); border: 1px solid var(--border-strong); margin-top: 32px; }
+.mc { background: var(--bg); padding: 24px 26px; }
+.mc-label { font-family: var(--font-mono); font-size: 10px; color: var(--text-faint); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 10px; }
+.mc-value { font-family: var(--font-mono); font-size: 16px; color: var(--text); font-weight: 500; line-height: 1.3; }
+.mc-value.accent { color: var(--accent); }
+
+/* CATEGORICAL CLAIM */
+.claim { margin-top: 40px; padding: clamp(32px, 5vw, 48px); background: var(--surface); border: 1px solid var(--border-strong); }
+.claim-label { font-family: var(--font-mono); font-size: 11px; color: var(--accent); letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 20px; }
+.claim-body { font-family: var(--font-display); font-weight: 600; font-size: clamp(22px, 3vw, 32px); line-height: 1.3; color: var(--text); letter-spacing: -0.01em; max-width: 28ch; }
+.claim-body em { color: var(--accent); font-style: italic; }
+
+/* LIMITATIONS */
+.limit-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); border: 1px solid var(--border); margin-top: 32px; }
+@media (max-width: 760px) { .limit-grid { grid-template-columns: 1fr; } }
+.lim { background: var(--bg); padding: 28px 32px; transition: background 0.3s ease; }
+.lim:hover { background: var(--surface); }
+.lim-num { font-family: var(--font-mono); font-size: 11px; color: var(--warn); letter-spacing: 0.14em; margin-bottom: 14px; }
+.lim-title { font-family: var(--font-display); font-weight: 700; font-size: 17px; color: var(--text); letter-spacing: -0.005em; line-height: 1.3; margin-bottom: 10px; }
+.lim-body { font-family: var(--font-mono); font-size: 13px; line-height: 1.7; color: var(--text-body); }
+.lim-body strong { color: var(--text); }
+.lim-body em { color: var(--warn); font-style: normal; }
+.lim-body code { color: var(--accent); font-size: 0.92em; background: var(--surface); padding: 1px 6px; }
+
+/* WHATS NEXT */
+.next-list { list-style: none; margin-top: 24px; }
+.next-list li { display: grid; grid-template-columns: 60px 1fr; gap: 24px; padding: 22px 0; border-top: 1px solid var(--border); font-family: var(--font-mono); font-size: 14px; line-height: 1.7; color: var(--text-body); }
+.next-list li:last-child { border-bottom: 1px solid var(--border); }
+.next-list li .x { font-family: var(--font-mono); font-size: 13px; color: var(--accent); }
+.next-list li strong { color: var(--text); }
+.next-list li em { color: var(--accent); font-style: normal; }
+
+.confidential { margin-top: 56px; padding: 24px 28px; border: 1px solid var(--border-strong); background: var(--surface); }
+.confidential-label { font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 12px; }
+.confidential-body { font-family: var(--font-mono); font-size: 13px; color: var(--text-muted); line-height: 1.75; max-width: 72ch; }
+.confidential-body em { color: var(--text-body); font-style: normal; }
+
+.cross-link { margin-top: 48px; padding: 36px 32px; background: var(--surface); border: 1px solid var(--border-strong); display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 24px; transition: background 0.25s ease; }
+.cross-link:hover { background: var(--surface-2); }
+.cross-link-label { font-family: var(--font-mono); font-size: 11px; color: var(--accent); letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 10px; }
+.cross-link-title { font-family: var(--font-display); font-size: clamp(20px, 2.4vw, 26px); font-weight: 700; color: var(--text); letter-spacing: -0.01em; line-height: 1.2; }
+.cross-link-title em { color: var(--accent); font-style: italic; }
+.cross-link-arrow { font-family: var(--font-mono); font-size: 14px; color: var(--accent); }
+
+.footer { padding: 48px 0 64px; font-family: var(--font-mono); font-size: 12px; color: var(--text-faint); letter-spacing: 0.04em; border-top: 1px solid var(--border); }
+.footer-inner { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 24px; }
+.footer a { color: var(--text-muted); transition: color 0.2s; }
+.footer a:hover { color: var(--text); }
+.footer-links { display: flex; gap: 20px; }
+
+@keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+.hero-kicker { animation: fadeUp 0.6s ease-out 0.05s both; }
+.hero-title { animation: fadeUp 0.8s ease-out 0.15s both; }
+.hero-lede { animation: fadeUp 0.8s ease-out 0.3s both; }
+.hero-meta-grid { animation: fadeUp 0.8s ease-out 0.45s both; }
+@media (max-width: 640px) { body { font-size: 13px; } }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="container nav-inner">
+    <a href="/" class="nav-logo">Yash<span class="dot">.</span>Vardhan</a>
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="/about/">About</a>
+      <a href="/work/" class="active">Work</a>
+      <a href="/personal/">Personal</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="container">
+    <div class="hero-kicker">Work · KhiladiPro · Event Detection</div>
+    <h1 class="hero-title">Audio Hit/Miss<em>.</em></h1>
+    <p class="hero-lede">
+      Bat-ball contact event detection from <strong>audio</strong>, not video. The only event-detection method in the production stack that <em>survives noisy training environments</em> where visual methods fail — nets, occlusion, motion blur, partial bat-on-ball contact. <strong>~85% production accuracy</strong>, fine-tune peaked at <em>86.36%</em>, built in a 9-day arc with a memorable annotation-export bug in the middle.
+    </p>
+    <div class="hero-meta-grid">
+      <div class="hero-meta-cell"><div class="hero-meta-label">Production Accuracy</div><div class="hero-meta-value accent">~85%</div></div>
+      <div class="hero-meta-cell"><div class="hero-meta-label">Fine-tune Peak</div><div class="hero-meta-value">86.36%</div></div>
+      <div class="hero-meta-cell"><div class="hero-meta-label">Target Beat By</div><div class="hero-meta-value accent">+6.36 pp</div></div>
+      <div class="hero-meta-cell"><div class="hero-meta-label">Modality</div><div class="hero-meta-value">Audio-only</div></div>
+    </div>
+  </div>
+</header>
+
+<!-- THE PROBLEM -->
+<section class="section">
+  <div class="container">
+    <span class="section-num">01 / The Problem</span>
+    <h2 class="section-title">Visual breaks <em>where the user actually trains</em>.</h2>
+    <div class="prose">
+      <p>Most amateur cricket and badminton happens in <strong>nets</strong>. Indoor nets, outdoor nets, mixed-lighting nets, single-camera handheld phone-on-tripod nets. This is where the user shoots their training video — and this is exactly where the visual-only event-detection pipeline starts to fall apart.</p>
+      <p>In broadcast footage, the ball-on-bat contact frame is unambiguous: clean light, stable camera, 4K resolution, the ball is always visible. In nets footage, the same event is <em>partially occluded by the net itself, partially clipped by the camera framing, partially blurred by 30 FPS motion, partially happening behind the batter's body</em>. The visual pipeline reports either no detection (model didn't see it) or false detection (model saw the ball pass and assumed contact). Either way: <em>analytics downstream gets corrupted</em>.</p>
+      <p>The audio modality is invariant to all of this. <strong>The contact sound is the contact sound</strong> — same acoustic signature regardless of camera angle, lighting, net density, or motion blur. If we can train a model to classify the bat-ball contact sound vs ambient noise, we have an event detector that <em>works in the same place the user actually generates the footage</em>.</p>
+    </div>
+  </div>
+</section>
+
+<!-- MODALITY COMPARISON -->
+<section class="section">
+  <div class="container">
+    <span class="section-num">02 / The Modality Choice</span>
+    <h2 class="section-title">Why <em>audio</em>, not better video.</h2>
+    <p class="section-sub">
+      The alternative would have been investing more in visual robustness — better occlusion handling, motion-blur compensation, multi-frame temporal smoothing. We chose audio. Here's the comparison that drove the decision.
+    </p>
+
+    <div class="modality-grid">
+      <div class="modality visual">
+        <div class="modality-tag">Visual</div>
+        <h3 class="modality-title">Visual contact detection <em>·</em> what breaks</h3>
+        <p class="modality-body">
+          The visual pipeline that powers shuttle tracking and cricket ball tracking <strong>also</strong> tries to detect bat-ball contact. In broadcast footage it's fine. In nets footage it isn't.
+        </p>
+        <ul class="modality-list">
+          <li>Net mesh partially occludes the contact frame</li>
+          <li>30 FPS motion blur smears the ball at contact moment</li>
+          <li>Single-angle phone captures lose contact behind the batter</li>
+          <li>Mixed indoor lighting creates inconsistent ball-on-bat texture</li>
+          <li>Same model that ships <em>93% on broadcast badminton</em> drops to unusable in nets</li>
+          <li>Improving any of these is months of training data, not weeks</li>
+        </ul>
+      </div>
+
+      <div class="modality audio">
+        <div class="modality-tag">Audio</div>
+        <h3 class="modality-title">Audio contact detection <em>·</em> what survives</h3>
+        <p class="modality-body">
+          The acoustic signature of bat-ball contact is <strong>modality-invariant</strong>. The microphone hears the contact sound whether or not the camera saw it.
+        </p>
+        <ul class="modality-list">
+          <li>Net mesh doesn't block sound</li>
+          <li>Frame-rate irrelevant — audio sample rate is 44.1 kHz</li>
+          <li>Camera angle doesn't matter — phone mic is omnidirectional</li>
+          <li>Lighting irrelevant</li>
+          <li><em>Same model serves broadcast AND nets footage</em></li>
+          <li>106 labelled samples sufficient for first viable model</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="claim">
+      <div class="claim-label">— The Categorical Claim</div>
+      <div class="claim-body">
+        The only event-detection method in the production stack that <em>survives noisy training environments</em> where visual-only methods fail.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ITERATION CHART -->
+<section class="section">
+  <div class="container">
+    <span class="section-num">03 / The Iteration</span>
+    <h2 class="section-title">68% to 86.36% in <em>23 hours</em>.</h2>
+    <p class="section-sub">
+      The build cycle spanned 9 days end-to-end (Jun 19–27, 2025), but the actual <em>accuracy jump</em> happened in a single overnight cycle — after an annotation-export bug was identified and fixed.
+    </p>
+
+    <div class="chart-wrap">
+      <svg class="chart-svg" viewBox="0 0 800 380" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+        <g stroke="#1a2230" stroke-width="1">
+          <line x1="80" y1="40" x2="760" y2="40"/>
+          <line x1="80" y1="100" x2="760" y2="100"/>
+          <line x1="80" y1="160" x2="760" y2="160"/>
+          <line x1="80" y1="220" x2="760" y2="220"/>
+          <line x1="80" y1="280" x2="760" y2="280"/>
+        </g>
+        <g font-family="JetBrains Mono, monospace" font-size="10" fill="#4b5563" letter-spacing="0.1em">
+          <text x="65" y="44" text-anchor="end">100%</text>
+          <text x="65" y="104" text-anchor="end">90%</text>
+          <text x="65" y="164" text-anchor="end">80%</text>
+          <text x="65" y="224" text-anchor="end">70%</text>
+          <text x="65" y="284" text-anchor="end">60%</text>
+        </g>
+        <line x1="80" y1="160" x2="760" y2="160" stroke="#fbbf24" stroke-width="1" stroke-dasharray="4 4" opacity="0.6"/>
+        <text x="765" y="164" font-family="JetBrains Mono, monospace" font-size="10" fill="#fbbf24" letter-spacing="0.08em">TARGET · 80%</text>
+
+        <path d="M 180 232 L 380 122 L 600 130" stroke="#38bdf8" stroke-width="2" fill="none"/>
+
+        <circle cx="180" cy="232" r="6" fill="#000" stroke="#fbbf24" stroke-width="2"/>
+        <circle cx="380" cy="122" r="6" fill="#38bdf8" stroke="#38bdf8" stroke-width="2"/>
+        <circle cx="600" cy="130" r="6" fill="#38bdf8" stroke="#38bdf8" stroke-width="2"/>
+
+        <g font-family="JetBrains Mono, monospace" font-size="13" fill="#ffffff" font-weight="500">
+          <text x="180" y="218" text-anchor="middle">68%</text>
+          <text x="380" y="108" text-anchor="middle">86.36%</text>
+          <text x="600" y="116" text-anchor="middle">~85%</text>
+        </g>
+
+        <g font-family="JetBrains Mono, monospace" font-size="10" fill="#6b7280" letter-spacing="0.08em">
+          <text x="180" y="330" text-anchor="middle">JUN 26</text>
+          <text x="180" y="346" text-anchor="middle" fill="#4b5563">First Training</text>
+          <text x="180" y="360" text-anchor="middle" fill="#fbbf24">106 samples · bug found</text>
+          
+          <text x="380" y="330" text-anchor="middle">JUN 27</text>
+          <text x="380" y="346" text-anchor="middle" fill="#4b5563">Fine-tune Peak</text>
+          <text x="380" y="360" text-anchor="middle" fill="#38bdf8">Bug fixed · +18.36 pp</text>
+          
+          <text x="600" y="330" text-anchor="middle">SEP 2025</text>
+          <text x="600" y="346" text-anchor="middle" fill="#4b5563">Production (expanded)</text>
+          <text x="600" y="360" text-anchor="middle" fill="#6b7280">Larger dataset · stable</text>
+        </g>
+
+        <g>
+          <line x1="195" y1="232" x2="260" y2="200" stroke="#fbbf24" stroke-width="1"/>
+          <rect x="260" y="180" width="115" height="32" fill="#000" stroke="#fbbf24" stroke-width="1"/>
+          <text x="317" y="194" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="#fbbf24" letter-spacing="0.06em">ALL LABELS = MISS</text>
+          <text x="317" y="206" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="#fbbf24" letter-spacing="0.06em">JSON EXPORT BUG</text>
+        </g>
+
+        <text x="80" y="20" font-family="Syne, sans-serif" font-size="14" fill="#ffffff" font-weight="600" letter-spacing="-0.01em">Accuracy iteration · Jun 19 – Sep 2025</text>
+      </svg>
+      <div class="chart-caption">
+        First training run on <strong>106 samples</strong> hit <em>68%</em> — below target, and the LabelStudio JSON export bug had just been resolved. After fine-tuning, the next cycle hit <em>86.36%</em> the following morning. The September 2025 production deployment on an expanded dataset settled at <em>~85%</em>, stable.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- THE BUG STORY -->
+<section class="section">
+  <div class="container">
+    <span class="section-num">04 / The Bug</span>
+    <h2 class="section-title">The annotation that <em>looked correct</em> in the UI.</h2>
+
+    <div class="bug-story">
+      <div class="bug-label">— Linear ticket AI-68 · June 26, 2025 · 09:34 UTC</div>
+      <p class="bug-quote">I have annotated the clips twice, but when exporting in JSON format, every annotation is marked as miss.</p>
+      <p class="bug-attr"><strong>yash.v@khiladipro.com</strong> · Linear AI-68 comment</p>
+      <div class="bug-body">
+        <p>This is the kind of bug that <strong>doesn't break anything visibly</strong>. The LabelStudio UI showed both hit and miss annotations correctly. The training pipeline accepted the exported JSON without error. <em>But the exported labels were corrupted</em> — every annotation, whether marked hit or miss in the UI, exported as "miss." A model trained on that data would learn to predict "miss" every time, regardless of the actual audio.</p>
+        <p>The bug was in the LabelStudio JSON export configuration — a templating issue where the hit-label keyword wasn't being written to the exported file. The fix took less than an hour once identified. <em>Finding it took longer</em>.</p>
+        <p><strong>Why this matters for the portfolio:</strong> the lesson isn't "labelling tools have bugs." The lesson is <strong>silent data corruption is the most dangerous bug class in ML pipelines</strong>. If the bug had survived undetected, every downstream training cycle would have been chasing model improvements against corrupted ground truth — a model that "improves" without ever working. The willingness to <em>annotate twice and notice the discrepancy</em>, dig into the export pipeline, and find the real story is what unlocked the 86.36% the next morning. <em>Most ML projects die quietly to silent data corruption</em>. This one didn't.</p>
+        <p>By <code>13:35 UTC</code> the same day, the training pipeline was re-run on corrected labels: <em>Total samples loaded: 106, Model Accuracy: 0.68</em>. By <code>13:37 UTC</code>: <em>"The accuracy is 68% I will work on it further to improve the accuracy."</em> By <code>08:42 UTC the next morning</code> (Jun 27): <em>"Improved Model Accuracy: 86.36%"</em>.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DETAILED TIMELINE -->
+<section class="section">
+  <div class="container">
+    <span class="section-num">05 / Timeline</span>
+    <h2 class="section-title">Nine days. <em>Six</em> events.</h2>
+    <p class="section-sub">
+      The full sequence from annotation pipeline setup to production deployment. Includes the bug, the fix, the fine-tune peak, and the September dataset expansion that stabilized the model at ~85%.
+    </p>
+
+    <div class="timeline">
+      <div class="tl-event">
+        <div class="tl-date">JUN 19 · 2025<small>Linear AI-21</small></div>
+        <div class="tl-content">
+          <div class="tl-title">Annotation pipeline setup<em> · LabelStudio</em></div>
+          <div class="tl-desc">
+            <span class="tl-tag">setup</span>
+            Configured LabelStudio for audio annotation. Designed the annotation schema: <em>hit</em> events vs <em>miss</em> events with timestamp markers. Audio clip preprocessing pipeline — segmenting longer recordings into per-event audio windows. Foundation work, no model yet.
+          </div>
+        </div>
+      </div>
+
+      <div class="tl-event">
+        <div class="tl-date">JUN 25 · 2025<small>Annotation</small></div>
+        <div class="tl-content">
+          <div class="tl-title">First round of annotations <em>· 106 clips</em></div>
+          <div class="tl-desc">
+            <span class="tl-tag">data</span>
+            Annotated the initial set of 106 audio clips manually — listening to each clip, marking hit vs miss based on the acoustic signature of bat-ball contact. <em>Ground truth dataset ready for first training run.</em>
+          </div>
+        </div>
+      </div>
+
+      <div class="tl-event">
+        <div class="tl-date">JUN 26 · 09:34 UTC<small>Bug discovery</small></div>
+        <div class="tl-content">
+          <div class="tl-title warn">JSON export bug <em>identified</em></div>
+          <div class="tl-desc">
+            <span class="tl-tag bug">bug</span>
+            Posted to Linear AI-68: <em>"I have annotated the clips twice, but when exporting in JSON format, every annotation is marked as miss."</em> The LabelStudio UI showed annotations correctly but the export was corrupted. <strong>This is the moment that determined the project's trajectory.</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="tl-event">
+        <div class="tl-date">JUN 26 · 13:35 UTC<small>First training</small></div>
+        <div class="tl-content">
+          <div class="tl-title">First training run<em> · 68% accuracy</em></div>
+          <div class="tl-desc">
+            <span class="tl-tag">training</span>
+            <em>"Total samples loaded: 106, Model Accuracy: 0.68"</em>. Below the 80% target. Two minutes later: <em>"The accuracy is 68% I will work on it further to improve the accuracy."</em> The bug had been resolved before this run — this 68% is an honest first-cycle baseline on corrected labels, not the corrupted ones.
+          </div>
+        </div>
+      </div>
+
+      <div class="tl-event">
+        <div class="tl-date">JUN 27 · 08:42 UTC<small>Fine-tune peak</small></div>
+        <div class="tl-content">
+          <div class="tl-title">Fine-tune complete <em>· 86.36%</em></div>
+          <div class="tl-desc">
+            <span class="tl-tag win">peak</span>
+            <em>"Improved Model Accuracy: 86.36%"</em>. <strong>Beat the 80% target by 6.36 percentage points</strong>. Hyperparameter sweep and fine-tuning on the same 106-sample dataset. The +18.36 pp lift over the first-run baseline came from optimization on the corrected labels, not more data. <em>23 hours from first-run baseline to fine-tune peak.</em>
+          </div>
+        </div>
+      </div>
+
+      <div class="tl-event">
+        <div class="tl-date">SEP 17–19 · 2025<small>Linear AI-236</small></div>
+        <div class="tl-content">
+          <div class="tl-title">Dataset expansion <em>· production deployment</em></div>
+          <div class="tl-desc">
+            <span class="tl-tag win">production</span>
+            Expanded annotation set with additional audio samples across more environments (broadcast + nets + indoor + outdoor). Re-trained on the larger dataset. <em>Production deployment settled at ~85% accuracy</em> — slightly below the 86.36% peak because the larger dataset has more environmental diversity (harder examples), but more robust to unseen environments. <strong>The number you'd actually trust in production.</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- RESULTS -->
+<section class="section">
+  <div class="container">
+    <span class="section-num">06 / Results</span>
+    <h2 class="section-title">What gets <em>shipped</em>.</h2>
+
+    <div class="metric-grid">
+      <div class="mc"><div class="mc-label">Production Accuracy</div><div class="mc-value accent">~85%</div></div>
+      <div class="mc"><div class="mc-label">Fine-tune Peak</div><div class="mc-value">86.36%</div></div>
+      <div class="mc"><div class="mc-label">Initial Target</div><div class="mc-value">80%</div></div>
+      <div class="mc"><div class="mc-label">First-Cycle Baseline</div><div class="mc-value">68%</div></div>
+      <div class="mc"><div class="mc-label">Initial Dataset</div><div class="mc-value">106 samples</div></div>
+      <div class="mc"><div class="mc-label">Production Dataset</div><div class="mc-value">Expanded · Sep '25</div></div>
+      <div class="mc"><div class="mc-label">Lift over Baseline</div><div class="mc-value accent">+18.36 pp</div></div>
+      <div class="mc"><div class="mc-label">Target Beat By</div><div class="mc-value accent">+6.36 pp</div></div>
+    </div>
+
+    <div class="prose" style="margin-top: 40px;">
+      <p>The production model serves as the <strong>event-detection layer for the KhiladiPro analytics pipeline</strong> on training-environment footage. Where visual contact detection drops to unusable, audio detection holds. <em>This is the model that lets KhiladiPro work where the user actually trains</em> — nets, indoor courts, single-camera phone setups — instead of being limited to broadcast-quality footage.</p>
+      <p>The <strong>~85%</strong> production number is the deliberately-honest framing. The fine-tune peak hit 86.36% on the original 106-sample dataset; production on the expanded dataset is slightly lower because the expansion deliberately added harder environments. <em>Reporting the lower number that's more representative of real-world performance is the more credible move than reporting the higher number from a smaller, easier dataset.</em></p>
+    </div>
+  </div>
+</section>
+
+<!-- HONEST LIMITATIONS -->
+<section class="section">
+  <div class="container">
+    <span class="section-num">07 / Honest Limitations</span>
+    <h2 class="section-title">What's <em>actually</em> in production.</h2>
+    <p class="section-sub">
+      Every system has limitations. Pretending the audio detector is bulletproof would be dishonest — and would set up downstream consumers for failures they couldn't anticipate.
+    </p>
+
+    <div class="limit-grid">
+      <div class="lim">
+        <div class="lim-num">— 01</div>
+        <h3 class="lim-title">No per-class breakdown reported</h3>
+        <div class="lim-body">
+          The 85% production accuracy is overall. <em>Hit vs miss class-level accuracy isn't separately reported</em> — if one class is consistently harder than the other (likely miss, since "miss" includes more acoustic variation), the headline number hides it. <strong>V2 work would surface the per-class confusion matrix.</strong>
+        </div>
+      </div>
+
+      <div class="lim">
+        <div class="lim-num">— 02</div>
+        <h3 class="lim-title">Microphone dependency</h3>
+        <div class="lim-body">
+          The model trains on audio from the same camera-microphone setup that captures the video. <em>Different microphones produce different acoustic signatures</em>. If the user switches phones, the audio characteristics change — model robustness across microphone hardware isn't formally benchmarked.
+        </div>
+      </div>
+
+      <div class="lim">
+        <div class="lim-num">— 03</div>
+        <h3 class="lim-title">Background noise floor</h3>
+        <div class="lim-body">
+          Works in quiet nets. Works in moderately-noisy nets. In <em>very</em> noisy environments — multiple courts active simultaneously, crowd noise, ambient music — the contact signature gets buried. <strong>Hard noise threshold beyond which the model degrades is not characterized.</strong>
+        </div>
+      </div>
+
+      <div class="lim">
+        <div class="lim-num">— 04</div>
+        <h3 class="lim-title">Single-modality decision boundary</h3>
+        <div class="lim-body">
+          Audio is a binary classifier — hit or miss, no confidence calibration. <em>No ensemble with visual</em> for ambiguous cases. A model that says "I'm 51% confident this is a hit" gets treated the same as "99% confident." V2 should add confidence calibration and visual ensemble for low-confidence cases.
+        </div>
+      </div>
+
+      <div class="lim">
+        <div class="lim-num">— 05</div>
+        <h3 class="lim-title">Cross-sport unproven</h3>
+        <div class="lim-body">
+          Trained and validated on cricket bat-ball contact. <em>Whether the same architecture works on badminton shuttle-racket contact or other sport-specific acoustic events is not yet tested</em>. The categorical claim about "noisy environments" is sport-specific evidence, not general evidence.
+        </div>
+      </div>
+
+      <div class="lim">
+        <div class="lim-num">— 06</div>
+        <h3 class="lim-title">Latency not benchmarked</h3>
+        <div class="lim-body">
+          Production deploys batched (audio clip → label). <em>Real-time / streaming-mode inference latency isn't measured</em>. For analytics this is fine; for in-game overlays or real-time feedback, the latency profile would need to be characterized.
+        </div>
+      </div>
+
+      <div class="lim">
+        <div class="lim-num">— 07</div>
+        <h3 class="lim-title">Held-out methodology not fully formal</h3>
+        <div class="lim-body">
+          The 85% comes from production evaluation but the held-out split methodology — same conditions vs cross-condition splits — isn't as formally documented as the shuttle benchmark's held-out clips + held-out venues structure. <em>Same standard should apply here</em>.
+        </div>
+      </div>
+
+      <div class="lim">
+        <div class="lim-num">— 08</div>
+        <h3 class="lim-title">No IAA on the audio labels</h3>
+        <div class="lim-body">
+          Audio annotation is harder than visual — humans listening to ambiguous "did that bat catch the ball?" sounds disagree at non-trivial rates. <em>Inter-annotator agreement was not formally measured</em>. The model's accuracy ceiling is bounded by labelling noise we haven't characterized.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WHATS NEXT -->
+<section class="section">
+  <div class="container">
+    <span class="section-num">08 / What's Next</span>
+    <h2 class="section-title">V2 <em>priorities</em>.</h2>
+    <ul class="next-list">
+      <li><span class="x">→ 01</span><span><strong>Per-class confusion matrix.</strong> Decompose the 85% overall into hit-accuracy and miss-accuracy separately. The class that's consistently harder reveals where retraining effort should go.</span></li>
+      <li><span class="x">→ 02</span><span><strong>Cross-microphone robustness benchmark.</strong> Evaluate the model on audio from <em>at least 3 different phone microphone profiles</em>. If accuracy varies by &gt;5pp across hardware, add microphone-aware preprocessing.</span></li>
+      <li><span class="x">→ 03</span><span><strong>Confidence calibration.</strong> The current model outputs binary labels. <em>Add a confidence score</em> calibrated against held-out accuracy — so "0.95 confidence" actually means 95% expected correctness. Enables downstream routing for low-confidence ambiguous events.</span></li>
+      <li><span class="x">→ 04</span><span><strong>Audio + visual ensemble for low-confidence cases.</strong> When audio confidence is borderline (e.g., 0.55-0.70), <em>fall back to visual</em> to break the tie. Pure audio when confident; ensemble when uncertain.</span></li>
+      <li><span class="x">→ 05</span><span><strong>Cross-sport extension to badminton.</strong> Shuttle-racket contact has a different acoustic signature but similar event-detection topology. Test whether the architecture transfers — if yes, <em>one event-detection module serves multiple sports</em>.</span></li>
+      <li><span class="x">→ 06</span><span><strong>Inter-annotator agreement (IAA) study.</strong> Re-annotate 10% of clips with a second labeller. The disagreement set bounds the labelling noise floor. <em>If we're at 85% and human IAA is 87%, we're close to ceiling and need different evaluation, not more training.</em></span></li>
+    </ul>
+
+    <a href="/work/annotation-engine/" class="cross-link" style="margin-top: 40px;">
+      <div>
+        <div class="cross-link-label">— Cross-link · Flywheel</div>
+        <div class="cross-link-title">Audio annotations <em>feed</em> the same flywheel architecture</div>
+      </div>
+      <div class="cross-link-arrow">→</div>
+    </a>
+
+    <div class="confidential">
+      <div class="confidential-label">— A note on detail</div>
+      <div class="confidential-body">This page describes <em>the categorical claim, the build cycle, the bug story, and the measured results</em>. Specific model architecture, audio feature extraction pipeline, hyperparameter values, and deployment infrastructure are not shown — this is production work for KhiladiPro, and the engineering substance is what's discoverable here without exposing IP.</div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container footer-inner">
+    <div>© Yash Vardhan</div>
+    <div class="footer-links">
+      <a href="https://github.com/yashv04" target="_blank" rel="noopener">GitHub <span style="color: var(--accent);">↗</span></a>
+      <a href="https://www.linkedin.com/in/yash-vardhan-5b3956169/" target="_blank" rel="noopener">LinkedIn <span style="color: var(--accent);">↗</span></a>
+      <a href="mailto:yashv3110@gmail.com">Email <span style="color: var(--accent);">↗</span></a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
