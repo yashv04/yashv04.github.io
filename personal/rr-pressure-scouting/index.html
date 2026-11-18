@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RR Pressure Scouting — Yash Vardhan</title>
+<meta name="description" content="A win-probability-based Pressure Index for every ball of IPL and T20I cricket (2022–26), player ratings against their own baseline, and an IPL 2027 auction shortlist for Rajasthan Royals. Built for SupeRR Selector Season 2.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/personal-detail.css">
+</head>
+<body>
+
+<nav class="nav">
+  <div class="container nav-inner">
+    <a href="/personal/" class="nav-back">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 11L5 7l4-4"/></svg>
+      Back to Personal Projects
+    </a>
+    <span class="nav-meta">Project / 10 / Pressure Scouting</span>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="container">
+    <div class="hero-kicker">10 — Personal Analytics / Scouting · SupeRR Selector Season 2</div>
+    <h1 class="hero-title">Who delivers <em>under pressure</em>?</h1>
+    <p class="hero-sub">A Pressure Index on every ball of IPL and T20I cricket from 2022 to 2026, built on a win-probability model. Each player is judged against what the exact situation usually produces and against their own normal level, then the best pressure performers still available are turned into a Rajasthan Royals shortlist for the IPL 2027 auction.</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item"><span class="label">Data</span><span class="value">IPL + T20I, 2022–26</span></div>
+      <div class="hero-meta-item"><span class="label">Deliveries</span><span class="value mono">200,961</span></div>
+      <div class="hero-meta-item"><span class="label">Model</span><span class="value mono">Win prob · GBM</span></div>
+      <div class="hero-meta-item"><span class="label">Players rated</span><span class="value mono">100 + 100</span></div>
+    </div>
+    <div class="hero-cta">
+      <a href="/personal/rr-pressure-scouting/dashboard/" class="hero-pill"><span class="dot"></span>Live dashboard</a>
+      <a href="https://unstop.com/hackathons/crp-superr-selector-season-2-help-shape-rajasthan-royals-ipl-2027-auction-strategy-rajasthan-royals-1792758" target="_blank" rel="noopener" class="hero-pill">SupeRR Selector Season 2 · Unstop</a>
+    </div>
+  </div>
+</header>
+
+<section class="section">
+  <div class="container">
+    <span class="section-num">01 / Problem</span>
+    <h2 class="section-title">Some players rise when the game is <em>on the line</em>. Can data tell which?</h2>
+    <div class="prose">
+      <p>Rajasthan Royals’ SupeRR Selector challenge asked for the ten most reliable batters and bowlers under pressure, measured <strong>against their usual level</strong>, using IPL and T20I data from 2022 onwards. Pressure was left for each entrant to define.</p>
+      <p>Two traps make this hard. A raw “death-overs strike rate” rewards finishers for the situation, not the skill. And pressure samples are small, so most “clutch” numbers are luck. The model below is built to avoid both.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <span class="section-num">02 / Defining pressure</span>
+    <h2 class="section-title">A <em>0–100</em> score on every ball.</h2>
+    <div class="formula">
+      <div class="formula-label">▸ Pressure Index ◂</div>
+      <div class="formula-line"><span class="out">PI</span> <span class="op">=</span> <span class="weight">0.40</span> <span class="op">·</span> <span class="var">stakes</span> &nbsp;<span class="op">// expected win-probability swing of the next ball</span></div>
+      <div class="formula-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="op">+</span> <span class="weight">0.20</span> <span class="op">·</span> <span class="var">closeness</span> &nbsp;<span class="op">// near 50–50, weighted up late in the match</span></div>
+      <div class="formula-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="op">+</span> <span class="weight">0.20</span> <span class="op">·</span> <span class="var">scoring_demand</span> &nbsp;<span class="op">// required rate, or runs below par</span></div>
+      <div class="formula-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="op">+</span> <span class="weight">0.20</span> <span class="op">·</span> <span class="var">wicket_stress</span> &nbsp;<span class="op">// more wickets down than usual</span></div>
+      <div class="formula-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="op">× 1.10 knockout · × 0.3 when the result is already decided</span></div>
+    </div>
+    <div class="prose" style="margin-top:24px;">
+      <p>Stakes come from two gradient-boosted win-probability models trained on the data (chase AUC <strong>0.86</strong>, first innings 0.69). For every ball, the six usual outcomes are played out and the average swing in win probability is the leverage. The top 25% of balls count as pressure.</p>
+      <p>The index separates real situations: from the lowest band to the highest, league strike rate falls from <strong>146 to 128</strong>, dot balls rise from 35% to 41%, and each ball moves the result about <strong>8 times as much</strong>.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <span class="section-num">03 / Rating players</span>
+    <h2 class="section-title">Judged against the <em>exact</em> situation.</h2>
+    <div class="formula">
+      <div class="formula-label">▸ Per ball ◂</div>
+      <div class="formula-line"><span class="out">runs_above_expected</span> <span class="op">=</span> (<span class="var">runs</span> <span class="op">−</span> <span class="var">expected_runs</span>) <span class="op">−</span> <span class="var">wicket_value</span> <span class="op">·</span> (<span class="var">out</span> <span class="op">−</span> <span class="var">expected_out</span>)</div>
+      <div class="formula-line"><span class="op">// expected values by format × innings × phase × wickets down × pressure band × pace/spin</span></div>
+    </div>
+    <div class="formula" style="margin-top:16px;">
+      <div class="formula-label">▸ Pressure Reliability Rating ◂</div>
+      <div class="formula-line"><span class="out">rating</span> <span class="op">=</span> <span class="weight">0.35</span> <span class="op">·</span> <span class="var">pressure_value</span> <span class="op">+</span> <span class="weight">0.25</span> <span class="op">·</span> <span class="var">win_prob_added</span> <span class="op">+</span> <span class="weight">0.20</span> <span class="op">·</span> <span class="var">rise_vs_own_baseline</span> <span class="op">+</span> <span class="weight">0.20</span> <span class="op">·</span> <span class="var">consistency</span></div>
+    </div>
+    <div class="prose" style="margin-top:24px;">
+      <p>T20Is against associate nations count half, A-team games 0.7, and each season back counts 15% less. Eligibility: 150+ pressure balls, 8+ pressure games, active in 2025–26. A bootstrap over 200 resamples of matches gives every player a rank range.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <span class="section-num">04 / The key finding</span>
+    <h2 class="section-title">Raw clutch numbers are <em>mostly noise</em>.</h2>
+    <div class="honesty">
+      <div class="honesty-label">▸ Reliability check</div>
+      <h3 class="honesty-title">A player’s pressure stats in odd matches barely predict their even matches.</h3>
+      <div class="honesty-stat">
+        <div class="honesty-stat-num">0.06</div>
+        <div class="honesty-stat-text">Split-half reliability (r) of pressure performance at about 150 pressure balls per half. Rank on raw pressure stats and you mostly rank luck.</div>
+      </div>
+      <div class="honesty-body" style="margin-bottom:0;"><p>So each player’s pressure score is shrunk toward their own overall level by an amount set from that measured reliability. The ranking still rewards players who lift under pressure, but 150 lucky balls can’t top the list.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <span class="section-num">05 / Output</span>
+    <h2 class="section-title">The <em>auction-available</em> top 10s.</h2>
+    <div class="prose" style="margin-bottom:24px;"><p>Filtered to players not retained on 18 Nov 2026 and clearly available to the IPL, then ranked within each player’s best phase using the SR / runs per innings / balls per dismissal / balls per boundary method from my SRH scouting work, blended 60/40 with pressure value.</p></div>
+    <div class="boards">
+      <div class="board">
+        <div class="board-label">Batters</div>
+        <div class="board-row" style="border-top:none;"><span class="board-row-rank">01</span><span class="board-row-name">Kamindu Mendis</span><span class="board-row-score">Anchor</span></div>
+        <div class="board-row"><span class="board-row-rank">02</span><span class="board-row-name">Harry Brook</span><span class="board-row-score">No. 3</span></div>
+        <div class="board-row"><span class="board-row-rank">03</span><span class="board-row-name">Shahrukh Khan</span><span class="board-row-score">Finisher</span></div>
+        <div class="board-row"><span class="board-row-rank">04</span><span class="board-row-name">Reeza Hendricks</span><span class="board-row-score">Top order</span></div>
+        <div class="board-row"><span class="board-row-rank">05</span><span class="board-row-name">Devon Conway</span><span class="board-row-score">Anchor</span></div>
+        <div class="board-row"><span class="board-row-rank">06</span><span class="board-row-name">Kusal Mendis</span><span class="board-row-score">Opener, wk</span></div>
+        <div class="board-row"><span class="board-row-rank">07</span><span class="board-row-name">Kusal Perera</span><span class="board-row-score">Middle order</span></div>
+        <div class="board-row"><span class="board-row-rank">08</span><span class="board-row-name">Pathum Nissanka</span><span class="board-row-score">Opener</span></div>
+        <div class="board-row"><span class="board-row-rank">09</span><span class="board-row-name">Jacob Bethell</span><span class="board-row-score">Death hitter</span></div>
+        <div class="board-row"><span class="board-row-rank">10</span><span class="board-row-name">Lorcan Tucker</span><span class="board-row-score">Middle, wk</span></div>
+      </div>
+      <div class="board">
+        <div class="board-label">Bowlers</div>
+        <div class="board-row" style="border-top:none;"><span class="board-row-rank">01</span><span class="board-row-name">Mitchell Starc</span><span class="board-row-score">Death pace</span></div>
+        <div class="board-row"><span class="board-row-rank">02</span><span class="board-row-name">Spencer Johnson</span><span class="board-row-score">Death pace</span></div>
+        <div class="board-row"><span class="board-row-rank">03</span><span class="board-row-name">Wanindu Hasaranga</span><span class="board-row-score">Spin, mid + death</span></div>
+        <div class="board-row"><span class="board-row-rank">04</span><span class="board-row-name">Matheesha Pathirana</span><span class="board-row-score">Death pace</span></div>
+        <div class="board-row"><span class="board-row-rank">05</span><span class="board-row-name">Liam Dawson</span><span class="board-row-score">Spin, middle</span></div>
+        <div class="board-row"><span class="board-row-rank">06</span><span class="board-row-name">Sean Abbott</span><span class="board-row-score">Death pace</span></div>
+        <div class="board-row"><span class="board-row-rank">07</span><span class="board-row-name">Trent Boult</span><span class="board-row-score">New ball</span></div>
+        <div class="board-row"><span class="board-row-rank">08</span><span class="board-row-name">Allah Ghazanfar</span><span class="board-row-score">Spin, PP</span></div>
+        <div class="board-row"><span class="board-row-rank">09</span><span class="board-row-name">Lockie Ferguson</span><span class="board-row-score">Pace, middle</span></div>
+        <div class="board-row"><span class="board-row-rank">10</span><span class="board-row-name">Mujeeb Ur Rahman</span><span class="board-row-score">Spin, middle</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <span class="section-num">06 / Building RR’s XI</span>
+    <h2 class="section-title">Strong powerplay bat, <em>weak death</em> bowling.</h2>
+    <div class="prose">
+      <p>In IPL 2025–26 RR scored at <strong>181</strong> in the powerplay against a league 152, but conceded <strong>11.41</strong> an over at the death against 10.67. Sandeep Sharma and Ravi Bishnoi rank 113th and 122nd of 137 death bowlers under pressure.</p>
+      <p><strong>Plan A:</strong> Jaiswal, Sooryavanshi, Jurel, Parag, <em>Shahrukh Khan</em>, Ferreira, Jadeja, <em>Hasaranga</em>, Archer, <em>Starc or Spencer Johnson</em>, Shami. Two of RR’s three overseas slots go on bowlers who replace its two weakest pressure bowlers, and an Indian finisher means no overseas slot is spent on batting.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <span class="section-num">07 / Limitations</span>
+    <h2 class="section-title">Where it is <em>less certain</em>.</h2>
+    <div class="limits">
+      <div class="limit-item"><div class="limit-num">01</div><div class="limit-text"><strong>Small pressure samples.</strong> 150–700 pressure balls per player; ranks 6–10 move across resamples.</div></div>
+      <div class="limit-item"><div class="limit-num">02</div><div class="limit-text"><strong>First-innings stakes are weaker.</strong> The first-innings win model has AUC 0.69, so leverage is blended with observable signals rather than used alone.</div></div>
+      <div class="limit-item"><div class="limit-num">03</div><div class="limit-text"><strong>Missing context.</strong> No venue scoring norms, pitch, dew or batting-position intent.</div></div>
+      <div class="limit-item"><div class="limit-num">04</div><div class="limit-text"><strong>No domestic data.</strong> Uncapped Indian players can’t be rated from IPL and T20I alone; Syed Mushtaq Ali Trophy data is the next addition.</div></div>
+      <div class="limit-item"><div class="limit-num">05</div><div class="limit-text"><strong>Availability changes.</strong> Bangladesh players and Harry Brook carry eligibility questions for 2027; prices are not modelled.</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="cta">
+  <div class="container">
+    <div class="cta-eyebrow">Explore the ratings</div>
+    <h2 class="cta-title">See who <em>lifts</em> under pressure.</h2>
+    <p class="cta-sub">Filter 100 batters and 100 bowlers by auction status, compare normal and pressure numbers, and see RR’s phase gaps.</p>
+    <div class="cta-buttons">
+      <a href="/personal/rr-pressure-scouting/dashboard/" class="btn btn-primary"><span class="live-dot"></span>Open Live Dashboard</a>
+      <a href="/personal/" class="btn">Back to Personal Projects</a>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container footer-inner">
+    <div>Yash Vardhan — Sports CV Engineer / Cricket Analyst</div>
+    <div>
+      <a href="/">Portfolio</a> &nbsp;·&nbsp;
+      <a href="https://www.linkedin.com/in/yash-vardhan-5b3956169/">LinkedIn</a> &nbsp;·&nbsp;
+      <a href="https://github.com/yashv04">GitHub</a> &nbsp;·&nbsp;
+      <a href="mailto:yashv3110@gmail.com">Email</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
